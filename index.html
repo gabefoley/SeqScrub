@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title> Seq Scrub</title>
+    <link rel="stylesheet" type="text/css" href="styles/index.css" media="all" />
+
+
+    
+</head>
+<header>
+Seq Scrub
+</header>
+
+<body>
+    
+    Upload an alignment (in FASTA format) and optionally a phylogenetic tree (in Newick format). <br><br>
+
+    <form id='file-form' action='upload.php' method="POST" enctype="multipart/form-data">
+    	<input type="file" id="fileToUpload" name="fileToUpload">
+    	<button type="submit" value = "submit" id="submit">Upload</button>
+    </form>
+
+    <br>
+
+    <section id = 'alert'>
+
+    </section>
+
+
+
+
+
+	<!-- Jquery and Jquery UI -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <!-- SeqScrub -->
+    <script src="js/seqscrub.js"></script>
+
+
+</body>
+</html>
