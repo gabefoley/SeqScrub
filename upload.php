@@ -1,6 +1,8 @@
 <?php
 
-error_reporting(E_ALL);
+define ('SITE_ROOT', realpath(dirname(__FILE__)));
+
+// error_reporting(E_ALL);
 
 
 
@@ -15,7 +17,7 @@ $uploadOK = 1;
 echo $target_file . "<br>" ;
 
 var_dump($_FILES);
-var_dump($_FILES[fileToUpload]);
+var_dump($_FILES['fileToUpload']);
 var_dump($target_file);
 
 if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
@@ -25,6 +27,11 @@ else {
 	echo "Sorry there was an issue uploading your file";
 	echo $_FILES['fileToUpload']['error'];
 
+}
+
+$fp = fopen($target_file, 'rb');
+while (($line = fgets($fp)) !== false){
+	echo "$line<br>";
 }
 
 
