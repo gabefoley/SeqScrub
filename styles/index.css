@@ -1,0 +1,225 @@
+html,
+body,
+.page {
+  height: 100%;
+}
+
+#cleanedSeqs {
+	height: 400px;
+	width: 33.3333%;
+	background: #2ecc71;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	word-wrap: break-word;
+
+}
+
+#cleanedSeqsHeader {
+	background: #2ecc71;
+}
+
+#badCharacters {
+	height: 400px;
+	width: 33.3333%;
+	background: #3498db;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	word-wrap: break-word;
+
+}
+
+#badCharactersHeader {
+	background: #3498db;
+}
+
+#badIds {
+	height: 400px;
+	width: 33.3333%;
+	background: #9b59b6;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	word-wrap: break-word;
+
+}
+
+#badIdsHeader{
+background: #9b59b6;
+
+}
+
+/*form * {
+  display: block;
+  margin: 10px;
+}*/
+
+
+
+body {
+	/*margin: 0;*/
+	margin: 10px 0px 0 15px ;
+}
+
+.fileinput {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.fileinput + label, .button {
+/*    font-size: 18px;
+	min-width: 100px;
+	height: 50px;
+    color: black;
+    background-color: #2ecc71;
+    display: inline-block;*/
+    -webkit-border-radius: 2px;
+    -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+    -webkit-user-select: none;
+    background-color: #2ecc71;
+
+    /*background: -webkit-linear-gradient(#fafafa, #f4f4f4 40%, #e5e5e5);*/
+    border: 1px solid #aaa;
+    color: #444;
+    /*font-size: inherit;*/
+
+    margin-bottom: 0px;
+    min-width: 120px;
+    padding: 3px 12px 3px 12px;
+    min-height: 50px;
+    font-size: 18px;
+    text-shadow:2px 2px 0 rgba(0,0,0,0.1);
+
+    /*font-family: sans-serif;*/
+}
+
+.fileinput:focus + label{
+	background: #9b59b6;
+
+}
+
+
+.fileinput + label:hover {
+	background: #3498db;
+}
+
+.fileinput + label, .button {
+	cursor: pointer; /* "hand" cursor */
+}
+
+
+/*.button {
+	background: #2ecc71;
+	text-shadow:2px 2px 0 rgba(0,0,0,0.1);
+
+	min-width: 100px;
+	height: 50px;
+	font-size: 18px;
+}*/
+
+.button:hover {
+	background: #3498db;
+
+}
+
+.button:focus {
+	background: #9b59b6;
+
+}
+
+
+#cleanedSeqsHeader, #badCharactersHeader, #badIdsHeader{
+	/*background:blue;*/
+	font-family: "Calibri";
+
+	font-size: 18px;
+	/*position:fixed;*/
+	z-index: 999;
+	height:38px;
+	width: 33.3333%;
+	text-shadow:2px 2px 0 rgba(0,0,0,0.1);
+	padding: 0px 0px 0px 2px;
+
+}
+
+header {
+	font-size: 54px;
+	font-family: "Raleway";
+	text-shadow:2px 2px 0 rgba(0,0,0,0.1);
+	height: 70px;
+
+}
+
+ @font-face { 
+	font-family: 'Moderne Sans'; 
+	src: url('Moderne Sans.ttf'); 
+} 
+
+@font-face { 
+	font-family: 'Raleway'; 
+	src: url('Raleway-Medium.ttf'); 
+} 
+
+ @font-face { 
+	font-family: 'Sansita'; 
+	src: url('Sansita-Regular.ttf'); 
+} 
+
+ @font-face { 
+	font-family: 'Choplin'; 
+	src: url('Choplin-Medium-DEMO.otf'); 
+} 
+
+ @font-face { 
+	font-family: 'Soria'; 
+	src: url('soria-font.ttf'); 
+} 
+
+.highlight {
+	background-color: #f1c40f;
+}
+
+.container {
+	z-index: 99;
+	display: flex;
+	align-items: stretch;
+	width: 100%;
+	border: 0px;
+	margin: 0px;
+	}
+
+.container label {
+	background-color: #2ecc71;
+	font-size: 20px;
+	font-family: "Calibri";
+	/*vertical-align: text-top;*/
+	width:33.3333%;
+	min-height:100%;
+	flex: 2;
+/*	border: solid 1px red;
+*/	display:flex;
+	align-items:center;
+	margin: 0px;
+	padding: 10px 0px 0px 10px;
+}
+
+.container .seqLabel2 {
+	background-color: #3498db;
+
+
+}
+
+.container .seqLabel3 {
+	background-color: #9b59b6;
+
+
+}
+
+textarea {
+	border: 0px;
+	margin: 0px;
+}
+
+

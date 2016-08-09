@@ -9,25 +9,76 @@
     
 </head>
 <header>
-Seq Scrub
+Seq Scrub<br><br>
 </header>
 
 <body>
-    
-    Upload an alignment (in FASTA format) and optionally a phylogenetic tree (in Newick format). <br><br>
 
-    <form id='file-form' action='upload.php' method="POST" enctype="multipart/form-data">
-    	<input type="file" id="fileToUpload" name="fileToUpload">
-    	<button type="submit" value = "submit" id="submit">Upload</button>
+
+    
+    Upload a FASTA file to edit all headers into the ID|Species_name format. <br><br>
+
+    The green box shows the correctly formatted headers<br>
+
+    The blue box shows any sequences which contained illegal characters<br>
+
+    The purple box shows any sequences which couldn't map to the ID|Species_name format<br><br>
+
+
+
+    <form id='data'>
+    	<input type="file" class="fileinput" id="file" name="file" />
+        <label for="file"> Choose a file </label>
+        <br><br>
+        Remove sequences containing these characters:
+        <input type="text" id="invalidChars" value="B J O U X Z" /> <br><br>
+        <input type="submit" class="button" value = "Submit"> <br><br>
+
     </form>
 
-    <br>
 
-    <section id = 'alert'>
 
+
+    <!-- <br> -->
+    <section class = container>
+    <label for = "cleanedSeqs" class="seqLabel1">Cleaned sequences: </label>
+    <label for = "badCharacters" class="seqLabel2">Sequences with illegal characters: </label>
+    <label for = "badIds" class="seqLabel3">Sequences that couldn't be mapped to a species: </label>
     </section>
+    <section class = container>
+    <!--         <header id ='cleanedSeqsHeader'>
+            Cleaned sequences: <br><br>
+            </header> -->
+    <!--         <header id ='badCharactersHeader'>
+            Sequences with illegal characters:<br><br>
+            </header> -->
+    <!--         <header id ='badIdsHeader'>
+            Sequences that couldn't be mapped to a species:<br><br>
+            </header> -->
 
 
+        <textarea readonly id = 'cleanedSeqs' spellcheck="false" autocomplete="off"></textarea>
+
+        <textarea readonly id = 'badCharacters' spellcheck="false" autocomplete="off"></textarea>
+
+        <textarea readonly id = 'badIds' spellcheck="false" autocomplete="off"></textarea>
+    </section>
+    <br>
+    <!-- <a href="https://github.com/eligrey/FileSaver.js" target="_blank">FileSaver.js</a> -->
+    <!-- <form id="save" onsubmit="download(this['fileToSave'].value, cleanedSeqs.value)"> -->
+    <form id="save">
+
+    Enter a filename: <input type="text" id="fileToSave"  value="" /> <br><br>
+        <input type="button" class = "button" id= 'saveButton' value="Save to new file" onclick="download(fileToSave.value, cleanedSeqs.value)">
+        <!-- <a href="newfile2.txt" download="cleanedSeqs">Download</a> -->
+
+    </form>
+
+<!--     <form onsubmit="download(this['name'].value, cleanedSeqs.value)">
+      <input type="text" name="name" value="test.txt">
+      <textarea name="text"></textarea>
+      <input type="submit" value="Download">
+    </form> -->
 
 
 

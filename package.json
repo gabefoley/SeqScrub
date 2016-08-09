@@ -1,0 +1,19 @@
+{
+  "name": "seqscrub",
+  "version": "1.0.0",
+  "description": "Automatically formats fasta file headers",
+  "main": "index.html",
+  "dependencies": {
+    "file-saver": "^1.3.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@bioinf1.biosci.uq.edu.au:gabe/SeqScrub.git"
+  },
+  "author": "gabefoley",
+  "license": "ISC"
+}
