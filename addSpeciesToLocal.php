@@ -9,17 +9,15 @@
 	// Create connection
 	$conn = new mysqli($servername, $username, $password, $dbname);
 
-	$stmt = $conn->prepare("INSERT INTO history(id, dataID, mode, motif, gap, col, seqIDs, seqNames, seqChars) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
-	$stmt->bind_param("isssiisss", $id, $dataID, $mode, $motif, $gap, $col, $seqIDs, $seqNames, $seqChars);
+	$stmt = $conn->prepare("INSERT INTO records(id, seqType, speciesName, seq) 
+		VALUES(?, ?, ?, ?)");
+	$stmt->bind_param("ssss", $id, $seqType, $speciesName, $seq);
 
-	$dataID = $_SESSION['dataID'];
-	$mode = $_POST['mode'];
-	$motif = $_POST['motif'];
-	$gap = $_POST['gap'];
-	$col = $_POST['col'];
-	$seqIDs = $_POST['seqIDs'];
-	$seqNames = $_POST['seqNames'];
-	$seqChars = $_POST['seqChars'];
+	$id = $_POST['id'];
+	$seqType = $_POST['seqType'];
+	$speciesName = $_POST['speciesName'];
+	$seq = $_POST['seq'];
+
 
 	
 	

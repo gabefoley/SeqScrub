@@ -222,4 +222,8 @@ textarea {
 	margin: 0px;
 }
 
+textarea:focus {
+	outline-width: 0;
+}
+
 
