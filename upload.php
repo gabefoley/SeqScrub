@@ -1,17 +1,18 @@
 <?php
 
-
-
+// Setup directory to store uploads
 $target_dir = "uploads/";
 $target_file = $target_dir . basename($_FILES["file"]["name"]);
-
 $returnArray = array();
+
+// Pattern to check if line is a header
 $headerPattern = "/^>.*/";
 $seq = '';
 $seqCount = 0;
 
+// Check to see if we can upload the file
 if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
-	// echo "<br>The file " . basename($_FILES["fileToUpload"]["name"]) . " has been uploaded<br>";
+
 }
 else {
 	echo "Sorry there was an issue uploading your file";
@@ -19,74 +20,84 @@ else {
 
 }
 
-if (isset($_POST['cleanID'])) {
-	echo 'We have cleanID<br>';
-}
-
-if (isset($_POST['illegalChars'])){
-	// echo 'We have illegalChars<br>';
-}
-
-
 
 $fp = fopen($target_file, 'rb');
 while (($line = fgets($fp)) !== false){
+	
 	// Clean up any instances of repeating pipe symbols
 	$line = str_replace("||", "|", $line);
+	
+	// If we are at an identifier
 	if (preg_match($headerPattern, $line)){
 		if ($seq != ''){
 			$returnArray[$seqCount]['seq'] = $seq;
-			// $seqArray = array('seq' => $seq);
-			// print_r($returnArray);
-			// $returnArray = $returnArray + $seqArray;
-			
-			// $returnArray = array_merge($returnArray, $seqArray);
 			$seq = '';
 			$seqCount +=1;
 		}
-		// echo $line . "<br/>" ;
-		// $returnArray['originalHeader'] = $line;
 
-		$lineArray = preg_split("/\/|\|/", $line);
-		if ($lineArray[0] == ">gi"){
-			// $returnValue = "$lineArray[3]";
+		$lineArray = preg_split("/[\s,]+/", $line);
 
-			// echo "$lineArray[3]"  . "<br/>"  ;
-			$returnArray[] = array('originalHeader' => $line,'trimmedHeader' => $lineArray[3], 'seqtype' => $lineArray[0]);
-			// $returnArray['trimmedHeader'] = $lineArray[3];
+
+
+		$type = substr($lineArray[0], 1, 2);
+		// echo "Type is \n";
+
+
+		if ($type == "gi" || $type == "tr"){
+			$trimmedHeader = preg_split("/\|/ ", $lineArray[0])[1];
+			$returnArray[] = array('originalHeader' => $line, 'type' => (substr($lineArray[0], 1, 2)),'id' => $trimmedHeader);
+
+
+
+
 		}
 		else {
-		// echo "$lineArray[1]"  . "<br/>" ;
-		// $returnValue = "$lineArray[1]";
-		// $returnArray.push("$lineArray[1]");
-		// echo "$lineArray[1]";
-		$returnArray[] = array('originalHeader' => $line,'trimmedHeader' => $lineArray[1], 'seqtype' => $lineArray[0]);
+			$trimmedHeader = substr(preg_split("/\|/ ", $lineArray[0])[0], 1);
+		// echo $trimmedHeader;
+			$returnArray[] = array('originalHeader' => $line, 'type' => $type,'id' => $trimmedHeader);
+
+
 		}
 
+		// // If ID is >gi, then try to map to Accession ID instead
+		// if (substr($lineArray[0], 0, 3 ) === ">gi" && $lineArray[3]){
+		// 	$trimmedHeader = preg_split("/\|/", $lineArray[0])[1];
 
-		// echo "$line<br>";
-			// array_push($returnArray, $returnValue);
+		// 	// Create the information to return
+		// 	$returnArray[] = array('originalHeader' => $line, 'type' => 'gi','id' => $trimmedHeader);
+		// }
+
+		// // If ID is >tr, then trim the EntryName information and just leave the unique identifier
+		// elseif (substr($lineArray[0], 0, 3 ) === ">tr"){
+		// 	$trimmedHeader = preg_split("/\|/", $lineArray[0])[1];
+		// 	$returnArray[] = array('originalHeader' => $line, 'type' => 'tr', 'id' => $trimmedHeader);
+
+
+		// }
+
+		// else {
+
+		// 	// Trim the ">" symbol from the header
+		// 	$trimmedHeader = substr($lineArray[0], 1);
+
+		// 	// Create the information to return
+		// 	$returnArray[] = array('originalHeader' => $line, 'type' => substr($lineArray[0], 0, 3 ),'id' => $trimmedHeader);
+		// }
 
 	}
 
 	else {
 
-
 	// Add all of the lines of the sequence to the sequence object
 	$seq .= str_replace(array("\r\n", "\n\r", "\n", "\r"), '', $line);
-
 	}
-
-
 }
 
+// Create object to return
 $returnArray[$seqCount]['seq'] = $seq;
 
 $jsonData = json_encode($returnArray);
 echo $jsonData;
-
-
-
 
 
 ?>

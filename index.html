@@ -6,7 +6,6 @@
     <link rel="stylesheet" type="text/css" href="styles/index.css" media="all" />
 
 
-    
 </head>
 <header>
 Seq Scrub<br><br>
@@ -14,8 +13,6 @@ Seq Scrub<br><br>
 
 <body>
 
-
-    
     Upload a FASTA file to edit all headers into the ID|Species_name format. <br><br>
 
     The green box shows the correctly formatted headers<br>
@@ -33,61 +30,46 @@ Seq Scrub<br><br>
         Remove sequences containing these characters:
         <input type="text" id="invalidChars" value="B J O U X Z" /> <br><br>
         <input type="submit" class="button" value = "Submit"> <br><br>
-
     </form>
 
 
 
-
-    <!-- <br> -->
     <section class = container>
     <label for = "cleanedSeqs" class="seqLabel1">Cleaned sequences: </label>
     <label for = "badCharacters" class="seqLabel2">Sequences with illegal characters: </label>
-    <label for = "badIds" class="seqLabel3">Sequences that couldn't be mapped to a species: </label>
+    <label for = "obsoleteSeqs" class="seqLabel3">Sequences that are obsolete: </label>
+    <label for = "badIds" class="seqLabel4">Sequences that couldn't be mapped to a species: </label>
     </section>
     <section class = container>
-    <!--         <header id ='cleanedSeqsHeader'>
-            Cleaned sequences: <br><br>
-            </header> -->
-    <!--         <header id ='badCharactersHeader'>
-            Sequences with illegal characters:<br><br>
-            </header> -->
-    <!--         <header id ='badIdsHeader'>
-            Sequences that couldn't be mapped to a species:<br><br>
-            </header> -->
-
-
+  
         <textarea readonly id = 'cleanedSeqs' spellcheck="false" autocomplete="off"></textarea>
 
         <textarea readonly id = 'badCharacters' spellcheck="false" autocomplete="off"></textarea>
 
+        <textarea readonly id = 'obsoleteSeqs' spellcheck="false" autocomplete="off"></textarea>
+
         <textarea readonly id = 'badIds' spellcheck="false" autocomplete="off"></textarea>
     </section>
     <br>
-    <!-- <a href="https://github.com/eligrey/FileSaver.js" target="_blank">FileSaver.js</a> -->
-    <!-- <form id="save" onsubmit="download(this['fileToSave'].value, cleanedSeqs.value)"> -->
+
     <form id="save">
 
     Enter a filename: <input type="text" id="fileToSave"  value="" /> <br><br>
-        <input type="button" class = "button" id= 'saveButton' value="Save to new file" onclick="download(fileToSave.value, cleanedSeqs.value)">
-        <!-- <a href="newfile2.txt" download="cleanedSeqs">Download</a> -->
+        <input type="button" class = "button" id= 'saveButton' value="Save to new file" onclick="downloadFile(fileToSave.value, cleanedSeqs.value)">
+        <input type="button" class = "button" id= 'saveButton' value="Save summary" onclick="downloadSummary(fileToSave.value)">
+
 
     </form>
 
-<!--     <form onsubmit="download(this['name'].value, cleanedSeqs.value)">
-      <input type="text" name="name" value="test.txt">
-      <textarea name="text"></textarea>
-      <input type="submit" value="Download">
-    </form> -->
-
-
-
-	<!-- Jquery and Jquery UI -->
+    <!-- Jquery and Jquery UI -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
     <!-- SeqScrub -->
-    <script src="js/seqscrub.js"></script>
+    <script src="./js/seqscrub.js"></script>
+
+    <!--Download.js -->
+    <script src="http://danml.com/js/download.js"></script>
 
 
 </body>
