@@ -106,20 +106,95 @@ body {
 
 
 .fileinput + label:hover {
-	background: #3498db;
+	background: goldenrod;
 }
 
 .fileinput + label, .button {
 	cursor: pointer; /* "hand" cursor */
 }
 
+#saveButton {
+	background-color: #2ecc71;
+
+}
+
+#fileToSave {
+	margin-left: 20px;
+}
+
+.button {
+	margin-right: 22%;
+}
 
 .button:hover {
-	background: #3498db;
+	background: goldenrod;
 
 }
 
 .button:focus {
+	background: #9b59b6;
+
+}
+
+
+#saveButton:hover {
+	background: goldenrod;
+
+}
+
+#saveButton:focus {
+	background: #9b59b6;
+
+}
+
+#illegalButton {
+	background-color: #3498db;
+
+}
+
+
+#illegalButton:hover {
+	background: #9b59b6;
+
+}
+
+#illegalButton:focus {
+	background: #9b59b6;
+
+}
+
+#obsoleteButton {
+	background-color: goldenrod;
+
+}
+#obsoleteButton {
+	text-decoration-color: black;
+	text-shadow: 0px;
+}
+
+
+#obsoleteButton:hover {
+	background: #2ecc71;
+
+}
+
+#obsoleteButton:focus {
+	background: #9b59b6;
+
+}
+
+#unmappableButton {
+	background-color: #9b59b6;
+
+}
+
+
+#unmappableButton:hover {
+	background: #3498db;
+
+}
+
+#unmappableButton:focus {
 	background: #9b59b6;
 
 }

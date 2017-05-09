@@ -1,4 +1,11 @@
+
 <?php
+// header('Access-Control-Allow-Origin: *');
+
+// header('Content-type: application/json');
+
+// header('content-type: application/json; charset=utf-8');
+header("access-control-allow-origin: http://eutils.ncbi.nlm.nih.gov");
 
 // Setup directory to store uploads
 $target_dir = "uploads/";
@@ -35,29 +42,50 @@ while (($line = fgets($fp)) !== false){
 			$seqCount +=1;
 		}
 
-		$lineArray = preg_split("/[\s,]+/", $line);
+		$lineArray = preg_split("/[\s,|_]+/", $line);
+		// echo "lineArray";
+		// echo $lineArray;
 
 
 
-		$type = substr($lineArray[0], 1, 2);
-		// echo "Type is \n";
+		$type = substr($lineArray[0], 1);
+		$id = "";
+		// echo "type is ";
+		// echo $type;
+
+// 
+		if ($type == "XP" || $type == "XM" || $type == "XR" || $type == "WP" || $type == "NP" || $type == "NC" || $type == "NG" || $type == "NM" || $type == "NR") {
+			$id = $type . "_" . $lineArray[1];
+
+		} elseif ($type == "pdb" || $type == "sp" || $type == "tr" || $type == "gi"){
+			$id = $lineArray[1];
+		
 
 
-		if ($type == "gi" || $type == "tr"){
-			$trimmedHeader = preg_split("/\|/ ", $lineArray[0])[1];
-			$returnArray[] = array('originalHeader' => $line, 'type' => (substr($lineArray[0], 1, 2)),'id' => $trimmedHeader);
-
-
-
+		} else {
+			$id = $type;
+			$type = "";
+			
 
 		}
-		else {
-			$trimmedHeader = substr(preg_split("/\|/ ", $lineArray[0])[0], 1);
-		// echo $trimmedHeader;
-			$returnArray[] = array('originalHeader' => $line, 'type' => $type,'id' => $trimmedHeader);
+
+			// echo $trimmedHeader;
+		$returnArray[] = array('originalHeader' => $line, 'type' => $type ,'id' => $id);
+
+		// echo '<pre>'; print_r($lineArray); echo '</pre>';
+
+			// echo "\n And then... \n";
+		// $trimmedHeader = preg_split("/\|/ ", $lineArray[0])[1];
 
 
-		}
+		// }
+		// else {
+		// 	$trimmedHeader = substr(preg_split("/\|/ ", $lineArray[0])[0], 1);
+		// // echo $trimmedHeader;
+		// 	$returnArray[] = array('originalHeader' => $line, 'type' => substr($lineArray[0], 1, 2),'id' => $trimmedHeader);
+
+
+		// }
 
 		// // If ID is >gi, then try to map to Accession ID instead
 		// if (substr($lineArray[0], 0, 3 ) === ">gi" && $lineArray[3]){

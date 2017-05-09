@@ -1,10 +1,24 @@
 var invalidChars
-addUnderscores = true;
 summary = "";
+ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"]
 
+document.getElementById('file').onchange = function () {
+  filename = this.value.replace(/.*[\/\\]/, '');
+  $("#fileToSave").val(filename)
+};
 
 //Program a custom submit function for the form
 $("form#data").submit(function(event) {
+
+  // Clear all the output sections
+  summary = "";
+  $("#cleanedSeqs").empty();
+  $("#badCharacters").empty();
+  $("#obsoleteSeqs").empty();
+  $("#badIds").empty();
+
+  addUnderscores = true;
+
 
   //Disable the default form submission
   event.preventDefault();
@@ -14,9 +28,12 @@ $("form#data").submit(function(event) {
   invalidChars = $("#invalidChars").val().split(" ");
 
   //Change the filename for the file to save to mirror the uploaded filename
-  var filepath = $('#file').val();
-  var filename = filepath.split(/(\\|\/)/g).pop();
-  $("#fileToSave").val(filename.split(".").join("_cleaned."))
+  // var filepath = $('#file').val();
+  // var filename = filepath.split(/(\\|\/)/g).pop();
+  // $("#fileToSave").val(filename.split(".").join("_cleaned."))
+
+  console.log("filename")
+  console.log(filename)
 
   var ncbiList = [];
   var uniprotList = [];
@@ -49,19 +66,23 @@ $("form#data").submit(function(event) {
           species: "",
           seq: jsonData[i].seq,
           obsolete: "",
+          ncbiChecked: false,
           originalHeader: jsonData[i].originalHeader
         };
 
+        console.log(record.type)
 
-        if (record.type == 'tr' || record.type == 'sp') {
+
+        if (record.type == 'tr' || record.type == 'sp' || record.type == 'pdb' || record.type == '') {
           uniprotList.push(record)
 
-        } else if (record.type == 'gi' || record.type == 'XP') {
+        } else {
           ncbiList.push(record);
         }
       }
 
       if (uniprotList.length > 0) {
+        console.log("Uniprot length = ", uniprotList.length)
         getDataFromUniprot(uniprotList)
 
 
@@ -69,6 +90,7 @@ $("form#data").submit(function(event) {
 
 
       if (ncbiList.length > 0) {
+        console.log("NCBI length = ", ncbiList.length)
         getDataFromNCBI(ncbiList);
       }
 
@@ -81,6 +103,19 @@ $("form#data").submit(function(event) {
 
 });
 
+function getIDString(records, database){
+  
+  idString = "";
+
+  for (var i = 0, size = records.length; i < size; i++) {
+    idString += records[i].id + (database == 'UniProt' ? "+OR+" : "," );
+  }
+
+  idString = idString.substring(0, idString.length - (database == 'UniProt' ? 4 : 1));
+  return idString
+}
+
+
 /**
  * [getSpeciesFromExternal description]
  * @param  {[type]} record [description]
@@ -88,18 +123,20 @@ $("form#data").submit(function(event) {
  */
 function getDataFromUniprot(records) {
 
-  idString = "";
+  // idString = "";
 
-  for (var i = 0, size = records.length; i < size; i++) {
+  // for (var i = 0, size = records.length; i < size; i++) {
 
-    idString += "id:" + records[i].id + "+OR+";
-  }
+  //   idString += records[i].id +  "+OR+";
+  // }
 
-  idString = idString.substring(0, idString.length - 4);
+  // idString = idString.substring(0, idString.length - 4);
+
+  getIDString(records, "UniProt")
 
   url = "http://www.uniprot.org/uniprot/?query=" + idString + "&format=xml"
 
-  console.log(url)
+  // console.log(url)
 
   var promise = $.ajax({
     url: url,
@@ -111,7 +148,7 @@ function getDataFromUniprot(records) {
       //   var string = record.originalHeader + record.seq + "&#010;&#010;";
       //   $("#badIds").append(string.trim());
       // }
-      // console.log(speciesData);
+      console.log(speciesData);
       getSpeciesNameFromUniProt(records, speciesData, idString);
 
     },
@@ -133,20 +170,25 @@ function getDataFromUniprot(records) {
 
 function getDataFromNCBI(records) {
 
-  idString = "";
+  // idString = "";
 
-  for (var i = 0, size = records.length; i < size; i++) {
+  // for (var i = 0, size = records.length; i < size; i++) {
 
 
-    idString += records[i].id + ",";
-  }
+  //   idString += records[i].id + ",";
+  //   console.log(records[i].id)
+  // }
+  // console.log('Size was ', records.length)
 
-  idString = idString.substring(0, idString.length - 1);
+  // idString = idString.substring(0, idString.length - 1);
+
+  getIDString(records, "NCBI")
+
 
   urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum"
 
-  console.log("next one")
-  console.log(urlDoc)
+  // console.log("next one")
+  // console.log(urlDoc)
   var promise = $.ajax({
     url: urlDoc,
     type: 'POST',
@@ -261,7 +303,8 @@ function getIDFromNCBI(records, speciesData) {
 function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
   speciesList = [];
 
-  urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=all"
+  // urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=all"
+  urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=fasta"
 
 
   console.log(urlAll)
@@ -280,7 +323,9 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
           accession = split(records[record].id, ".")
           // console.log(accession)
 
-          path = "//Textseq-id_accession[contains(., '"+ accession + "')]/ancestor::Seq-entry//Org-ref_taxname/text()";
+          path = "/TSeqSet/TSeq/TSeq_accver[contains(., '" + accession + "')]/../TSeq_orgname/text()"
+
+          // path = "//Textseq-id_accession[contains(., '"+ accession + "')]/ancestor::Seq-entry//Org-ref_taxname/text()";
           // console.log(path)
           var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
@@ -319,21 +364,32 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 function getSpeciesNameFromUniProt(records, speciesData) {
 
-  // console.log('got here')
-  // console.log(records)
+  console.log('got here');
+  console.log(records);
+  console.log(speciesData);
 
   fullList = [];
 
   if (speciesData != null) {
-    xmlDoc = speciesData;
+    // xmlDoc = speciesData;
 
     // path = "//*[@type='scientific']/text()";
 
     for (record in records) {
-      path = "/*/*/*[name()='accession'][contains(., '" + records[record].id + "')]/following-sibling::*[name()='organism']/*[@type='scientific']"
+      path = "";
 
-      //  console.log(path);
-      var node = xmlDoc.evaluate(path, xmlDoc, null, XPathResult.ANY_TYPE, null);
+      if (records[record].type == "pdb") {
+        path = "//*[name()='dbReference'][@id='3QM4']/preceding-sibling::*[name()='organism']/*[@type='scientific']"
+      }
+
+      else {
+              path = "/*/*/*[name()='accession'][contains(., '" + records[record].id + "')]/following-sibling::*[name()='organism']/*[@type='scientific']"
+
+      }
+
+       console.log(path);
+       console.log("DATA: ", speciesData)
+      var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
       // node.iterateNext();
       // console.log( records[record].id, " and ", node.textContent)
 
@@ -429,14 +485,17 @@ function getSpeciesNameFromUniProt(records, speciesData) {
 function checkUniProtObsolete(records, idString) {
 
   obsoleteList = [];
-  idString = "";
+  // idString = "";
 
-    for (var i = 0, size = records.length; i < size; i++) {
+  //   for (var i = 0, size = records.length; i < size; i++) {
 
-    idString += "id:" + records[i].id + "+OR+";
-  }
+  //   idString += "id:" + records[i].id + "+OR+";
+  // }
 
-  idString = idString.substring(0, idString.length - 4);
+  // idString = idString.substring(0, idString.length - 4);
+
+  getIDString(records, "UniProt")
+
 
 
   // console.log(idString);
@@ -492,6 +551,8 @@ function appendOutput(records, obsoleteList) {
   //Boolean value to hold if the current sequence has illegal characters
   containsBad = false;
 
+  ncbiCheck = []
+
   // Check to see if there are any illegal characters
 
   for (i in records) {
@@ -504,18 +565,28 @@ function appendOutput(records, obsoleteList) {
     }
 
     if ((records[i].species == null | records[i].species == "") && !(obsoleteList.includes(records[i].id))) {
-      console.log("Bad seqeunce is", records[i].id)
+      console.log("Bad sequence is", records[i].id)
+      if (records[i].ncbiChecked == true) {
+        var string = records[i].originalHeader + records[i].seq + "&#010;";
+        $("#badIds").append(string.trim());
+      }
 
-      var string = records[i].originalHeader + records[i].seq + "&#010;&#010;";
-      $("#badIds").append(string.trim());
+      else {
+        records[i].ncbiChecked = true
+        ncbiCheck.push(records[i])
+
+
+
+      }
+
     } else if (obsoleteList.includes(records[i].id)) {
 
-      var string = records[i].originalHeader + records[i].seq + "&#010;&#010;";
+      var string = records[i].originalHeader + records[i].seq + "&#010;";
       $("#obsoleteSeqs").append(string.trim());
     } else {
 
       formattedType = records[i].type;
-      if (formattedType == "XP"){
+      if (ids_with_underscores.indexOf(formattedType) >= 0){
         formattedType = "";
       }
       else if (records[i].type.length > 0) {
@@ -533,7 +604,7 @@ function appendOutput(records, obsoleteList) {
       //   }
 
 
-        var string = records[i].originalHeader + records[i].seq + "&#010;&#010;";
+        var string = records[i].originalHeader + records[i].seq + "&#010;";
         if (addUnderscores) {
           string = string.replace(/ /g, "_")
         }
@@ -550,7 +621,9 @@ function appendOutput(records, obsoleteList) {
 
         });
 
-        var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;" + records[i].seq + "&#010;&#010;";
+        var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;" + records[i].seq + "&#010;";
+        // var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;&#010;" + records[i].seq + "&#010;";
+
         if (addUnderscores) {
           string = string.replace(/ /g, "_")
         }
@@ -572,6 +645,10 @@ function appendOutput(records, obsoleteList) {
 
       containsBad = false;
     }
+  }
+  if (ncbiCheck.length > 0){  
+    console.log("running ncbi check with ", ncbiCheck)
+    getDataFromNCBI(ncbiCheck);
   }
 
 }
@@ -607,7 +684,7 @@ function getSpeciesFromLocal(record) {
 function downloadFile(filename, text) {
   var element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', $("#fileToSave").val());
+  element.setAttribute('download', filename);
 
   element.style.display = 'none';
   document.body.appendChild(element);

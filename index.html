@@ -15,20 +15,27 @@ Seq Scrub<br><br>
 
     Upload a FASTA file to edit all headers into the ID|Species_name format. <br><br>
 
-    The green box shows the correctly formatted headers<br>
+<!--     The green box shows the correctly formatted headers<br>
 
     The blue box shows any sequences which contained illegal characters<br>
 
-    The purple box shows any sequences which couldn't map to the ID|Species_name format<br><br>
+    The purple box shows any sequences which couldn't map to the ID|Species_name format<br><br> -->
 
 
 
     <form id='data'>
     	<input type="file" class="fileinput" id="file" name="file" />
         <label for="file"> Choose a file </label>
+        <input type="text" id="fileToSave"  value="   " /> <br><br>
+
         <br><br>
         Remove sequences containing these characters:
         <input type="text" id="invalidChars" value="B J O U X Z" /> <br><br>
+        <label for="file"> Change spaces to underscores in species name </label> 
+        <input type="checkbox" id="addUnderscore" value=checked name="addUnderscore"><br><br>
+
+
+
         <input type="submit" class="button" value = "Submit"> <br><br>
     </form>
 
@@ -54,8 +61,10 @@ Seq Scrub<br><br>
 
     <form id="save">
 
-    Enter a filename: <input type="text" id="fileToSave"  value="" /> <br><br>
-        <input type="button" class = "button" id= 'saveButton' value="Save to new file" onclick="downloadFile(fileToSave.value, cleanedSeqs.value)">
+        <input type="button" class = "button" id= 'saveButton' value="Save cleaned sequences" onclick="downloadFile(fileToSave.value, cleanedSeqs.value)"> <br><br>
+<!--         <input type="button" class = "button" id= 'illegalButton' value="Save illegal sequences" onclick="downloadFile(fileToSave.value, badCharacters.value)">
+        <input type="button" class = "button" id= 'obsoleteButton' value="Save obsolete sequences" onclick="downloadFile(fileToSave.value, obsoleteSeqs.value)">
+        <input type="button" class = "button" id= 'unmappableButton' value="Save unmappable sequences" onclick="downloadFile(fileToSave.value, badIds.value)"> <br> <br> -->
         <input type="button" class = "button" id= 'saveButton' value="Save summary" onclick="downloadSummary(fileToSave.value)">
 
 
