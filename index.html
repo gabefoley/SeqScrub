@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <title> Seq Scrub</title>
     <link rel="stylesheet" type="text/css" href="styles/index.css" media="all" />
 
@@ -12,6 +13,20 @@ Seq Scrub<br><br>
 </header>
 
 <body>
+<div class="loader" style="display:none" >
+    <!-- <img src=scrub3.gif> -->
+    <img src=scrubcrop.gif>
+
+
+    <div class="loader-text"  >
+        Cleaning sequences!
+    </div>
+    <!-- <img src=loading2.gif> -->
+
+    <!-- <img src=scrub_big.gif> -->
+
+</div>
+
 
     Upload a FASTA file to edit all headers into the ID|Species_name format. <br><br>
 
@@ -32,7 +47,7 @@ Seq Scrub<br><br>
         Remove sequences containing these characters:
         <input type="text" id="invalidChars" value="B J O U X Z" /> <br><br>
         <label for="file"> Change spaces to underscores in species name </label> 
-        <input type="checkbox" id="addUnderscore" value=checked name="addUnderscore"><br><br>
+        <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore"><br><br>
 
 
 

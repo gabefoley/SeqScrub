@@ -1,56 +1,23 @@
 var invalidChars
-var count = 0
-var baddegg = 0
 summary = "";
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"]
 
-// $( document ).ajaxSend(function() {
-//   $( ".loader" ).show();
-// });
-
-// $(document).ajaxComplete(function () {
-//      $( ".loader" ).hide();
-//  });
-
-// $('div.container').block({
-//     message: '<h1>Premium Users only</h1>',
-// });
-
-$(document).on({
-    ajaxStart: function() { $( ".loader" ).show();    },
-     // ajaxStop: function() { $( ".loader" ).hide(); }    
-});
-
-function checkFinal(count){
-  if (count == numRecords){
-    $( ".loader" ).hide();
-  }
-}
-
-
 document.getElementById('file').onchange = function () {
-
   filename = this.value.replace(/.*[\/\\]/, '');
   $("#fileToSave").val(filename)
 };
 
 //Program a custom submit function for the form
 $("form#data").submit(function(event) {
-  // $( ".loader" ).show();
-
-
 
   // Clear all the output sections
   summary = "";
-  count = 0
   $("#cleanedSeqs").empty();
   $("#badCharacters").empty();
   $("#obsoleteSeqs").empty();
   $("#badIds").empty();
 
-  addUnderscores = $('#addUnderscore').is(":checked");
-
-  // console.log("addunderscores is ", addUnderscores)
+  addUnderscores = true;
 
 
   //Disable the default form submission
@@ -61,12 +28,12 @@ $("form#data").submit(function(event) {
   invalidChars = $("#invalidChars").val().split(" ");
 
   //Change the filename for the file to save to mirror the uploaded filename
-  var filepath = $('#file').val();
-  var filename = filepath.split(/(\\|\/)/g).pop();
+  // var filepath = $('#file').val();
+  // var filename = filepath.split(/(\\|\/)/g).pop();
   // $("#fileToSave").val(filename.split(".").join("_cleaned."))
 
-  // console.log("filename")
-  // console.log(filename)
+  console.log("filename")
+  console.log(filename)
 
   var ncbiList = [];
   var uniprotList = [];
@@ -84,10 +51,9 @@ $("form#data").submit(function(event) {
     processData: false,
     success: function(returndata) {
 
-      // console.log(returndata)
+      console.log(returndata)
 
       jsonData = JSON.parse(returndata);
-      numRecords = jsonData.length;
 
       // For each sequence in the file
       for (var i = 0; i < jsonData.length; i++) {
@@ -104,24 +70,20 @@ $("form#data").submit(function(event) {
           originalHeader: jsonData[i].originalHeader
         };
 
-        // console.log(record.type)
+        console.log(record.type)
 
 
         if (record.type == 'tr' || record.type == 'sp' || record.type == 'pdb' || record.type == '') {
           uniprotList.push(record)
 
         } else {
-          record.ncbiChecked = true;
           ncbiList.push(record);
         }
       }
 
       if (uniprotList.length > 0) {
         console.log("Uniprot length = ", uniprotList.length)
-        while (uniprotList.length){
-          getDataFromUniprot(uniprotList.splice(0,500))
-
-        }
+        getDataFromUniprot(uniprotList)
 
 
       }
@@ -129,13 +91,8 @@ $("form#data").submit(function(event) {
 
       if (ncbiList.length > 0) {
         console.log("NCBI length = ", ncbiList.length)
-        while (ncbiList.length){
-          // console.log("first time round", ncbiList.splice(0,300))
-        getDataFromNCBI(ncbiList.splice(0,500));
+        getDataFromNCBI(ncbiList);
       }
-      }
-
-
 
 
     }
@@ -144,8 +101,7 @@ $("form#data").submit(function(event) {
 
 
 
-})
-
+});
 
 function getIDString(records, database){
   
@@ -166,7 +122,6 @@ function getIDString(records, database){
  * @return {[type]}        [description]
  */
 function getDataFromUniprot(records) {
-  console.log ("%%%%% UNIPROT LENGTH %%%%%", records.length)
 
   // idString = "";
 
@@ -177,8 +132,7 @@ function getDataFromUniprot(records) {
 
   // idString = idString.substring(0, idString.length - 4);
 
-
-  idString = getIDString(records, "UniProt")
+  getIDString(records, "UniProt")
 
   url = "http://www.uniprot.org/uniprot/?query=" + idString + "&format=xml"
 
@@ -188,7 +142,6 @@ function getDataFromUniprot(records) {
     url: url,
     type: 'POST',
     async: true,
-
     success: function(speciesData) {
 
       // if (!$.trim(speciesData)) {
@@ -216,8 +169,6 @@ function getDataFromUniprot(records) {
 
 
 function getDataFromNCBI(records) {
-  console.log ("%%%%% NCBI LENGTH %%%%%", records.length)
-
 
   // idString = "";
 
@@ -231,7 +182,7 @@ function getDataFromNCBI(records) {
 
   // idString = idString.substring(0, idString.length - 1);
 
-  idString = getIDString(records, "NCBI")
+  getIDString(records, "NCBI")
 
 
   urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum"
@@ -257,7 +208,7 @@ function getDataFromNCBI(records) {
 
   });
 
-  // promise.done(function(speciesData) {});
+  promise.done(function(speciesData) {});
 }
 
 
@@ -352,8 +303,6 @@ function getIDFromNCBI(records, speciesData) {
 function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
   speciesList = [];
 
-  idString = getIDString(records, "NCBI")
-
   // urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=all"
   urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=fasta"
 
@@ -415,9 +364,9 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 function getSpeciesNameFromUniProt(records, speciesData) {
 
-  // console.log('got here');
-  // console.log(records);
-  // console.log(speciesData);
+  console.log('got here');
+  console.log(records);
+  console.log(speciesData);
 
   fullList = [];
 
@@ -430,7 +379,7 @@ function getSpeciesNameFromUniProt(records, speciesData) {
       path = "";
 
       if (records[record].type == "pdb") {
-        path = "//*[name()='dbReference'][@id='" + records[record].id + "']/preceding-sibling::*[name()='organism']/*[@type='scientific']"
+        path = "//*[name()='dbReference'][@id='3QM4']/preceding-sibling::*[name()='organism']/*[@type='scientific']"
       }
 
       else {
@@ -438,8 +387,8 @@ function getSpeciesNameFromUniProt(records, speciesData) {
 
       }
 
-       // console.log(path);
-       // console.log("DATA: ", speciesData)
+       console.log(path);
+       console.log("DATA: ", speciesData)
       var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
       // node.iterateNext();
       // console.log( records[record].id, " and ", node.textContent)
@@ -545,7 +494,7 @@ function checkUniProtObsolete(records, idString) {
 
   // idString = idString.substring(0, idString.length - 4);
 
-  idString = getIDString(records, "UniProt")
+  getIDString(records, "UniProt")
 
 
 
@@ -607,34 +556,19 @@ function appendOutput(records, obsoleteList) {
   // Check to see if there are any illegal characters
 
   for (i in records) {
-  containsBad = false;
-
 
     for (j in records[i].seq) {
       if (invalidChars.includes(records[i].seq[j])) {
         containsBad = true;
-        console.log("BAD EGG ", records[i].id)
-        console.log(records[i].seq[j])
+        // console.log(records[i])
       }
     }
 
-    if (containsBad){
-      baddegg += 1
-      console.log("bad egg is ", baddegg)
-
-
-    }
-
-    if ((records[i].species == null || records[i].species == "") && !(obsoleteList.includes(records[i].id))) {
-      // console.log("Bad sequence is", records[i].id)
-      // console.log(records[i])
+    if ((records[i].species == null | records[i].species == "") && !(obsoleteList.includes(records[i].id))) {
+      console.log("Bad sequence is", records[i].id)
       if (records[i].ncbiChecked == true) {
         var string = records[i].originalHeader + records[i].seq + "&#010;";
         $("#badIds").append(string.trim());
-        count +=1
-        console.log("Count is now ", count )
-        checkFinal(count)
-
       }
 
       else {
@@ -649,11 +583,6 @@ function appendOutput(records, obsoleteList) {
 
       var string = records[i].originalHeader + records[i].seq + "&#010;";
       $("#obsoleteSeqs").append(string.trim());
-      count +=1
-      console.log("Count is now ", count )
-      checkFinal(count)
-
-
     } else {
 
       formattedType = records[i].type;
@@ -676,26 +605,21 @@ function appendOutput(records, obsoleteList) {
 
 
         var string = records[i].originalHeader + records[i].seq + "&#010;";
-        // if (addUnderscores) {
-        //   string = string.replace(/ /g, "_")
-        // }
+        if (addUnderscores) {
+          string = string.replace(/ /g, "_")
+        }
         $("#badCharacters").append(string.trim());
-        count +=1
-        console.log("Count is now ", count )
-        checkFinal(count)
-
-      // }
 
       } else {
 
-      //   dataString = "id=" + records[i].id + "&speciesName=" + records[i].species + "&seq=" + records[i].seq
-      //   $.ajax({
-      //     url: 'addSpeciesToLocal.php',
-      //     type: 'POST',
-      //     data: dataString,
-      //     success: function() {}
+        dataString = "id=" + records[i].id + "&speciesName=" + records[i].species + "&seq=" + records[i].seq
+        $.ajax({
+          url: 'addSpeciesToLocal.php',
+          type: 'POST',
+          data: dataString,
+          success: function() {}
 
-      //   });
+        });
 
         var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;" + records[i].seq + "&#010;";
         // var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;&#010;" + records[i].seq + "&#010;";
@@ -705,11 +629,6 @@ function appendOutput(records, obsoleteList) {
         }
 
         $("#cleanedSeqs").append(string.trim());
-        count += 1
-        console.log("Count is now ", count )
-        checkFinal(count)
-
-
 
 
         summarySpecies = records[i].species
@@ -720,23 +639,18 @@ function appendOutput(records, obsoleteList) {
 
         summary += ">" + formattedType + records[i].id + "|" + summarySpecies + " FROM: " + records[i].originalHeader + "\n";
 
-      // }
+      }
 
 
 
+      containsBad = false;
     }
   }
+  if (ncbiCheck.length > 0){  
+    console.log("running ncbi check with ", ncbiCheck)
+    getDataFromNCBI(ncbiCheck);
+  }
 
-
-}
-containsBad = false;
-
-
-
-if (ncbiCheck.length > 0){  
-  console.log("running ncbi check with ", ncbiCheck)
-  getDataFromNCBI(ncbiCheck);
-}
 }
 
 function getSpeciesFromLocal(record) {

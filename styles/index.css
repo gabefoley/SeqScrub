@@ -280,4 +280,51 @@ textarea:focus {
 	outline-width: 0;
 }
 
+.loader {
+  position: absolute;
+  background: white;
+  left: 40%;
+  top: 50%;
+  z-index: 1;
+/*  width: 100px;
+  height: 100px;*/
+  margin: -75px 0 0 -75px;
+  border: 16px solid #f3f3f3;
+  border-radius: 200%;
+  border-top: 16px solid #9b59b6;
+/*  border-left: 16px solid #2ecc71;
+  border-right: 16px solid #2ecc71;
+  border-bottom: 16px solid #9b59b6;*/
+
+
+  width: 310px;
+  height: 310px;
+  -webkit-animation: spin 2s linear infinite;
+  -moz-animation: spin 2s linear infinite;
+   -ms-animation: spin 2s linear infinite;
+    -o-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+.loader img {
+    display:block;
+    margin:auto;
+    margin-top:15%;
+
+    /*width: 70%;*/
+    /*height: 50%;*/
+}
+
+.loader-text {
+	    display:block;
+	    margin-top: 10%;
+	    margin-left: 20%;
+	    font-size: 20px;
+	    font-family: "Raleway";
+	    text-shadow:2px 2px 0 rgba(0,0,0,0.1);
+	    /*height: 70px;*/
+	    z-index: 999;
+
+	}
+
+
 

@@ -1,11 +1,8 @@
 
 <?php
-// header('Access-Control-Allow-Origin: *');
-
-// header('Content-type: application/json');
-
-// header('content-type: application/json; charset=utf-8');
 header("access-control-allow-origin: http://eutils.ncbi.nlm.nih.gov");
+header("access-control-allow-origin: http://uniprot.org");
+
 
 // Setup directory to store uploads
 $target_dir = "uploads/";
