@@ -42,13 +42,12 @@ Seq Scrub<br><br>
     	<input type="file" class="fileinput" id="file" name="file" />
         <label for="file"> Choose a file </label>
         <input type="text" id="fileToSave"  value="   " /> <br><br>
-
-        <br><br>
         Remove sequences containing these characters:
         <input type="text" id="invalidChars" value="B J O U X Z" /> <br><br>
-        <label for="file"> Change spaces to underscores in species name </label> 
+        <label for="addUnderscore"> Change spaces to underscores in species name </label> 
         <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore"><br><br>
-
+        <label for="getFirstID"> Extract first ID from headers with multiple IDs (otherwise send to unmappable output) </label> 
+        <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID"><br><br>
 
 
         <input type="submit" class="button" value = "Submit"> <br><br>

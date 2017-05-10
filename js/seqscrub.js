@@ -181,8 +181,9 @@ function getDataFromUniprot(records) {
   idString = getIDString(records, "UniProt")
 
   url = "http://www.uniprot.org/uniprot/?query=" + idString + "&format=xml"
+  // url = "http://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,reviewed"
 
-  // console.log(url)
+  console.log(url)
 
   var promise = $.ajax({
     url: url,
@@ -412,13 +413,33 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 }
 
+function getSpeciesNameFromUniProt2(records, speciesData) {
+
+
+  if (speciesData != null){
+
+    for (line in speciesData){
+      console.log(splitLine)
+      splitLine = line.split("\t")
+      if (splitLine.length > 1){
+        if (splitLine[2] == "Deleted.") {
+          obsoleteList.push(splitLine[1])
+
+        }
+
+        else {
+          records[splitLine[0]].species = splitLine[3];
+        }
+      }
+    }
+  }
+
+  appendOutput(records, obsoleteList)
+}
+
+
 
 function getSpeciesNameFromUniProt(records, speciesData) {
-
-  // console.log('got here');
-  // console.log(records);
-  // console.log(speciesData);
-
   fullList = [];
 
   if (speciesData != null) {
@@ -797,6 +818,7 @@ function split(str, char) {
 }
 
 // Allow for easy selection of full text in each window
+
 $("#cleanedSeqs").click(function() {
   $("#cleanedSeqs").select();
 });
