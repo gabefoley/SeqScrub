@@ -36,7 +36,6 @@ document.getElementById('file').onchange = function () {
 
 //Program a custom submit function for the form
 $("form#data").submit(function(event) {
-  // $( ".loader" ).show();
 
 
 
@@ -49,8 +48,7 @@ $("form#data").submit(function(event) {
   $("#badIds").empty();
 
   addUnderscores = $('#addUnderscore').is(":checked");
-
-  // console.log("addunderscores is ", addUnderscores)
+  commonName = $('#commonName').is(":checked")
 
 
   //Disable the default form submission
@@ -63,11 +61,6 @@ $("form#data").submit(function(event) {
   //Change the filename for the file to save to mirror the uploaded filename
   var filepath = $('#file').val();
   var filename = filepath.split(/(\\|\/)/g).pop();
-  // $("#fileToSave").val(filename.split(".").join("_cleaned."))
-
-  // console.log("filename")
-  // console.log(filename)
-
   var ncbiList = [];
   var uniprotList = [];
   uniprotDict = {};
@@ -84,7 +77,7 @@ $("form#data").submit(function(event) {
     processData: false,
     success: function(returndata) {
 
-      // console.log(returndata)
+      console.log(returndata)
 
       jsonData = JSON.parse(returndata);
       numRecords = jsonData.length;
@@ -104,8 +97,6 @@ $("form#data").submit(function(event) {
           originalHeader: jsonData[i].originalHeader
         };
 
-        // console.log(record.type)
-
 
         if (record.type == 'tr' || record.type == 'sp' || record.type == 'pdb' || record.type == '') {
           uniprotList.push(record)
@@ -122,11 +113,7 @@ $("form#data").submit(function(event) {
           getDataFromUniprot(uniprotList.splice(0,500))
 
         }
-
-
       }
-
-
       if (ncbiList.length > 0) {
         console.log("NCBI length = ", ncbiList.length)
         while (ncbiList.length){
@@ -134,10 +121,6 @@ $("form#data").submit(function(event) {
         getDataFromNCBI(ncbiList.splice(0,500));
       }
       }
-
-
-
-
     }
 
   });
@@ -152,10 +135,10 @@ function getIDString(records, database){
   idString = "";
 
   for (var i = 0, size = records.length; i < size; i++) {
-    idString += records[i].id + (database == 'UniProt' ? "+OR+" : "," );
+    idString += records[i].id + (database == 'UniProt' ? "+OR+id:" : "," );
   }
 
-  idString = idString.substring(0, idString.length - (database == 'UniProt' ? 4 : 1));
+  idString = idString.substring(0, idString.length - (database == 'UniProt' ? 7 : 1));
   return idString
 }
 
@@ -167,21 +150,10 @@ function getIDString(records, database){
  */
 function getDataFromUniprot(records) {
   console.log ("%%%%% UNIPROT LENGTH %%%%%", records.length)
-
-  // idString = "";
-
-  // for (var i = 0, size = records.length; i < size; i++) {
-
-  //   idString += records[i].id +  "+OR+";
-  // }
-
-  // idString = idString.substring(0, idString.length - 4);
-
-
   idString = getIDString(records, "UniProt")
 
-  url = "http://www.uniprot.org/uniprot/?query=" + idString + "&format=xml"
-  // url = "http://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,reviewed"
+  // url = "http://www.uniprot.org/uniprot/?query=" + idString + "&format=xml"
+  url = "http://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,reviewed"
 
   console.log(url)
 
@@ -192,53 +164,58 @@ function getDataFromUniprot(records) {
 
     success: function(speciesData) {
 
-      // if (!$.trim(speciesData)) {
-      //   var string = record.originalHeader + record.seq + "&#010;&#010;";
-      //   $("#badIds").append(string.trim());
-      // }
-      console.log(speciesData);
-      getSpeciesNameFromUniProt(records, speciesData, idString);
+      getSpeciesNameFromUniProt2(records, speciesData, idString);
 
     },
+    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+      if (errorThrown == "Bad Request"){
+        response = XMLHttpRequest.responseText
+        alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
 
-    // If we couldn't map the sequence to a species
-    // error: function() {
-    //   var string = record.originalHeader + record.seq + "&#010;&#010;";
-    //   $("#badIds").append(string.trim());
+        obsoleteList = []
+        appendOutput(records, obsoleteList)
+      
+      }
 
-    // }
+      else {
+        alert("There was a fatal error \n" + records.length + " sequences are being written to unmappable" );
+        obsoleteList = []
+        appendOutput(records, obsoleteList)
+
+        if (count != numRecords) {
+          alert("Please note: Currently not all sequences have been written to an output field")
+        }
+        else {
+          alert ("Please note: Despite the error, all sequences have still been written to an output field")
+        }
+
+        // $( ".loader" ).hide();
+        // return
+
+
+      }
+
+
+
+
+
+
+    }   
   });
-
-  // promise.done(function(speciesData) {
-
-
-  // });
 }
 
 
 function getDataFromNCBI(records) {
+
   console.log ("%%%%% NCBI LENGTH %%%%%", records.length)
 
-
-  // idString = "";
-
-  // for (var i = 0, size = records.length; i < size; i++) {
-
-
-  //   idString += records[i].id + ",";
-  //   console.log(records[i].id)
-  // }
-  // console.log('Size was ', records.length)
-
-  // idString = idString.substring(0, idString.length - 1);
 
   idString = getIDString(records, "NCBI")
 
 
   urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum"
+  console.log(urlDoc)
 
-  // console.log("next one")
-  // console.log(urlDoc)
   var promise = $.ajax({
     url: urlDoc,
     type: 'POST',
@@ -248,6 +225,53 @@ function getDataFromNCBI(records) {
       // console.log("Data from NCBI", speciesData);
       getIDFromNCBI(records, speciesData)
     },
+    // error: function (XMLHttpRequest, textStatus, errorThrown) {
+    //   obsoleteList = []
+
+    //   // for (record in records){
+    //   //   obsoleteList.push(records[record].id)
+
+    //   // }
+
+    //   appendOutput(records, obsoleteList)
+      
+
+    // }
+
+    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+      if (errorThrown == "Bad Request"){
+        // response = XMLHttpRequest.responseText
+        // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
+
+        obsoleteList = []
+        appendOutput(records, obsoleteList)
+      
+      }
+
+      else {
+        alert("There was a fatal error \n" + records.length + " sequences are being written to unmappable" );
+        obsoleteList = []
+        appendOutput(records, obsoleteList)
+
+        if (count != numRecords) {
+          alert("Please note: Currently not all sequences have been written to an output field")
+        }
+        else {
+          alert ("Please note: Despite the errors, all sequences have still been written to an output field")
+        }
+
+        // $( ".loader" ).hide();
+        // return
+
+
+      }
+
+
+
+
+
+
+    }   
 
     // error: function() {
 
@@ -257,6 +281,7 @@ function getDataFromNCBI(records) {
     // }
 
   });
+
 
   // promise.done(function(speciesData) {});
 }
@@ -288,7 +313,7 @@ function getIDFromNCBI(records, speciesData) {
         while (thisNode) {
           records[record].id = thisNode.textContent
           records[record].type = '';
-          // console.log(thisNode.textContent, records[record].id)
+          console.log(thisNode.textContent, records[record].id)
           thisNode = node.iterateNext();
         }
       } catch (e) {
@@ -407,31 +432,80 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
       appendOutput(records, obsoleteList)
 
     },
+    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+      if (errorThrown == "Bad Request"){
+        // response = XMLHttpRequest.responseText
+        // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
+
+        obsoleteList = []
+        appendOutput(records, obsoleteList)
+      
+      }
+
+      else {
+        alert("There was a fatal error \n" + records.length + " sequences are being written to unmappable and the program is exiting prematurely" );
+        obsoleteList = []
+        appendOutput(records, obsoleteList)
+        if (count != numRecords) {
+          alert("Please note: Not all sequences were written to an output field")
+        }
+        else {
+          alert ("Please note: Despite the errors, all sequences have still been written to an output field")
+        }
+        $( ".loader" ).hide();
+
+      }
+
+
+
+
+    }   
+
 
   })
 
 
 }
 
-function getSpeciesNameFromUniProt2(records, speciesData) {
 
 
-  if (speciesData != null){
+function getSpeciesNameFromUniProt2(records, speciesData, idString) {
+  console.log('got here')
+  console.log(records)
+  obsoleteList = [];
+  speciesDict = {}
 
-    for (line in speciesData){
-      console.log(splitLine)
-      splitLine = line.split("\t")
-      if (splitLine.length > 1){
-        if (splitLine[2] == "Deleted.") {
-          obsoleteList.push(splitLine[1])
+  if (speciesData != null) {
 
+    splitData = speciesData.split("\n")
+
+
+    for (line in splitData) {
+      if (splitData[line] != null){
+      // console.log(splitData[line])
+      splitLine = splitData[line].split("\t")
+      if (splitLine[2] != null){
+      if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
+        console.log("add to obsolete", splitLine[0])
+        obsoleteList.push(splitLine[0])
+      }
+
+      else {
+        endIndex = splitLine[3].indexOf(" (")
+
+          speciesDict[splitLine[0]] = splitLine[3].substr(0, endIndex == -1 ? splitLine[3].length : endIndex)
         }
-
-        else {
-          records[splitLine[0]].species = splitLine[3];
-        }
+        
       }
     }
+  }
+  }
+
+    for (record in records){
+      console.log(records[record] )
+      if (records[record].id in speciesDict){
+        records[record].species = speciesDict[records[record].id]
+      }
   }
 
   appendOutput(records, obsoleteList)
@@ -620,6 +694,8 @@ function checkUniProtObsolete(records, idString) {
 
 function appendOutput(records, obsoleteList) {
 
+  console.log("ONSOLETE LIST", obsoleteList)
+
   //Boolean value to hold if the current sequence has illegal characters
   containsBad = false;
 
@@ -647,7 +723,7 @@ function appendOutput(records, obsoleteList) {
     }
 
     if ((records[i].species == null || records[i].species == "") && !(obsoleteList.includes(records[i].id))) {
-      // console.log("Bad sequence is", records[i].id)
+      console.log("Bad sequence is", records[i].id)
       // console.log(records[i])
       if (records[i].ncbiChecked == true) {
         var string = records[i].originalHeader + records[i].seq + "&#010;";
@@ -815,6 +891,11 @@ function split(str, char) {
   return  str.slice(0, i);
  else
   return str;     
+}
+
+function Abort()
+{
+   throw new Error('This is not an error. This is just to abort javascript');
 }
 
 // Allow for easy selection of full text in each window

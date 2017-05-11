@@ -39,7 +39,7 @@ while (($line = fgets($fp)) !== false){
 			$seqCount +=1;
 		}
 
-		$lineArray = preg_split("/[\s,|_]+/", $line);
+		$lineArray = preg_split("/[\s,|_\/]+/", $line);
 		// echo "lineArray";
 		// echo $lineArray;
 
