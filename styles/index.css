@@ -6,7 +6,7 @@ body,
 
 #cleanedSeqs {
 	height: 300px;
-	width: 33.3333%;
+	width: 25%;
 	background: #2ecc71;
 	overflow-y: scroll;
 	overflow-x: hidden;
@@ -20,7 +20,7 @@ body,
 
 #badCharacters {
 	height: 300px;
-	width: 33.3333%;
+	width: 25%;
 	background: #3498db;
 	overflow-y: scroll;
 	overflow-x: hidden;
@@ -34,7 +34,7 @@ body,
 
 #badIds {
 	height: 300px;
-	width: 33.3333%;
+	width: 25%;
 	background: #9b59b6;
 	overflow-y: scroll;
 	overflow-x: hidden;
@@ -49,7 +49,7 @@ background: #9b59b6;
 
 #obsoleteSeqs {
 	height: 300px;
-	width: 33.3333%;
+	width: 25%;
 	background: goldenrod;
 	overflow-y: scroll;
 	overflow-x: hidden;
@@ -281,20 +281,24 @@ textarea:focus {
 }
 
 .loader {
-  position: absolute;
+  position: fixed;
   background: white;
-  left: 40%;
-  top: 50%;
-  z-index: 1;
+  /*left: 50%;*/
+  /*top: 40%;*/
+  z-index: 10000;
 /*  width: 100px;
   height: 100px;*/
-  margin: -75px 0 0 -75px;
+  /*margin: -75px 0 0 -75px;*/
   border: 16px solid #f3f3f3;
   border-radius: 200%;
   border-top: 16px solid #9b59b6;
 /*  border-left: 16px solid #2ecc71;
   border-right: 16px solid #2ecc71;
   border-bottom: 16px solid #9b59b6;*/
+  width: 100px;
+  height:100px;
+  top: calc(50vh - (/* height */300px / 2));
+  left: calc(50vw - (/* width */400px / 2));
 
 
   width: 310px;
@@ -327,4 +331,40 @@ textarea:focus {
 	}
 
 
+	.tooltip {
+	    position: relative;
+	    display: inline-block;
+	    border-bottom: 1px dotted black;
+	}
+
+	.tooltip .tooltiptext {
+	    visibility: hidden;
+	    width: 320px;
+	    background-color: #2ecc71;
+	    color: black;
+	    margin: black;
+	    text-align: center;
+	    border-radius: 0px;
+	    border-color: black;
+	    padding: 5px 0;
+	    position: absolute;
+	    z-index: 1;
+	    top: -5px;
+	    left: 102%;
+	}
+
+	.tooltip .tooltiptext::after {
+	    content: "";
+	    border-color: black;
+	    position: absolute;
+	    top: 50%;
+	    right: 100%;
+	    margin-top: -5px;
+	    border-width: 5px;
+	    border-style: solid;
+	    border-color: transparent black transparent transparent;
+	}
+	.tooltip:hover .tooltiptext {
+	    visibility: visible;
+	}
 
