@@ -2,8 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Access-Control-Allow-Origin" content="*">
-    <meta http-equiv="Access-Control-Allow-Origin" content="http://eutils.ncbi.nlm.nih.gov.au">
+    <!-- <meta http-equiv="Access-Control-Allow-Origin" content="*"> -->
+    <meta http-equiv="Access-Control-Allow-Origin" content="http://eutils.ncbi.nlm.nih.gov">
 
     <title> SeqScrub</title>
     <link rel="stylesheet" type="text/css" href="styles/index.css" media="all" />
@@ -66,8 +66,6 @@ SeqScrub<br><br>
         <label for="getFirstID"> Retain only the first ID from headers with multiple IDs (otherwise send to unmappable output) </label>
 
         <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID"><br><br>
-        <label for="commonName"> Append common name after species name </label> 
-        <input type="checkbox" checked id="commonName" value="" autocomplete="off" name="commonName"><br><br>
 
 
         <input type="submit" class="button" value = "Submit"> <br><br>

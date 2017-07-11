@@ -1,7 +1,16 @@
 
 <?php
-header("access-control-allow-origin: http://eutils.ncbi.nlm.nih.gov");
-header("access-control-allow-origin: http://uniprot.org");
+// header("access-control-allow-origin: http://eutils.ncbi.nlm.nih.gov");
+// header("access-control-allow-origin: http://uniprot.org");
+// header("access-control-allow-origin: *");
+
+
+// $http_origin = $_SERVER['HTTP_ORIGIN'];
+
+// if ($http_origin == "http://eutils.ncbi.nlm.nih.gov" || $http_origin == "http://uniprot.org")
+// {  
+//     header("Access-Control-Allow-Origin: $http_origin");
+// }
 
 
 // Setup directory to store uploads

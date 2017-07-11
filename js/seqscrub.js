@@ -1,3 +1,8 @@
+// header('Access-Control-Allow-Origin: http://eutils.ncbi.nlm.nih.gov');
+
+
+
+
 var invalidChars
 var count = 0
 var baddegg = 0
@@ -97,9 +102,12 @@ $("form#data").submit(function(event) {
     cache: false,
     contentType: false,
     processData: false,
+    // xhrFields: {
+    //   withCredentials: true
+    // },
     success: function(returndata) {
 
-      // console.log(returndata)
+      console.log(returndata)
 
       jsonData = JSON.parse(returndata);
       numRecords = jsonData.length;
@@ -216,6 +224,9 @@ function getDataFromUniprot(records, pdb) {
     url: url,
     type: 'POST',
     async: true,
+    // xhrFields: {
+    //   withCredentials: true
+    // },
 
     success: function(speciesData) {
 
@@ -274,6 +285,9 @@ function getDataFromNCBI(records) {
     url: urlDoc,
     type: 'POST',
     async: true,
+    // xhrFields: {
+    //   withCredentials: true
+    // },
     success: function(speciesData) {
 
       // console.log("Data from NCBI", speciesData);
@@ -444,6 +458,9 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
     url: urlAll,
     type: 'POST',
     async: true,
+    // xhrFields: {
+    //   withCredentials: true
+    // },
     success: function(speciesData) {
 
       // console.log("Data from NCBI", speciesData);
@@ -592,6 +609,9 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
     url: url,
     type: 'POST',
     async: true,
+    // xhrFields: {
+    //   withCredentials: true
+    // },
 
     success: function(speciesData) {
 
@@ -698,6 +718,9 @@ function checkUniProtObsolete(records, idString) {
     url: urlDoc,
     type: 'POST',
     async: true,
+    // xhrFields: {
+    //   withCredentials: true
+    // },
     success: function(speciesData) {
 
       if (speciesData != null) {
@@ -899,6 +922,7 @@ function getSpeciesFromLocal(record) {
     url: 'getSpeciesFromLocal.php',
     type: 'POST',
     data: dataString,
+
     success: function(returnData) {
       // console.log("Return data from getSpeciesFromLocal" + returnData);
 
