@@ -11,6 +11,7 @@ ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"]
 
 
 $("#commonName").attr('checked', false)
+$("")
 
 
 
@@ -87,12 +88,7 @@ $("form#data").submit(function(event) {
     cache: false,
     contentType: false,
     processData: false,
-    // xhrFields: {
-    //   withCredentials: true
-    // },
     success: function(returndata) {
-
-      // console.log(returndata)
 
       jsonData = JSON.parse(returndata);
       numRecords = jsonData.length;
@@ -107,6 +103,7 @@ $("form#data").submit(function(event) {
 
         var record = {
           id: jsonData[i].id,
+          taxon: "",
           type: jsonData[i].type,
           species: "",
           seq: jsonData[i].seq,
@@ -191,6 +188,36 @@ function getIDString(records, database){
   return idString
 }
 
+function getTaxonID(records, database) {
+
+  console.log(records);
+
+  idString = "";
+
+  if ( database == "UniProt"){
+    linker = "+OR+id:";
+    trim = 7;
+  }
+
+  else if (database == "PDB") {
+    linker = "+OR+";
+    trim = 4
+  }
+
+  else if (database == "NCBI"){
+    linker = ","
+    trim = 1
+  }
+
+  for (var i = 0, size = records.length; i < size; i++) {
+    idString += records[i].taxon + linker;
+  }
+
+  idString = idString.substring(0, idString.length - trim);
+  return idString
+
+}
+
 
 
 function getDataFromUniprot(records, pdb) {
@@ -253,36 +280,22 @@ function getDataFromNCBI(records) {
 
   urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum"
 
+  console.log('getDataFromNCBI')
+  console.log(urlDoc)
+
   var promise = $.ajax({
     url: urlDoc,
     type: 'POST',
     async: true,
-    // xhrFields: {
-    //   withCredentials: true
-    // },
+
     success: function(speciesData) {
 
-      // console.log("Data from NCBI", speciesData);
       getIDFromNCBI(records, speciesData)
     },
-    // error: function (XMLHttpRequest, textStatus, errorThrown) {
-    //   obsoleteList = []
 
-    //   // for (record in records){
-    //   //   obsoleteList.push(records[record].id)
-
-    //   // }
-
-    //   appendOutput(records, obsoleteList)
-      
-
-    // }
 
     error: function(XMLHttpRequest, textStatus, errorThrown) { 
       if (errorThrown == "Bad Request"){
-        // response = XMLHttpRequest.responseText
-        // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
-
         obsoleteList = []
         appendOutput(records, obsoleteList)
       
@@ -299,11 +312,6 @@ function getDataFromNCBI(records) {
         else {
           alert ("Please note: Despite the errors, all sequences have still been written to an output field")
         }
-
-        // $( ".loader" ).hide();
-        // return
-
-
       }
 
 
@@ -313,17 +321,9 @@ function getDataFromNCBI(records) {
 
     }   
 
-    // error: function() {
-
-    //   var string = record.originalHeader + record.seq + "&#010;&#010;";
-    //   $("#badIds").append(string.trim());
-
-    // }
 
   });
 
-
-  // promise.done(function(speciesData) {});
 }
 
 
@@ -339,19 +339,25 @@ function getIDFromNCBI(records, speciesData) {
 
 
     for (record in records) {
-      path = "*/DocSum/Id[contains(., '" + records[record].id + "')]/following-sibling::Item[@Name='AccessionVersion']/text()"
-
-      // console.log(path)
+      // This is the part where I might need to grab clean accessionversion
+      // path = "*/DocSum/Id[contains(., '" + records[record].id + "')]/following-sibling::Item[@Name='AccessionVersion']/text()"
+      // path = "*/DocSum/Id[contains(., '" + records[record].id + "')]/following-sibling::Item[@Name='TaxId']/text()"
+      path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + records[record].id + "')]/../Item[@Name='TaxId']/text()"
 
       var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
-      // console.log(node)
+
+      console.log('path')
+      console.log(path)
+
+
 
 
       try {
         var thisNode = node.iterateNext();
 
         while (thisNode) {
-          records[record].id = thisNode.textContent
+
+          records[record].taxon = thisNode.textContent
           records[record].type = '';
           // console.log(thisNode.textContent, records[record].id)
           thisNode = node.iterateNext();
@@ -367,34 +373,7 @@ function getIDFromNCBI(records, speciesData) {
     obsoleteCheck = "//DocSum[Item[contains(., 'removed')]]//Item[@Name='AccessionVersion']/text()";
 
 
-    // path = "//Item[@Name='AccessionVersion']/text()"
 
-
-
-
-    // try {
-    //   var thisNode = node.iterateNext();
-
-    //   while (thisNode) {
-    //     fullList.push(thisNode.textContent);
-    //     thisNode = node.iterateNext();
-    //   }
-    // } catch (e) {
-    //   console.log('Error: Document tree modified during iteration ' + e);
-    // }
-
-
-    // recordLen = Object.keys(records).length
-
-    // console.log(fullList.length)
-    // console.log(records.length)
-
-
-    // for (var i = 0, size = records.length - 1; i <= size; i++) {
-    //   records[i].id = fullList[i]
-    //   records[i].type = ''; // Remove the previous identifier
-
-    // }
 
     var node = speciesData.evaluate(obsoleteCheck, speciesData, null, XPathResult.ANY_TYPE, null);
 
@@ -408,11 +387,127 @@ function getIDFromNCBI(records, speciesData) {
     } catch (e) {
       console.log('Error: Document tree modified during iteration ' + e);
     }
-    getSpeciesNameFromNCBI(records, idString, obsoleteList)
+    getSpeciesNameFromNCBI2(records, idString, obsoleteList)
 
 
 
   }
+}
+
+function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
+  speciesList = [];
+
+  idString = getTaxonID(records, "NCBI")
+
+  urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all"
+
+
+
+
+  console.log('urlAll')
+
+  console.log(urlAll)
+  var promise = $.ajax({
+    url: urlAll,
+    type: 'POST',
+    async: true,
+
+    success: function(speciesData) {
+
+      // console.log("Data from NCBI", speciesData);
+      if (speciesData != null) {
+
+
+        for (record in records){
+          accession = split(records[record].id, ".")
+          // console.log(accession)
+        
+          // INFO: This is the new path
+          path = "//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName | //TaxId[contains(., '" + records[record].taxon + "')]/../Division | //TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName"
+
+
+
+          console.log(path)
+          var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
+
+          // console.log(node)
+
+        try {
+          var thisNode = node.iterateNext();
+
+
+          species = ""
+
+          console.log('here')
+          console.log(records[record])
+
+
+
+            while (thisNode) {
+
+
+              records[record].species += thisNode.textContent + " "
+              thisNode = node.iterateNext();
+
+            }
+
+
+          
+
+        
+
+        } catch (e) {
+          console.log('Error: Document tree modified during iteration ' + e);
+        }
+
+
+
+        // console.log("Finished iteration")
+
+        }
+      }
+
+      console.log(records[record])
+
+
+      
+
+      appendOutput(records, obsoleteList)
+
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+      if (errorThrown == "Bad Request"){
+        // response = XMLHttpRequest.responseText
+        // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
+
+        obsoleteList = []
+        appendOutput(records, obsoleteList)
+      
+      }
+
+      else {
+        alert("There was a fatal error \n" + records.length + " sequences are being written to unmappable and the program is exiting prematurely" );
+        obsoleteList = []
+        appendOutput(records, obsoleteList)
+        if (count != numRecords) {
+          alert("Please note: Not all sequences were written to an output field")
+        }
+        else {
+          alert ("Please note: Despite the errors, all sequences have still been written to an output field")
+        }
+        $( ".loader" ).hide();
+
+      }
+
+
+
+
+    }   
+
+
+  })
+
+
 }
 
 function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
@@ -432,15 +527,12 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 
 
-  console.log(urlAll)
-  // console.log("^^^^")
+  // console.log(urlAll)
   var promise = $.ajax({
     url: urlAll,
     type: 'POST',
     async: true,
-    // xhrFields: {
-    //   withCredentials: true
-    // },
+
     success: function(speciesData) {
 
       // console.log("Data from NCBI", speciesData);
@@ -449,7 +541,7 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
         for (record in records){
           accession = split(records[record].id, ".")
-          console.log(accession)
+          // console.log(accession)
         
         if (commonName){
           path = "c " +
@@ -462,10 +554,10 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 
 
-          console.log(path)
+          // console.log(path)
           var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
-          console.log(node)
+          // console.log(node)
 
         try {
           var thisNode = node.iterateNext();
@@ -480,13 +572,13 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
             species += " (" + thisNode.textContent
 
-            console.log(accession, " AND NOW WITH ", thisNode.textContent )
+            // console.log(accession, " AND NOW WITH ", thisNode.textContent )
 
             thisNode = node.iterateNext();
 
           }
 
-          console.log("Outside the node now")
+          // console.log("Outside the node now")
 
           species = species.slice(2) + ")"
           records[record].species = species
@@ -574,7 +666,7 @@ function getSpeciesNameFromUniProt2(records, speciesData, idString) {
 
     for (line in splitData) {
       if (splitData[line] != null){
-      console.log(splitData[line])
+      // console.log(splitData[line])
       splitLine = splitData[line].split("\t")
       if (splitLine[2] != null){
       if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
@@ -898,7 +990,7 @@ function appendOutput(records, obsoleteList) {
         // alert("No common name found for " + string)
       }
 
-        var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;" + records[i].seq + "&#010;";
+        var string = ">" + formattedType + records[i].id + "|" + records[i].species.trim() + "&#010;" + records[i].seq + "&#010;";
         // var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;&#010;" + records[i].seq + "&#010;";
 
         if (addUnderscores) {
@@ -974,6 +1066,9 @@ function split(str, char) {
 }
 
 
+
+
+
 // Allow for easy selection of full text in each window
 
 $("#cleanedSeqs").click(function() {
@@ -990,4 +1085,44 @@ $("#obsoleteSeqs").click(function() {
 
 $("#badIds").click(function() {
   $("#badIds").select();
+});
+
+/*
+  Dropdown with Multiple checkbox select with jQuery - May 27, 2013
+  (c) 2013 @ElmahdiMahmoud
+  license: https://www.opensource.org/licenses/mit-license.php
+*/
+
+$(".dropdown dt a").on('click', function() {
+  $(".dropdown dd ul").slideToggle('fast');
+});
+
+$(".dropdown dd ul li a").on('click', function() {
+  $(".dropdown dd ul").hide();
+});
+
+function getSelectedValue(id) {
+  return $("#" + id).find("dt a span.value").html();
+}
+
+$(document).bind('click', function(e) {
+  var $clicked = $(e.target);
+  if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
+});
+
+$('.mutliSelect input[type="checkbox"]').on('click', function() {
+
+  var title = $(this).closest('.mutliSelect').find('input[type="checkbox"]').val(),
+    title = $(this).val() + ",";
+
+  if ($(this).is(':checked')) {
+    var html = '<span title="' + title + '">' + title + '</span>';
+    $('.multiSel').append(html);
+    $(".hida").hide();
+  } else {
+    $('span[title="' + title + '"]').remove();
+    var ret = $(".hida");
+    $('.dropdown dt a').append(ret);
+
+  }
 });
