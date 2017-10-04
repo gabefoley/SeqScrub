@@ -32,7 +32,7 @@ SeqScrub<br><br>
 
 </div>
 
-
+area
     Upload a FASTA file to edit all headers into the ID|Species_name format. <br><br>
 
 <!--     The green box shows the correctly formatted headers<br>
@@ -66,6 +66,9 @@ SeqScrub<br><br>
         <label for="getFirstID"> Retain only the first ID from headers with multiple IDs (otherwise send to unmappable output) </label>
 
         <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID"><br><br>
+
+        <label for="commonName"> Append common name after species name </label> 
+        <input type="checkbox" checked id="commonName" value="" autocomplete="off" name="commonName"><br><br>
 
 
         <input type="submit" class="button" value = "Submit"> <br><br>

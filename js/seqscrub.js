@@ -1,7 +1,7 @@
 // header('Access-Control-Allow-Origin: http://eutils.ncbi.nlm.nih.gov');
 
 
-
+var noCommon = ""
 
 var invalidChars
 var count = 0
@@ -34,6 +34,7 @@ function checkFinal(count){
   if (count == numRecords){
     $( ".loader" ).hide();
     $(".loader-text").html("Cleaning sequences!");
+    console.log(noCommon)
 
   }
 }
@@ -107,7 +108,7 @@ $("form#data").submit(function(event) {
     // },
     success: function(returndata) {
 
-      console.log(returndata)
+      // console.log(returndata)
 
       jsonData = JSON.parse(returndata);
       numRecords = jsonData.length;
@@ -127,6 +128,7 @@ $("form#data").submit(function(event) {
           seq: jsonData[i].seq,
           obsolete: "",
           ncbiChecked: false,
+          noCommonName: false,
           originalHeader: jsonData[i].originalHeader
         };
 
@@ -281,6 +283,7 @@ function getDataFromNCBI(records) {
 
   urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum"
 
+  // console.log(urlDoc)
   var promise = $.ajax({
     url: urlDoc,
     type: 'POST',
@@ -448,11 +451,19 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
   idString = getIDString(records, "NCBI")
 
-  // urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=all"
-  urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=fasta"
+  // If we want the commonName we have to use the full record
+  if (commonName){
+    urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=all"
+}
+
+  // Otherwise we can use the more compact record
+    else {
+      urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=fasta"
+    }
 
 
-  // console.log(urlAll)
+
+  console.log(urlAll)
   // console.log("^^^^")
   var promise = $.ajax({
     url: urlAll,
@@ -469,36 +480,79 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
         for (record in records){
           accession = split(records[record].id, ".")
-          // console.log(accession)
+          console.log(accession)
+        
+        if (commonName){
+          path = "//Seq-entry_set[.//Textseq-id_accession[contains(., '" + accession + "')]]//Org-ref_taxname/text() " +
+          " | //Seq-entry_set[.//Textseq-id_accession[contains(., '" + accession + "')]]//Org-ref_common/text()"
+        }
 
+        else {
           path = "/TSeqSet/TSeq/TSeq_accver[contains(., '" + accession + "')]/../TSeq_orgname/text()"
+        }
 
-          // path = "//Textseq-id_accession[contains(., '"+ accession + "')]/ancestor::Seq-entry//Org-ref_taxname/text()";
-          // console.log(path)
+
+
+          console.log(path)
           var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
-          // console.log(node)
+          console.log(node)
 
         try {
           var thisNode = node.iterateNext();
 
+
+          species = ""
+
+          if (commonName){
+
+
           while (thisNode) {
 
-            // console.log(accession, " AND NOW WITH ", thisNode.textContent )
+            species += " (" + thisNode.textContent
 
-            records[record].species = thisNode.textContent
+            console.log(accession, " AND NOW WITH ", thisNode.textContent )
+
             thisNode = node.iterateNext();
 
           }
+
+          console.log("Outside the node now")
+
+          species = species.slice(2) + ")"
+          records[record].species = species
+          species = ""
+
+
+        }
+
+        else {
+
+            while (thisNode) {
+
+
+              records[record].species = thisNode.textContent
+              thisNode = node.iterateNext();
+
+            }
+
+
+          
+
+        }
+
         } catch (e) {
           console.log('Error: Document tree modified during iteration ' + e);
         }
 
+
+
         // console.log("Finished iteration")
 
         }
-
       }
+
+      
 
       appendOutput(records, obsoleteList)
 
@@ -553,7 +607,7 @@ function getSpeciesNameFromUniProt2(records, speciesData, idString) {
 
     for (line in splitData) {
       if (splitData[line] != null){
-      // console.log(splitData[line])
+      console.log(splitData[line])
       splitLine = splitData[line].split("\t")
       if (splitLine[2] != null){
       if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
@@ -564,10 +618,9 @@ function getSpeciesNameFromUniProt2(records, speciesData, idString) {
       else {
         endIndex = -1;
 
-        if (commonName){
+        if (commonName && splitLine[3].indexOf(")") > 0){
 
-          endIndex = splitLine[3].indexOf(")") + 1
-
+            endIndex = splitLine[3].indexOf(")") + 1
 
         }
 
@@ -782,6 +835,10 @@ function appendOutput(records, obsoleteList) {
 
     }
 
+
+
+
+
     if ((records[i].species == null || records[i].species == "") && !(obsoleteList.includes(records[i].id))) {
       // console.log("Bad sequence is", records[i].id)
       // console.log(records[i])
@@ -869,12 +926,24 @@ function appendOutput(records, obsoleteList) {
 
       //   });
 
+      if (commonName && records[i].species.indexOf("(") <= 0){
+        records[i].species = records[i].species.slice(0, -1)
+        noCommon += ">" + formattedType + records[i].id + "|" + records[i].species + "\n"
+        // alert("No common name found for " + string)
+      }
+
         var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;" + records[i].seq + "&#010;";
         // var string = ">" + formattedType + records[i].id + "|" + records[i].species + "&#010;&#010;" + records[i].seq + "&#010;";
 
         if (addUnderscores) {
           string = string.replace(/ /g, "_")
         }
+
+        // console.log(commonName)
+        // console.log(records[i].species.indexOf("("))
+
+
+        // noCommon += ">" + formattedType + records[i].id + "|" + records[i].species + "\n"
 
         $("#cleanedSeqs").append(string.trim());
         count += 1
@@ -915,34 +984,6 @@ if (ncbiCheck.length > 0){
 }
 }
 
-function getSpeciesFromLocal(record) {
-  // console.log("Got to speciesFromLocal with ", record);
-  var dataString = 'id=' + record.trimmedHeader;
-  $.ajax({
-    url: 'getSpeciesFromLocal.php',
-    type: 'POST',
-    data: dataString,
-
-    success: function(returnData) {
-      // console.log("Return data from getSpeciesFromLocal" + returnData);
-
-
-      speciesData = JSON.parse(returnData);
-
-      // If we already have an entry with the same sequence then use this entry
-      if (speciesData.length > 0) {
-        data = speciesData[0];
-
-
-        var string = ">" + data['ID'] + data['speciesName'] + "&#010;" + record.seq + "&#010;&#010;";
-        $("#cleanedSeqs").append(string.trim());
-      } else {
-        getSpeciesFromExternal(record)
-      }
-    }
-  })
-
-}
 
 function downloadFile(filename, text) {
 
