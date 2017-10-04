@@ -9,17 +9,6 @@ var baddegg = 0
 summary = "";
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"]
 
-// $( document ).ajaxSend(function() {
-//   $( ".loader" ).show();
-// });
-
-// $(document).ajaxComplete(function () {
-//      $( ".loader" ).hide();
-//  });
-
-// $('div.container').block({
-//     message: '<h1>Premium Users only</h1>',
-// });
 
 $("#commonName").attr('checked', false)
 
@@ -27,7 +16,6 @@ $("#commonName").attr('checked', false)
 
 $(document).on({
     ajaxStart: function() { $( ".loader" ).show();    },
-     // ajaxStop: function() { $( ".loader" ).hide(); }    
 });
 
 function checkFinal(count){
@@ -42,13 +30,9 @@ function checkFinal(count){
 function progressText(count){
 
   pad = count.toString().padStart(numRecords.toString().length, 0)
-
   $(".loader-text").html("Cleaned " + pad + "/" + numRecords );
   $("#progressbar").progressbar({ value: 200});
   $(".loader").css("border-top", "border-top: 16px solid red");
-
-  // $('#progressbar .progress-bar').css({'width':100+'%'});
-
 }
 
 
@@ -208,27 +192,18 @@ function getIDString(records, database){
 }
 
 
-/**
- * [getSpeciesFromExternal description]
- * @param  {[type]} record [description]
- * @return {[type]}        [description]
- */
+
 function getDataFromUniprot(records, pdb) {
-  // console.log ("%%%%% UNIPROT LENGTH %%%%%", records.length)
   idString = getIDString(records, "UniProt")
 
   // url = "http://www.uniprot.org/uniprot/?query=" + idString + "&format=xml"
   url = "http://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,reviewed"
 
-  // console.log(url)
-
   var promise = $.ajax({
     url: url,
     type: 'POST',
     async: true,
-    // xhrFields: {
-    //   withCredentials: true
-    // },
+
 
     success: function(speciesData) {
 
@@ -257,8 +232,6 @@ function getDataFromUniprot(records, pdb) {
           alert ("Please note: Despite the error, all sequences have still been written to an output field")
         }
 
-        // $( ".loader" ).hide();
-        // return
 
 
       }
@@ -275,15 +248,11 @@ function getDataFromUniprot(records, pdb) {
 
 function getDataFromNCBI(records) {
 
-  // console.log ("%%%%% NCBI LENGTH %%%%%", records.length)
-
-
   idString = getIDString(records, "NCBI")
 
 
   urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum"
 
-  // console.log(urlDoc)
   var promise = $.ajax({
     url: urlDoc,
     type: 'POST',
@@ -483,7 +452,7 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
           console.log(accession)
         
         if (commonName){
-          path = "//Seq-entry_set[.//Textseq-id_accession[contains(., '" + accession + "')]]//Org-ref_taxname/text() " +
+          path = "c " +
           " | //Seq-entry_set[.//Textseq-id_accession[contains(., '" + accession + "')]]//Org-ref_common/text()"
         }
 
@@ -595,8 +564,6 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 
 function getSpeciesNameFromUniProt2(records, speciesData, idString) {
-  // console.log('got here')
-  // console.log(records)
   obsoleteList = [];
   speciesDict = {}
 
@@ -611,7 +578,6 @@ function getSpeciesNameFromUniProt2(records, speciesData, idString) {
       splitLine = splitData[line].split("\t")
       if (splitLine[2] != null){
       if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
-        // console.log("add to obsolete", splitLine[0])
         obsoleteList.push(splitLine[0])
       }
 
@@ -939,20 +905,9 @@ function appendOutput(records, obsoleteList) {
           string = string.replace(/ /g, "_")
         }
 
-        // console.log(commonName)
-        // console.log(records[i].species.indexOf("("))
-
-
-        // noCommon += ">" + formattedType + records[i].id + "|" + records[i].species + "\n"
-
         $("#cleanedSeqs").append(string.trim());
         count += 1
         progressText(count)
-
-        // console.log("Count is now ", count )
-        // checkFinal(count)
-
-
 
 
         summarySpecies = records[i].species
@@ -1017,34 +972,6 @@ function split(str, char) {
  else
   return str;     
 }
-
-// $( function() {
-//   var progressbar = $( "#progressbar" ),
-//     progressLabel = $( ".progress-label" );
-
-//   progressbar.progressbar({
-//     value: false,
-//     change: function() {
-//       progressLabel.text( progressbar.progressbar( "value" ) + "%" );
-//     },
-//     complete: function() {
-//       progressLabel.text( "Complete!" );
-//     }
-//   });
-
-//   function progress() {
-//     var val = progressbar.progressbar( "value" ) || 0;
-
-//     progressbar.progressbar( "value", val + 2 );
-
-//     if ( val < 99 ) {
-//       setTimeout( progress, 80 );
-//     }
-//   }
-
-//   setTimeout( progress, 2000 );
-// } );
-
 
 
 // Allow for easy selection of full text in each window
