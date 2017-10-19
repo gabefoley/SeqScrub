@@ -133,7 +133,7 @@ $("form#data").submit(function(event) {
       if (uniprotList.length > 0) {
         console.log("Uniprot length = ", uniprotList.length)
         while (uniprotList.length){
-          getDataFromUniprot(uniprotList.splice(0,300), false)
+          getDataFromUniprot(uniprotList.splice(0,100), false)
           // getDataFromNCBI(uniprotList.splice(0,500));
 
 
@@ -143,7 +143,7 @@ $("form#data").submit(function(event) {
       if (pdbList.length > 0) {
         console.log("PDB length = ", pdbList.length)
         while (pdbList.length){
-          getPDBSpeciesNameFromUniProt(pdbList.splice(0,300), true)
+          getPDBSpeciesNameFromUniProt(pdbList.splice(0,100), true)
 
         }
       }
@@ -151,7 +151,7 @@ $("form#data").submit(function(event) {
         console.log("NCBI length = ", ncbiList.length)
         while (ncbiList.length){
           // console.log("first time round", ncbiList.splice(0,300))
-        getDataFromNCBI(ncbiList.splice(0,300));
+        getDataFromNCBI(ncbiList.splice(0,100));
       }
       }
     }
@@ -214,7 +214,6 @@ function getTaxonID(records) {
 
 
 function getDataFromUniprot(records, pdb) {
-  console.log('am in get data from uniprot')
   obsoleteList = [];
   speciesDict = {}
   idString = getIDString(records, "UniProt")
@@ -239,13 +238,10 @@ function getDataFromUniprot(records, pdb) {
           if (splitData[line] != null){
           // console.log(splitData[line])
           splitLine = splitData[line].split("\t")
-          console.log(splitLine)
 
           if (splitLine[2] != null){
-            console.log('found a deletion')
-            console.log(splitLine[2])
+
             if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
-              console.log('found an obsolete from uniprot')
               obsoleteList.push(splitLine[0])
             }
 
@@ -274,13 +270,7 @@ function getDataFromUniprot(records, pdb) {
         for (record in records){
           // console.log("record id from uniprot")
           // console.log(records[record].id)
-              if (records[record].id == "AKC54672.1"){
-                console.log('from in here')
-                console.log(records[record])
-                console.log(records[record].species)
-                console.log(speciesDict)
 
-          }
           if (records[record].id in speciesDict){
             records[record].taxon = speciesDict[records[record].id]
           }
@@ -329,7 +319,6 @@ function getDataFromUniprot(records, pdb) {
 
 
 function getDataFromNCBI(records) {
-  console.log('am in getdatafromncbi')
 
   idString = getIDString(records, "NCBI")
 
@@ -388,8 +377,6 @@ function getIDFromNCBI(records, speciesData) {
 
   fullList = [];
   obsoleteList = [];
-  // console.log(records)
-  // console.log("And then the change")
 
   if (speciesData != null) {
 
@@ -415,17 +402,7 @@ function getIDFromNCBI(records, speciesData) {
 
         while (thisNode) {
 
-              if (records[record].id == "AKC54672.1"){
 
-                console.log('from somewhere else')
-                console.log(records[record])
-                console.log(records[record].species)
-                console.log('path')
-                console.log(path)
-                console.log(speciesData)
-
-
-          }
 
           records[record].taxon = thisNode.textContent
           records[record].type = '';
@@ -451,14 +428,12 @@ function getIDFromNCBI(records, speciesData) {
       var thisNode = node.iterateNext();
 
       while (thisNode) {
-        console.log('found an obsolete from ncbi')
         obsoleteList.push(thisNode.textContent);
         thisNode = node.iterateNext();
       }
     } catch (e) {
       console.log('Error: Document tree modified during iteration ' + e);
     }
-    console.log('got to this part')
     getSpeciesNameFromNCBI2(records, idString, obsoleteList)
 
 
@@ -478,9 +453,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 
 
-  console.log('urlAll')
 
-  console.log(urlAll)
   var promise = $.ajax({
     url: urlAll,
     type: 'POST',
@@ -524,17 +497,6 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
           // console.log('here')
           // console.log(records[record])
 
-              if (records[record].id == "AKC54672.1"){
-
-                console.log('from ncbi2')
-                console.log(records[record])
-                console.log(records[record].species)
-                console.log('path')
-                console.log(path)
-                console.log(speciesData)
-
-
-          }
 
 
 
@@ -547,18 +509,6 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
             }
 
 
-
-                if (records[record].id == "AKC54672.1"){
-
-                  console.log('AFTER ncbi2')
-                  console.log(records[record])
-                  console.log(records[record].species)
-                  console.log('path')
-                  console.log(path)
-                  console.log(speciesData)
-
-
-            }
           
 
         
@@ -580,8 +530,8 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 
       
-      console.log ('obsolete lis is')
-      console.log(obsoleteList)
+      // console.log ('obsolete lis is')
+      // console.log(obsoleteList)
       appendOutput(records, obsoleteList)
 
     },
@@ -637,10 +587,8 @@ function getSpeciesNameFromUniProt2(records, speciesData, idString) {
       // console.log(splitData[line])
       splitLine = splitData[line].split("\t")
       if (splitLine[2] != null){
-        console.log('from uniprot2')
-        console.log(splitLine[2])
+
       if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
-        console.log('found an obsolete from uniprot2')
         obsoleteList.push(splitLine[0])
       }
 
@@ -793,17 +741,7 @@ function appendOutput(records, obsoleteList) {
   // Check to see if there are any illegal characters
 
   for (i in records) {
-    console.log (records[i])
-    console.log('obsoleteList is ')
-    console.log(obsoleteList)
 
-    if (records[i].id == "AKC54672.1"){
-      console.log('yep')
-      console.log(records[i])
-      console.log(records[i].species)
-
-
-}
 
     // console.log(records[i])
   containsBad = false;
@@ -828,9 +766,8 @@ function appendOutput(records, obsoleteList) {
 
 
 
+
     if ((records[i].species == null || records[i].species == "" || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
-      // console.log("Bad sequence is", records[i].id)
-      // console.log(records[i])
       if (records[i].ncbiChecked == true) {
         var string = records[i].originalHeader + records[i].seq + "&#010;";
         $("#badIds").append(string.trim());
