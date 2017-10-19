@@ -2,18 +2,13 @@
 
 
 var noCommon = ""
-
 var invalidChars
 var count = 0
-var baddegg = 0
 summary = "";
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"]
 
-
 $("#commonName").attr('checked', false)
 $("")
-
-
 
 $(document).on({
     ajaxStart: function() { $( ".loader" ).show();    },
@@ -247,18 +242,11 @@ function getDataFromUniprot(records, pdb) {
 
             else {
 
-              //Current working spo
 
-
-              // console.log ('taxon id is ')
-              // console.log(splitLine[0])
               taxonList = splitLine[4].split(",")
-              // console.log(taxonList[taxonList.length - 1])
-
 
               speciesDict[splitLine[0]] = taxonList[taxonList.length - 1].trim()
 
-              console.log(obsoleteList)
 
             }
               }
@@ -268,8 +256,6 @@ function getDataFromUniprot(records, pdb) {
       
 
         for (record in records){
-          // console.log("record id from uniprot")
-          // console.log(records[record].id)
 
           if (records[record].id in speciesDict){
             records[record].taxon = speciesDict[records[record].id]
@@ -277,7 +263,6 @@ function getDataFromUniprot(records, pdb) {
       }
 
 
-      // getSpeciesNameFromNCBI2(records, speciesData, idString);
       getSpeciesNameFromNCBI2(records, idString, obsoleteList);
 
 
@@ -573,68 +558,6 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 
 
-function getSpeciesNameFromUniProt2(records, speciesData, idString) {
-  obsoleteList = [];
-  speciesDict = {}
-
-  if (speciesData != null) {
-
-    splitData = speciesData.split("\n")
-
-
-    for (line in splitData) {
-      if (splitData[line] != null){
-      // console.log(splitData[line])
-      splitLine = splitData[line].split("\t")
-      if (splitLine[2] != null){
-
-      if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
-        obsoleteList.push(splitLine[0])
-      }
-
-      else {
-
-        // console.log(splitLine[4])
-
-
-        // speciesDict[splitLine[0]] = splitLine[3].substr(0, endIndex == -1 ? splitLine[3].length : endIndex)
-
-
-
-      }
-
-      // else {
-      //   endIndex = -1;
-
-      //   if (commonName && splitLine[3].indexOf(")") > 0){
-
-      //       endIndex = splitLine[3].indexOf(")") + 1
-
-      //   }
-
-      //   else {
-      //     endIndex = splitLine[3].indexOf(" (")
-      //   }
-
-      //     speciesDict[splitLine[0]] = splitLine[3].substr(0, endIndex == -1 ? splitLine[3].length : endIndex)
-      //   }
-        
-      }
-    }
-  }
-  }
-
-    for (record in records){
-      // console.log(records[record] )
-      if (records[record].id in speciesDict){
-        records[record].taxon = speciesDict[records[record].id]
-      }
-  }
-
-  appendOutput(records, obsoleteList)
-}
-
-
 
 function getPDBSpeciesNameFromUniProt(records, speciesData) {
   fullList = [];
@@ -731,40 +654,21 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
 function appendOutput(records, obsoleteList) {
 
-  // console.log("ONSOLETE LIST", obsoleteList)
-
   //Boolean value to hold if the current sequence has illegal characters
   containsBad = false;
 
   ncbiCheck = []
 
   // Check to see if there are any illegal characters
-
   for (i in records) {
-
-
-    // console.log(records[i])
   containsBad = false;
 
 
     for (j in records[i].seq) {
       if (invalidChars.includes(records[i].seq[j])) {
         containsBad = true;
-        // console.log("BAD EGG ", records[i].id)
-        // console.log(records[i].seq[j])
       }
     }
-
-    if (containsBad){
-      baddegg += 1
-      // console.log("bad egg is ", baddegg)
-
-
-    }
-
-
-
-
 
 
     if ((records[i].species == null || records[i].species == "" || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
