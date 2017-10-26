@@ -64,6 +64,9 @@ $("form#data").submit(function(event) {
   //Grab all form data  
   var formData = new FormData($(this)[0]);
   invalidChars = $("#invalidChars").val().split(" ");
+  invalidCharsRegex = new RegExp(invalidChars.join("|"))
+  console.log(invalidChars)
+  console.log(invalidCharsRegex)
 
   //Change the filename for the file to save to mirror the uploaded filename
   var filepath = $('#file').val();
@@ -654,22 +657,10 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
 function appendOutput(records, obsoleteList) {
 
-  //Boolean value to hold if the current sequence has illegal characters
-  containsBad = false;
-
   ncbiCheck = []
 
   // Check to see if there are any illegal characters
   for (i in records) {
-  containsBad = false;
-
-
-    for (j in records[i].seq) {
-      if (invalidChars.includes(records[i].seq[j])) {
-        containsBad = true;
-      }
-    }
-
 
     if ((records[i].species == null || records[i].species == "" || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
       if (records[i].ncbiChecked == true) {
@@ -694,10 +685,6 @@ function appendOutput(records, obsoleteList) {
       var string = records[i].originalHeader + records[i].seq + "&#010;";
       $("#obsoleteSeqs").append(string.trim());
       count +=1
-      // progressText(count)
-
-      // console.log("Count is now ", count )
-      // checkFinal(count)
 
 
     } else {
@@ -714,25 +701,15 @@ function appendOutput(records, obsoleteList) {
 
 
       // // If there are illegal characters highlight them within the text
-      if (containsBad) {
-      //   for (i in invalidChars) {
-      //     console.log(i)
+      if (invalidCharsRegex.test(records[i].seq)) {
 
-      //   }
 
 
         var string = records[i].originalHeader + records[i].seq + "&#010;";
-        // if (addUnderscores) {
-        //   string = string.replace(/ /g, "_")
-        // }
+
         $("#badCharacters").append(string.trim());
         count +=1
-        // progressText(count)
 
-        // console.log("Count is now ", count )
-        // checkFinal(count)
-
-      // }
 
       } else {
 
@@ -792,7 +769,6 @@ function appendOutput(records, obsoleteList) {
 }
 progressText(count)
 checkFinal(count)
-containsBad = false;
 
 
 

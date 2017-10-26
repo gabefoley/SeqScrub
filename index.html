@@ -9,6 +9,8 @@
 
     <title> SeqScrub</title>
     <link rel="stylesheet" type="text/css" href="styles/index.css" media="all" />
+    <!-- <link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css"> -->
+
 
 
 </head>
@@ -28,22 +30,15 @@ SeqScrub<br><br>
         Cleaning sequences!
     </div>
 
-    <!-- <img src=loading2.gif> -->
-
-    <!-- <img src=scrub_big.gif> -->
 
 </div>
     Upload a FASTA file to edit all headers into the ID|Species_name format. <br><br>
 
-<!--     The green box shows the correctly formatted headers<br>
-
-    The blue box shows any sequences which contained illegal characters<br>
-
-    The purple box shows any sequences which couldn't map to the ID|Species_name format<br><br> -->
-
 
 
     <form id='data'>
+
+        <!-- <button type="button" class="btn">Basic</button> -->
     	<input type="file" class="fileinput" id="file" name="file" />
         <label for="file"> Choose a file </label>
 
@@ -122,8 +117,6 @@ SeqScrub<br><br>
     </section>
     <br>
 
-    <!-- <div id="progress"><div class="progress-label">Loading...</div></div> -->
-
     <br>
 
     Which output fields should be saved?
@@ -159,6 +152,13 @@ SeqScrub<br><br>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <!-- Tether -->
+    <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
+
+
+    <!-- Bootstrap -->
+    <script src=./js/bootstrap.min.js>
 
     <!--JSZip -->
     <script src="./js/jszip.min.js"></script>
