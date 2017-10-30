@@ -16,6 +16,8 @@
 // Setup directory to store uploads
 $target_dir = "uploads/";
 $target_file = $target_dir . basename($_FILES["file"]["name"]);
+$tree_file = $target_dir . basename($_FILES["tree"]["name"]);
+
 $returnArray = array();
 
 // Pattern to check if line is a header
@@ -23,8 +25,12 @@ $headerPattern = "/^>.*/";
 $seq = '';
 $seqCount = 0;
 
+
+function checkUpload($filename, $file) {
+
+
 // Check to see if we can upload the file
-if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+if (move_uploaded_file($_FILES[$filename]["tmp_name"], $file)) {
 
 }
 else {
@@ -32,10 +38,18 @@ else {
 	exit;
 
 }
+}
 
 
-$fp = fopen($target_file, 'rb');
-while (($line = fgets($fp)) !== false){
+checkUpload("file", $target_file);
+
+if ($_FILES["tree"]["name"]){
+	checkUpload("tree", $tree_file);
+}
+
+
+$file = fopen($target_file, 'rb');
+while (($line = fgets($file)) !== false){
 	
 	// Clean up any instances of repeating pipe symbols
 	$line = str_replace("||", "|", $line);
@@ -49,17 +63,14 @@ while (($line = fgets($fp)) !== false){
 		}
 
 		$lineArray = preg_split("/[\s,|_\/]+/", $line);
-		// echo "lineArray";
-		// echo $lineArray;
 
 
 
 		$type = substr($lineArray[0], 1);
 		$id = "";
-		// echo "type is ";
-		// echo $type;
 
-// 
+
+
 		if ($type == "XP" || $type == "XM" || $type == "XR" || $type == "WP" || $type == "NP" || $type == "NC" || $type == "NG" || $type == "NM" || $type == "NR") {
 			$id = $type . "_" . $lineArray[1];
 
@@ -127,8 +138,19 @@ while (($line = fgets($fp)) !== false){
 	}
 }
 
+
+
+
 // Create object to return
+
 $returnArray[$seqCount]['seq'] = $seq;
+
+$file = fopen($tree_file, 'rb');
+while (($line = fgets($file)) !== false){
+	$returnArray[$seqCount + 1]['tree'] = $line;
+	}
+
+
 
 $jsonData = json_encode($returnArray);
 echo $jsonData;
