@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- <meta http-equiv="Access-Control-Allow-Origin" content="*"> -->
+    <meta http-equiv="Access-Control-Allow-Origin" content="http://eutils.ncbi.nlm.nih.gov">
+    <meta http-equiv="Access-Control-Allow-Origin" content="http://uniprot.org">
+
+
+    <title> SeqScrub</title>
+    <link rel="stylesheet" type="text/css" href="styles/index.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="styles/stylesheet.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="styles/normalize.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="styles/selectize.default.css" media="all" />
+
+
+    <!-- <link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css"> -->
+
+
+
+</head>
+<header>
+SeqScrub<br><br>
+</header>
+
+<body>
+
+
+    Upload a FASTA file to edit all headers into the ID|Species_name format. <br><br>
+
+    <form id='data'>
+
+    <!-- <div class="col-lg-6 col-sm-6 col-12"> -->
+        <label class="btn btn-primary">
+            Choose a file 
+        </label>
+        <input type="text" id="fileToSave"  value="   " /> <br>
+
+        <label class="btn btn-primary">
+            Choose a tree (optional) 
+        </label>
+
+        <input type="text" id="treeToSave"  value="   " /> <br>
+
+        <label for="invalidChars"> Remove sequences containing these characters: </label>
+        <input type="text" id="invalidChars" value="B J O U X Z" /> <br>
+
+
+
+        <select name="select-tools" id="select-tools" multiple="multiple">
+            <option selected value="headerID">ID</option>
+            <option selected value="headerSpecies">Species name</option>
+            <option value="headerFamily">Family</option>
+            <option value="headerOrder">Order</option>
+        </select>
+
+
+<!--         <select id="select-tools">
+            <option selected="selected" value="headerID">ID</option>
+            <option selected="selected" value="headerSpecies">Species name</option>
+            <option selected="selected" value="headerFamily">Family</option>
+            <option selected="selected" value="headerOrder">Order</option>
+        </select> -->
+
+    <!--                     <div class="control-group">
+                           <label for="input-sortable">Tags:</label>
+                            <input type="text" id="input-sortable" class="input-sortable demo-default" value="drag,these,items,around">
+                        </div> -->
+
+
+
+
+<!--         <div class = "tooltip"> -->
+
+<!--         <span class="tooltiptext">Any sequences with these characters will be output to the illegal characters field</span>
+        </div> 
+        <br><br>  -->
+
+<!--         <div class = "tooltip"> -->
+        <label for="addUnderscore"> Change spaces to underscores in species name </label>
+        <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore"><br><br>
+<!--         <span class="tooltiptext">Homo sapiens will become Homo_sapiens</span>
+        </div> 
+        <br><br>  -->
+
+        <label for="getFirstID"> Retain only the first ID from headers with multiple IDs (otherwise send to unmappable output) </label>
+
+        <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID"><br><br>
+
+
+
+
+        <input type="submit" class="button" value = "Submit"> <br><br>
+    </form>
+
+
+
+    <section class = container>
+    <label for = "cleanedSeqs" class="seqLabel1">Cleaned sequences: </label>
+    <label for = "badCharacters" class="seqLabel2">Sequences with illegal characters: </label>
+    <label for = "obsoleteSeqs" class="seqLabel3">Sequences that are obsolete: </label>
+    <label for = "badIds" class="seqLabel4">Sequences that couldn't be mapped to a species: </label>
+    </section>
+    <section class = container>
+  
+        <textarea readonly id = 'cleanedSeqs' spellcheck="false" autocomplete="off"></textarea>
+
+        <textarea readonly id = 'badCharacters' spellcheck="false" autocomplete="off"></textarea>
+
+        <textarea readonly id = 'obsoleteSeqs' spellcheck="false" autocomplete="off"></textarea>
+
+        <textarea readonly id = 'badIds' spellcheck="false" autocomplete="off"></textarea>
+    </section>
+    <br>
+
+    <br>
+
+    Which output fields should be saved?
+    <br><br>
+
+
+    <form id="save">
+    <input type="checkbox" checked id="cleanCheck" value="" autocomplete="off" name="cleanCheck">
+    <label for="cleanCheck">Cleaned sequences</label> 
+    <input type="checkbox" checked id="illegalCheck" value="" autocomplete="off" name="illegalCheck">
+    <label for="illegalCheck"> Sequences with illegal characters </label> 
+    <input type="checkbox" checked id="obsoleteCheck" value="" autocomplete="off" name="obsoleteCheck">
+    <label for="obsoleteCheck"> Sequences that are obsolete </label> 
+    <input type="checkbox" checked id="unmappableCheck" value="" autocomplete="off" name="unmappableCheck">
+    <label for="unmappableCheck"> Sequences that couldn't be mapped </label>    <br><br>
+
+    <input type="checkbox" checked id="selectAll" value="" autocomplete="off" name="sellectAll">
+    <label for="selectAll"> Select all output </label>
+
+    <br><br>
+
+        <input type="button" class = "button" id= 'saveButton' value="Save output" onclick="downloadFile(fileToSave.value, cleanedSeqs.value)"> <br><br>
+<!--         <input type="button" class = "button" id= 'illegalButton' value="Save illegal sequences" onclick="downloadFile(fileToSave.value, badCharacters.value)">
+        <input type="button" class = "button" id= 'obsoleteButton' value="Save obsolete sequences" onclick="downloadFile(fileToSave.value, obsoleteSeqs.value)">
+        <input type="button" class = "button" id= 'unmappableButton' value="Save unmappable sequences" onclick="downloadFile(fileToSave.value, badIds.value)"> <br> <br> -->
+        <input type="button" class = "button" id= 'saveButton' value="Save summary" onclick="downloadSummary(fileToSave.value)">
+
+
+    </form>
+
+    <!-- Jquery and Jquery UI -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <!-- Tether -->
+    <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
+
+
+    <!-- Bootstrap -->
+    <script src="./js/bootstrap.min.js"></script>
+
+    <!-- JSZip -->
+    <script src="./js/jszip.min.js"></script>
+
+    <!-- Selectize.js -->
+    <script src="./js/selectize.min.js"></script>
+
+    <!-- SeqScrub -->
+    <script src="./js/seqscrub.js"></script>
+
+    <!--Download.js -->
+    <script src="http://danml.com/js/download.js"></script>
+
+
+
+
+</body>
+</html>
