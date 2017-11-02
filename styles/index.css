@@ -53,6 +53,13 @@ background: #9b59b6;
 
 }
 
+#error-div{
+	max-height: 400px;
+	overflow: scroll;
+	word-break:break-all;
+
+}
+
 #obsoleteSeqs {
 	height: 300px;
 	width: 25%;

@@ -2,11 +2,11 @@
 
 var noCommon = "";
 var count = 0;
+var taxon_info = 0;
 var invalidCharsRegex = "";
 summary = "";
 var cleanTree = false;
 var tree = "";
-var taxon_info = 4;
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"];
 
 $("#commonName").attr('checked', false);
@@ -26,16 +26,32 @@ function hideLoadingScreen(){
 function checkFinal(count, records){
   if (count == numRecords){
     hideLoadingScreen();
-    if (noCommon.length > 0) {
-      console.log(noCommon);
+    // if (noCommon.length > 0) {
+    //   console.log(noCommon);
 
-    }
+    // }
 
     // If we are also cleaning a tree
     if (cleanTree) {
       cleanTree = cleanTreeNames();
       console.log(cleanTree);
     }
+
+    // Check if we were able to find the taxonomic information the user requested
+    noTaxonWarn = "";
+    for (var i in records){
+      if (!records[i].foundtaxon){
+        noTaxonWarn += records[i].id + "<br>";
+      }
+
+
+    }
+
+    // If there is a seqeunce without taxonomic information
+    if (noTaxonWarn.length > 0){
+      bootstrap_alert.warning("Couldn't find the full taxonomic information for <br>" + noTaxonWarn);
+}
+
   }
 }
 
@@ -108,6 +124,12 @@ $("form#data").submit(function(event) {
   addUnderscores = $('#addUnderscore').is(":checked");
   commonName = $('#commonName').is(":checked");
   retainFirst = $('#getFirstID').is(":checked");
+
+ 
+  headerFormat = $('select#header-format').val();
+  taxon_info = headerFormat.length - 1;
+
+
 
 
   //Disable the default form submission
@@ -350,16 +372,9 @@ function getDataFromUniprot(records, pdb) {
       }
 
       else {
-        alert("There was a fatal error \n" + records.length + " sequences are being written to unmappable" );
-        obsoleteList = [];
-        appendOutput(records, obsoleteList);
 
-        if (count != numRecords) {
-          alert("Please note: Currently not all sequences have been written to an output field");
-        }
-        else {
-          alert ("Please note: Despite the error, all sequences have still been written to an output field");
-        }
+        generateAlert(records)
+
 
 
 
@@ -379,8 +394,8 @@ function getDataFromNCBI(records) {
 
   idString = getIDString(records, "NCBI");
 
+    urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&idss=" + idString + "&retmode=xml&rettype=docsum";
 
-  urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum";
 
   var promise = $.ajax({
     url: urlDoc,
@@ -395,28 +410,18 @@ function getDataFromNCBI(records) {
 
     error: function(XMLHttpRequest, textStatus, errorThrown) { 
       if (errorThrown == "Bad Request"){
+        console.log('error here')
+        console.log(errorThrown);
+        console.log(urlDoc)
         obsoleteList = [];
         appendOutput(records, obsoleteList);
-      
+        bootstrap_alert.warning("There was an error when trying to reach this URL:<br> " + '<a href=' + urlDoc + '>' +urlDoc+ '</a>');
+
       }
 
       else {
-        alert("There was a fatal error \n" + records.length + " sequences are being written to unmappable" );
-        obsoleteList = [];
-        appendOutput(records, obsoleteList);
-
-        if (count != numRecords) {
-          alert("Please note: Currently not all sequences have been written to an output field");
-        }
-        else {
-          alert ("Please note: Despite the errors, all sequences have still been written to an output field");
-        }
+        generateAlert(records);
       }
-
-
-
-
-
 
     }   
 
@@ -514,9 +519,22 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
         for (var record in records){
           if (records[record].taxon.length > 1) {
 
+            path = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1]";
 
-          // accession = split(records[record].id, ".")
-          // console.log(accession)
+            headerFormat.forEach(function(headerOpt) {
+              if (headerOpt.indexOf('header') == -1){
+
+                path += " | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
+              }
+            });
+
+            path2 = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='order']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='class']/../ScientificName)[1]";
+
+
+
+
+
+
         
           // INFO: This is the new path
           // path = "//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName | //TaxId[contains(., '" + records[record].taxon + "')]/../Division | //TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName"
@@ -524,7 +542,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
           // path = "(//TaxId[contains(., '" + records[record].taxon + "')]/../Division)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName)[1]"
           
           // Family order class
-          path = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='order']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='class']/../ScientificName)[1]";
+          // path2 = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='order']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='class']/../ScientificName)[1]";
 
           // Class
           // path = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='class']/../ScientificName)[1]";
@@ -554,6 +572,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
               thisNode = node.iterateNext();
 
             }
+
 
           if (taxoncount >= taxon_info){
             records[record].foundtaxon = true;
@@ -587,16 +606,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
       }
 
       else {
-        alert("There was a fatal error \n" + records.length + " sequences are being written to unmappable and the program is exiting prematurely" );
-        obsoleteList = [];
-        appendOutput(records, obsoleteList);
-        if (count != numRecords) {
-          alert("Please note: Not all sequences were written to an output field");
-        }
-        else {
-          alert ("Please note: Despite the errors, all sequences have still been written to an output field");
-        }
-        $( ".loader" ).hide();
+        generateAlert(records);
 
       }
 
@@ -679,17 +689,7 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
       }
 
       else {
-        alert("There was a fatal error \n" + records.length + " sequences are being written to unmappable" );
-        obsoleteList = [];
-        appendOutput(records, obsoleteList);
-
-        if (count != numRecords) {
-          alert("Please note: Currently not all sequences have been written to an output field");
-        }
-        else {
-          alert ("Please note: Despite the error, all sequences have still been written to an output field");
-        }
-
+        generateAlert(records)
 
       }
 
@@ -782,10 +782,7 @@ function appendOutput(records, obsoleteList) {
         }
 
 
-        // Check if we were able to find the taxonomic information the user requested
-        if (!records[i].foundtaxon){
-          console.log('No taxonomic info found for', header);
-        }
+
 
 
 
@@ -936,7 +933,7 @@ $('.input-sortable').selectize({
 
 
 
-$('#select-tools').selectize({
+$('#header-format').selectize({
     maxItems: null,
     valueField: 'id',
     labelField: 'title',
@@ -960,7 +957,7 @@ $(function() {
   var theme_match = String(window.location).match(/[?&]theme=([a-z0-9]+)/);
   var theme = (theme_match && theme_match[1]) || 'default';
   var themes = ['default','legacy','bootstrap2','bootstrap3'];
-  $('head').append('<link rel="stylesheet" href="../dist/css/selectize.' + theme + '.css">');
+  $('head').append('<link rel="stylesheet" href="../css/selectize.' + theme + '.css">');
 
   var $themes = $('<div>').addClass('theme-selector').insertAfter('h1');
   for (var i = 0; i < themes.length; i++) {
@@ -1003,6 +1000,30 @@ $(function() {
     $container.insertAfter($input);
   });
 });
+
+function generateAlert(){
+  bootstrap_alert.warning("There was a fatal error \n" + records.length + " sequences are being written to unmappable" );
+  obsoleteList = [];
+  appendOutput(records, obsoleteList);
+
+  if (count != numRecords) {
+    bootstrap_alert.warning("Please note: Currently not all sequences have been written to an output field");
+  }
+  else {
+    bootstrap_alert.warning ("Please note: Despite the error, all sequences have still been written to an output field");
+  }
+
+  hideLoadingScreen();
+}
+
+//Error handing
+bootstrap_alert = function() {}
+bootstrap_alert.warning = function(message) {
+            $('#error-div').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+        };
+    
+
+
 
 $(document).bind('click', function(e) {
   var $clicked = $(e.target);
