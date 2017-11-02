@@ -4,6 +4,7 @@ $(document).ready(function() {
   document.getElementsByTagName("html")[0].style.visibility = "visible";
 });
 
+var finishedRecords = [];
 var noCommon = "";
 var count = 0;
 var taxon_info = 0;
@@ -29,17 +30,16 @@ function hideLoadingScreen(){
 // Check that we have the correct number of cleaned sequences
 function checkFinal(count, records){
   if (count == numRecords){
+    console.log("got here")
+    console.log(records);
+    console.log(records.length)
     hideLoadingScreen();
     // if (noCommon.length > 0) {
     //   console.log(noCommon);
 
     // }
 
-    // If we are also cleaning a tree
-    if (cleanTree) {
-      cleanTree = cleanTreeNames();
-      console.log(cleanTree);
-    }
+
 
     // Check if we were able to find the taxonomic information the user requested
     noTaxonWarn = "";
@@ -55,6 +55,13 @@ function checkFinal(count, records){
     if (noTaxonWarn.length > 0){
       bootstrap_alert.warning("Couldn't find the full taxonomic information for <br>" + noTaxonWarn);
 }
+    appendOutput(records);
+
+    // If we are also cleaning a tree
+    if (cleanTree) {
+      cleanTree = cleanTreeNames();
+      bootstrap_alert.warning(cleanTree);
+    }
 
   }
 }
@@ -65,6 +72,9 @@ function cleanTreeNames() {
 
   cleanTree = tree;
 
+  console.log('we are here');
+  console.log(splitSummary);
+
   for (var line in splitSummary){
     splitLine = splitSummary[line];
 
@@ -72,6 +82,9 @@ function cleanTreeNames() {
 
     newname = splitLine.split("FROM:")[0].trim();
     oldname = splitLine.split("FROM:")[1].trim();
+
+    console.log(newname)
+    console.log(oldname)
 
     // Escape characters in the old name which will interfere with our regular expression
     oldname = escapeRegExp(oldname);
@@ -120,6 +133,7 @@ $("form#data").submit(function(event) {
   // Clear all the output sections
   summary = "";
   count = 0;
+  finishedRecords = [];
   $("#cleanedSeqs").empty();
   $("#badCharacters").empty();
   $("#obsoleteSeqs").empty();
@@ -134,7 +148,7 @@ $("form#data").submit(function(event) {
 
  
   headerFormat = $('select#header-format').val();
-  taxon_info = headerFormat.length - 1;
+  taxon_info = headerFormat.length;
 
 
 
@@ -380,7 +394,7 @@ function getDataFromUniprot(records, pdb) {
         alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable");
 
         obsoleteList = [];
-        appendOutput(records, obsoleteList);
+        sortOutput(records, obsoleteList);
       
       }
 
@@ -427,7 +441,7 @@ function getDataFromNCBI(records) {
         console.log(errorThrown);
         console.log(urlDoc)
         obsoleteList = [];
-        appendOutput(records, obsoleteList);
+        sortOutput(records, obsoleteList);
         bootstrap_alert.warning("There was an error when trying to reach this URL:<br> " + '<a href=' + urlDoc + '>' +urlDoc+ '</a>');
 
       }
@@ -532,37 +546,29 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
         for (var record in records){
           if (records[record].taxon.length > 1) {
 
-            path = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1]";
+            path = "";
+
 
             headerFormat.forEach(function(headerOpt) {
-              if (headerOpt.indexOf('header') == -1){
 
-                path += " | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
+              console.log(headerOpt);
+              if (headerOpt == 'species') {
+                path += "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1]";
               }
+
+              else {
+                path += " (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
+              }
+              
+              path += " | ";
             });
 
-            path2 = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='order']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='class']/../ScientificName)[1]";
+            path = path.substring(0, path.length - 3);
+
+            console.log(path);
 
 
 
-
-
-
-        
-          // INFO: This is the new path
-          // path = "//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName | //TaxId[contains(., '" + records[record].taxon + "')]/../Division | //TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName"
-
-          // path = "(//TaxId[contains(., '" + records[record].taxon + "')]/../Division)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName)[1]"
-          
-          // Family order class
-          // path2 = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='order']/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='class']/../ScientificName)[1]";
-
-          // Class
-          // path = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='class']/../ScientificName)[1]";
-
-
-          // family
-          // path = "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1] | (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='family']/../ScientificName)[1]";
 
 
 
@@ -605,7 +611,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
       }
     }
 
-      appendOutput(records, obsoleteList);
+      sortOutput(records, obsoleteList);
 
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) { 
@@ -614,7 +620,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
         // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
 
         obsoleteList = [];
-        appendOutput(records, obsoleteList);
+        sortOutput(records, obsoleteList);
       
       }
 
@@ -686,7 +692,7 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
       }
 
 
-        appendOutput(records, obsoleteList);
+        sortOutput(records, obsoleteList);
 
 
 
@@ -697,7 +703,7 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
         alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable");
 
         obsoleteList = [];
-        appendOutput(records, obsoleteList);
+        sortOutput(records, obsoleteList);
       
       }
 
@@ -719,75 +725,105 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
 
 
-function appendOutput(records, obsoleteList) {
+function sortOutput(records, obsoleteList) {
 
   ncbiCheck = [];
 
   // Check to see if there are any illegal characters
   for (var i in records) {
-
+    console.log(records[i]);
     if ((records[i].species == null || records[i].species == "" || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
       if (records[i].ncbiChecked == true) {
-        output = records[i].originalHeader + records[i].seq + "&#010;";
-        $("#badIds").append(output.trim());
+        console.log('oh yeah we got here');
+        records[i].appendTo = "badIds";
+        finishedRecords.push(records[i]);
         count +=1;
-      }
-      else {
+      } else {
         records[i].ncbiChecked = true;
         ncbiCheck.push(records[i]);
-
-
-
       }
-
     } else if (obsoleteList.includes(records[i].id)) {
 
-      output= records[i].originalHeader + records[i].seq + "&#010;";
-      $("#obsoleteSeqs").append(output.trim());
-      count +=1;
+        records[i].appendTo = "obsoleteSeqs";
+        finishedRecords.push(records[i]);
 
-
+        count +=1;
     } else {
-
-      formattedType = records[i].type;
-      if (ids_with_underscores.indexOf(formattedType) >= 0){
-        formattedType = "";
-      }
-      else if (records[i].type.length > 0) {
-
-        formattedType += "|";
-
-      }
-
 
       // // If there are illegal characters highlight them within the text
       if (invalidCharsRegex.test(records[i].seq)) {
+        records[i].appendTo = "badCharacters";
+        finishedRecords.push(records[i]);
 
-
-
-        output = records[i].originalHeader + records[i].seq + "&#010;";
-
-        $("#badCharacters").append(output.trim());
         count +=1;
 
+    } else {
+    // User has specified not to just retain the first ID, and there are multiple IDs
+    if (!retainFirst) {
+      if (records[i].originalHeader.split(">").length > 1) {
+        records[i].appendTo = "badIDs";
+        finishedRecords.push(records[i]);
 
-      } else {
-        if (!retainFirst) {
-          if (records[i].originalHeader.split(">").length > 1) {
-            output = records[i].originalHeader + records[i].seq + "&#010;";
-            $("#badIds").append(output.trim());
-            count +=1;
-            break;
-
-          }
-        }
-
-      if (commonName && records[i].species.indexOf("(") <= 0){
-
-
-        records[i].species = records[i].species.slice(0, -1);
-        noCommon += ">" + formattedType + records[i].id + "|" + records[i].species + "\n";
+        count +=1;
+        break;
       }
+    }
+      records[i].appendTo = "cleanedSeqs";
+      finishedRecords.push(records[i]);
+
+      count += 1;
+      // progressText(count);
+    }
+  }
+}
+progressText(count);
+checkFinal(count, finishedRecords);
+
+
+
+if (ncbiCheck.length > 0){  
+  getDataFromNCBI(ncbiCheck);
+}
+}
+
+function appendOutput(records){
+
+  records.sort(function (a, b) {
+    return a.order - b.order;
+  });
+
+
+  for (var i in records){
+
+    switch (records[i].appendTo) {
+      
+      case "badIds":
+        output = records[i].originalHeader + records[i].seq + "&#010;";
+        $("#badIds").append(output.trim());
+        break;
+
+      case "obsoleteSeqs":
+        output= records[i].originalHeader + records[i].seq + "&#010;";
+        $("#obsoleteSeqs").append(output.trim());
+        break;
+
+      
+      case "badCharacters":
+        output = records[i].originalHeader + records[i].seq + "&#010;";
+        $("#badCharacters").append(output.trim());
+        break;
+
+
+      case "cleanedSeqs":
+        formattedType = records[i].type;
+        if (ids_with_underscores.indexOf(formattedType) >= 0){
+          formattedType = "";
+        }
+        else if (records[i].type.length > 0) {
+
+          formattedType += "|";
+
+        }
 
         var header = ">" + formattedType + records[i].id + "|" + records[i].species.trim();
         if (addUnderscores) {
@@ -795,16 +831,9 @@ function appendOutput(records, obsoleteList) {
         }
 
 
-
-
-
-
         output = header + "&#010;" + records[i].seq + "&#010;";
 
         $("#cleanedSeqs").append(output.trim());
-        count += 1;
-        progressText(count);
-
 
         summarySpecies = records[i].species;
         
@@ -813,23 +842,12 @@ function appendOutput(records, obsoleteList) {
         }
 
         summary += formattedType + records[i].id + "|" + summarySpecies + " FROM: " + records[i].originalHeader.substring(1) + "\n";
-
+        break;
 
 
 
     }
   }
-
-
-}
-progressText(count);
-checkFinal(count, records);
-
-
-
-if (ncbiCheck.length > 0){  
-  getDataFromNCBI(ncbiCheck);
-}
 }
 
 
@@ -958,10 +976,10 @@ $('#header-format').selectize({
 
 });
 
-$('#header-format').onchange = function () {
-  console.log('deteched');
-    $('#header-format').options[0].selected = true;
-}
+// $('#header-format').onchange = function () {
+//   console.log('deteched');
+//     $('#header-format').options[0].selected = true;
+// }
 
 // $('#select-tools option').prop('selected', true);
 
@@ -1021,7 +1039,7 @@ $(function() {
 function generateAlert(){
   bootstrap_alert.warning("There was a fatal error \n" + records.length + " sequences are being written to unmappable" );
   obsoleteList = [];
-  appendOutput(records, obsoleteList);
+  sortOutput(records, obsoleteList);
 
   if (count != numRecords) {
     bootstrap_alert.warning("Please note: Currently not all sequences have been written to an output field");
