@@ -2,35 +2,31 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <!-- <meta http-equiv="Access-Control-Allow-Origin" content="*"> -->
     <meta http-equiv="Access-Control-Allow-Origin" content="http://eutils.ncbi.nlm.nih.gov">
     <meta http-equiv="Access-Control-Allow-Origin" content="http://uniprot.org">
-
-
     <title> SeqScrub</title>
     <link rel="stylesheet" type="text/css" href="styles/index.css" media="all" />
     <link rel="stylesheet" type="text/css" href="styles/stylesheet.css" media="all" />
     <link rel="stylesheet" type="text/css" href="styles/normalize.css" media="all" />
     <link rel="stylesheet" type="text/css" href="styles/selectize.default.css" media="all" />
-
-
     <link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css">
-
-
-
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
 </head>
+
 <header>
-SeqScrub<br><br>
+    SeqScrub
 </header>
 
 <body>
 
-<div class="loader" style = "display:none">
-    <img src=img/scrubcrop.gif>
-    <div class="loader-text">
-        Cleaning sequences!
-    </div>
+    <div class="loader" style = "display:none">
+        <img src=img/scrubcrop.gif>
+        <div class="loader-text">
+        Cleaning sequences!</div>
 </div>
+
+
 
 <div class="container-fluid">
     <div class="row">
@@ -42,7 +38,7 @@ SeqScrub<br><br>
 
 
 
-                        <input type="file" class="fileinput" id="file" name="file" />
+                        <input required type="file" class="fileinput" id="file" name="file" />
                         <label for="file" class="btn btn-primary"> Choose a file </label>
 
                         <input type="text" id="fileToSave"  value="   " /> <br>
@@ -51,92 +47,84 @@ SeqScrub<br><br>
                         <label for="tree" class="btn btn-primary"> Choose a tree (optional) </label>
 
                         <input type="text" id="treeToSave"  value="   " /> <br>
-
-
-                    <label for="header-format"> Select header output format: </label>
-
-                    <select name="header-format" id="header-format" multiple="multiple">
-                        <option selected value="headerID">ID</option>
-                        <option selected value="headerSpecies">Species name</option>
-                        <option value="genus">Genus</option>
-                        <option value="family">Family</option>
-                        <option value="order">Order</option>
-                        <option value="class">Class</option>
-
-                        <option value="division">Division</option>
-                        <option value="phylum">Phylum</option>
-                        <option value="kingdom">Kingdom</option>
-
-                    </select>
-
-
-
-                    <label for="invalidChars" > Remove sequences containing: </label>
-                    <input type="text" id="invalidChars" value="B J O U X Z" /> <br>
-
-
-
-                <!-- <button type="file" id=file class="fileinput">Basic</button> -->
-
-                <!-- <button type="button" class="btn">Basic</button> -->
-                <!-- <input type="file" class="fileinput" id="file" name="file" /> -->
-                <!-- <label for="file"> Choose a file </label> -->
-
-
-                <!-- <input type="file" class="fileinput" id="tree" name="tree" /> -->
-
-                <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore">
-
-                <label for="addUnderscore"> Change spaces to underscores in species name </label> <br>
-
-                <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID">
-
-                <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br>
-
-
-
-                <input type="submit" class="button" value = "Submit"> <br><br>
+<input type="submit" class="btn btn-primary" value = "Submit"> <br><br>
             </div>
-            </form>
         </div>
-        <div id="error-div" class="col-lg-6">
+        <div class="col-lg-6">
+
+            <label for="header-format"> Select header output format: (Click field to add and drag items to rearrange) </label>
+
+            <select name="header-format" id="header-format" multiple="multiple">
+                <option selected value="headerSpecies">Species name</option>
+                <option value="family">Family</option>
+                <option value="order">Order</option>
+                <option value="class">Class</option>
+                <option value="division">Division</option>
+                <option value="phylum">Phylum</option>
+                <option value="kingdom">Kingdom</option>
+
+            </select>
+
+                <label for="invalidChars" > Remove sequences containing: </label>
+                <input type="text" id="invalidChars" value="B J O U X Z" /> <br>
+
+
+
+            <!-- <button type="file" id=file class="fileinput">Basic</button> -->
+
+            <!-- <button type="button" class="btn">Basic</button> -->
+            <!-- <input type="file" class="fileinput" id="file" name="file" /> -->
+            <!-- <label for="file"> Choose a file </label> -->
+
+
+            <!-- <input type="file" class="fileinput" id="tree" name="tree" /> -->
+
+            <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore">
+
+            <label for="addUnderscore"> Change spaces to underscores in species name </label> <br>
+
+            <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID">
+
+            <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br>
+
+            <input type="checkbox" checked id="checkObsolete" value=checked name="checkObsolete">
+
+            <label for="checkObsolete"> Remove obsolete records </label> <br>
+
+            <input type="checkbox" checked id="removeUnclean" value=checked name="removeUnclean">
+
+            <label for="removeUnclean"> Remove uncleaned records</label> <br><br>
         </div>
+    </form>
     </div>
 </div>
 
 
 
+<section class = output-container>
+    <label for = "cleanedSeqs" class="seqLabel1">Cleaned sequences: </label>
+    <label for = "badCharacters" class="seqLabel2">Sequences with illegal characters: </label>
+    <label for = "obsoleteSeqs" class="seqLabel3">Sequences that are obsolete: </label>
+    <label for = "badIds" class="seqLabel4">Sequences that couldn't be mapped to a species: </label>
+</section>
+<section class = output-container>
 
+    <textarea readonly id = 'cleanedSeqs' spellcheck="false" autocomplete="off"></textarea>
 
+    <textarea readonly id = 'badCharacters' spellcheck="false" autocomplete="off"></textarea>
 
+    <textarea readonly id = 'obsoleteSeqs' spellcheck="false" autocomplete="off"></textarea>
 
+    <textarea readonly id = 'badIds' spellcheck="false" autocomplete="off"></textarea>
+</section>
 
-    <section class = container-fluid>
-
-        <div class="row">
-            <div class="seqLabel1 col" >Cleaned sequences:</div>
-            <div class="seqLabel2 col" >Sequences with illegal characters:</div>
-            <div class="seqLabel3 col" >Sequences that are obsolete: </div>
-            <div class="seqLabel4 col" >Sequences that couldn't be cleaned:</div>
-
-        </div>
-
-
-    <div class="row">
-
-        <textarea class="border col-lg-3" readonly id = 'cleanedSeqs' spellcheck="false" autocomplete="off"></textarea>
-
-        <textarea class="border col-lg-3" readonly id = 'badCharacters' spellcheck="false" autocomplete="off"></textarea>
-
-        <textarea class="border col-lg-3" readonly id = 'obsoleteSeqs' spellcheck="false" autocomplete="off"></textarea>
-
-        <textarea class="border col-lg-3" readonly id = 'badIds' spellcheck="false" autocomplete="off"></textarea>
-    </div>
-    </section>
     <br>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6">
+
     <form id="save">
         <div class="form-group">
-            <div class="col-lg-4 col-sm-3 col-12">
                 Which output fields should be saved? <br><br>
 
 
@@ -167,6 +155,11 @@ SeqScrub<br><br>
         </div>
         </div>
     </form>
+
+    <div id="error-div" class="col-lg-6">
+        error
+    </div>
+
 
     <!-- Jquery and Jquery UI -->
 <!--     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>

@@ -97,7 +97,7 @@
   box-sizing: border-box;
 }
 .selectize-control.plugin-remove_button [data-value] .remove:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: #219150;
 }
 .selectize-control.plugin-remove_button [data-value].active .remove {
   border-left-color: #26a65b;

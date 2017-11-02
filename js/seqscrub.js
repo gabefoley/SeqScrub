@@ -1,5 +1,9 @@
 // header('Access-Control-Allow-Origin: http://eutils.ncbi.nlm.nih.gov');
 
+$(document).ready(function() {
+  document.getElementsByTagName("html")[0].style.visibility = "visible";
+});
+
 var noCommon = "";
 var count = 0;
 var taxon_info = 0;
@@ -125,6 +129,9 @@ $("form#data").submit(function(event) {
   commonName = $('#commonName').is(":checked");
   retainFirst = $('#getFirstID').is(":checked");
 
+  console.log(addUnderscores)
+  console.log(retainFirst)
+
  
   headerFormat = $('select#header-format').val();
   taxon_info = headerFormat.length - 1;
@@ -137,6 +144,8 @@ $("form#data").submit(function(event) {
 
   //Grab all form data  
   var formData = new FormData($(this)[0]);
+
+  console.log(formData);
 
   //Generate a new regex containing the invalid character
   invalidCharsRegex = new RegExp($("#invalidChars").val().trim().replace(/ /g, "|"));
@@ -183,7 +192,10 @@ $("form#data").submit(function(event) {
 
         var id = jsonData[i].id.toString();
 
+        console.log(id);
+
         var record = {
+          order: i,
           id: jsonData[i].id.replace(/-/g,"_"),
           taxon: "",
           type: jsonData[i].type,
@@ -193,6 +205,7 @@ $("form#data").submit(function(event) {
           ncbiChecked: false,
           noCommonName: false,
           foundtaxon: false,
+          appendTo: "",
           originalHeader: jsonData[i].originalHeader
         };
 
@@ -394,7 +407,7 @@ function getDataFromNCBI(records) {
 
   idString = getIDString(records, "NCBI");
 
-    urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&idss=" + idString + "&retmode=xml&rettype=docsum";
+    urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum";
 
 
   var promise = $.ajax({
@@ -760,7 +773,7 @@ function appendOutput(records, obsoleteList) {
 
       } else {
         if (!retainFirst) {
-          if (records[record].originalHeader.split(">").length > 1) {
+          if (records[i].originalHeader.split(">").length > 1) {
             output = records[i].originalHeader + records[i].seq + "&#010;";
             $("#badIds").append(output.trim());
             count +=1;
@@ -945,6 +958,11 @@ $('#header-format').selectize({
 
 });
 
+$('#header-format').onchange = function () {
+  console.log('deteched');
+    $('#header-format').options[0].selected = true;
+}
+
 // $('#select-tools option').prop('selected', true);
 
 
@@ -957,7 +975,6 @@ $(function() {
   var theme_match = String(window.location).match(/[?&]theme=([a-z0-9]+)/);
   var theme = (theme_match && theme_match[1]) || 'default';
   var themes = ['default','legacy','bootstrap2','bootstrap3'];
-  $('head').append('<link rel="stylesheet" href="../css/selectize.' + theme + '.css">');
 
   var $themes = $('<div>').addClass('theme-selector').insertAfter('h1');
   for (var i = 0; i < themes.length; i++) {
@@ -1021,7 +1038,8 @@ bootstrap_alert = function() {}
 bootstrap_alert.warning = function(message) {
             $('#error-div').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
         };
-    
+
+
 
 
 

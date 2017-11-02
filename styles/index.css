@@ -16,7 +16,8 @@ body,
 	background: #2ecc71;
 	overflow-y: scroll;
 	overflow-x: hidden;
-	word-wrap: break-word;
+	/*word-wrap: break-word;*/
+	font-size: 12px;
 
 }
 
@@ -239,6 +240,8 @@ header {
 	src: url('Raleway-Medium.ttf'); 
 } 
 
+html { visibility:hidden; }
+
 
 .highlight {
 	background-color: #f1c40f;
@@ -253,7 +256,7 @@ header {
 	margin: 0px;
 	}
 
-.container label {
+/*.container label {
 	background-color: #2ecc71;
 	font-size: 20px;
 	font-family: "Calibri";
@@ -291,8 +294,57 @@ textarea {
 
 textarea:focus {
 	outline-width: 0;
+}*/
+
+.output-container {
+	z-index: 99;
+	display: flex;
+	align-items: stretch;
+	width: 100%;
+	border: 0px;
+	margin: 0px;
+	}
+
+
+.output-container label {
+	background-color: #2ecc71;
+	font-size: 20px;
+	font-family: "Calibri";
+	width:33.3333%;
+	min-height:100%;
+	flex: 2;
+	display:flex;
+	align-items:center;
+	margin: 0px;
+	padding: 10px 0px 0px 10px;
 }
 
+.output-container .seqLabel2 {
+	background-color: #3498db;
+
+
+}
+
+.output-container .seqLabel3 {
+	background-color: goldenrod;
+
+
+}
+
+.output-container .seqLabel4 {
+	background-color: #9b59b6;
+
+
+}
+
+textarea {
+	border: 0px;
+	margin: 0px;
+}
+
+textarea:focus {
+	outline-width: 0;
+}
 .loader {
   position: fixed;
   background: white;
