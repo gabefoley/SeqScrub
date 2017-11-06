@@ -1,5 +1,7 @@
 // header('Access-Control-Allow-Origin: http://eutils.ncbi.nlm.nih.gov');
 
+
+
 $(document).ready(function() {
   document.getElementsByTagName("html")[0].style.visibility = "visible";
 });
@@ -13,6 +15,9 @@ summary = "";
 var cleanTree = false;
 var tree = "";
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"];
+
+
+$.support.cors = true;
 
 $("#commonName").attr('checked', false);
 $("");
@@ -30,9 +35,9 @@ function hideLoadingScreen(){
 // Check that we have the correct number of cleaned sequences
 function checkFinal(count, records){
   if (count == numRecords){
-    console.log("got here")
+    console.log("got here");
     console.log(records);
-    console.log(records.length)
+    console.log(records.length);
     hideLoadingScreen();
     // if (noCommon.length > 0) {
     //   console.log(noCommon);
@@ -83,8 +88,8 @@ function cleanTreeNames() {
     newname = splitLine.split("FROM:")[0].trim();
     oldname = splitLine.split("FROM:")[1].trim();
 
-    console.log(newname)
-    console.log(oldname)
+    console.log(newname);
+    console.log(oldname);
 
     // Escape characters in the old name which will interfere with our regular expression
     oldname = escapeRegExp(oldname);
@@ -92,6 +97,9 @@ function cleanTreeNames() {
 
     treeRegEx = new RegExp(oldname);
     cleanTree = cleanTree.replace(treeRegEx, newname);
+
+    // This step is needed in case a program had already encased a name in the Newick string with quotation marks.
+    cleanTree = cleanTree.replace(/'/g, "");
   }
 }
 
@@ -111,7 +119,7 @@ function progressText(count){
 
 
 // Update the filename field
-document.getElementById('file').onchange = function () {
+document.getElementById("file").onchange = function () {
 
   filename = this.value.replace(/.*[\/\\]/, '');
   $("#fileToSave").val(filename);
@@ -143,8 +151,8 @@ $("form#data").submit(function(event) {
   commonName = $('#commonName').is(":checked");
   retainFirst = $('#getFirstID').is(":checked");
 
-  console.log(addUnderscores)
-  console.log(retainFirst)
+  console.log(addUnderscores);
+  console.log(retainFirst);
 
  
   headerFormat = $('select#header-format').val();
@@ -184,6 +192,8 @@ $("form#data").submit(function(event) {
     contentType: false,
     processData: false,
     success: function(returndata) {
+
+      console.log(returndata);
 
       jsonData = JSON.parse(returndata);
 
@@ -255,7 +265,7 @@ $("form#data").submit(function(event) {
       if (uniprotList.length > 0) {
         console.log("Uniprot length = ", uniprotList.length);
         while (uniprotList.length){
-          getDataFromUniprot(uniprotList.splice(0,100), false);
+          getDataFromUniprot(uniprotList.splice(0,200), false);
           // getDataFromNCBI(uniprotList.splice(0,500));
 
 
@@ -265,14 +275,14 @@ $("form#data").submit(function(event) {
       if (pdbList.length > 0) {
         console.log("PDB length = ", pdbList.length);
         while (pdbList.length){
-          getPDBSpeciesNameFromUniProt(pdbList.splice(0,100), true);
+          getPDBSpeciesNameFromUniProt(pdbList.splice(0,200), true);
 
         }
       }
       if (ncbiList.length > 0) {
         console.log("NCBI length = ", ncbiList.length);
         while (ncbiList.length){
-        getDataFromNCBI(ncbiList.splice(0,100));
+        getDataFromNCBI(ncbiList.splice(0,200));
       }
       }
     }
@@ -343,6 +353,9 @@ function getDataFromUniprot(records, pdb) {
   var promise = $.ajax({
     url: url,
     type: 'POST',
+    headers: {
+        'Content-Type':'text/plain'
+     },
     async: true,
 
 
@@ -400,7 +413,7 @@ function getDataFromUniprot(records, pdb) {
 
       else {
 
-        generateAlert(records)
+        generateAlert(records);
 
 
 
@@ -426,7 +439,13 @@ function getDataFromNCBI(records) {
 
   var promise = $.ajax({
     url: urlDoc,
+
     type: 'POST',
+    headers: {
+        'Content-Type':'text/plain'
+     },
+
+
     async: true,
 
     success: function(speciesData) {
@@ -437,9 +456,9 @@ function getDataFromNCBI(records) {
 
     error: function(XMLHttpRequest, textStatus, errorThrown) { 
       if (errorThrown == "Bad Request"){
-        console.log('error here')
+        console.log('error here');
         console.log(errorThrown);
-        console.log(urlDoc)
+        console.log(urlDoc);
         obsoleteList = [];
         sortOutput(records, obsoleteList);
         bootstrap_alert.warning("There was an error when trying to reach this URL:<br> " + '<a href=' + urlDoc + '>' +urlDoc+ '</a>');
@@ -493,7 +512,7 @@ function getIDFromNCBI(records, speciesData) {
           thisNode = node.iterateNext();
         }
       } catch (e) {
-        console.log('Error: Document tree modified during iteration ' + e);
+        bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
       }
 
     }
@@ -513,7 +532,7 @@ function getIDFromNCBI(records, speciesData) {
         thisObsoleteNode = obsoleteNode.iterateNext();
       }
     } catch (e) {
-      console.log('Error: Document tree modified during iteration ' + e);
+      bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
     }
     getSpeciesNameFromNCBI2(records, idString, obsoleteList);
 
@@ -532,10 +551,17 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 
 
-
   var promise = $.ajax({
     url: urlAll,
     type: 'POST',
+    headers: {
+        'Content-Type':'text/plain'
+     },
+    // headers: {
+    //    "Access-Control-Allow-Origin": "*",
+    //    "Access-Control-Allow-Methods": "*",
+    //    "Access-Control-Allow-Headers": "*"
+    // },
     async: true,
 
     success: function(speciesData) {
@@ -604,7 +630,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
         
 
         } catch (e) {
-          console.log('Error: Document tree modified during iteration ' + e);
+          bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
         }
 
         }
@@ -655,10 +681,10 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
   var promise = $.ajax({
     url: url,
     type: 'POST',
+    headers: {
+        'Content-Type':'text/plain'
+     },
     async: true,
-    // xhrFields: {
-    //   withCredentials: true
-    // },
 
     success: function(speciesData) {
 
@@ -682,7 +708,7 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
               thisNode = node.iterateNext();
             }
           } catch (e) {
-            console.log('Error: Document tree modified during iteration ' + e);
+            bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
           }
 
 
@@ -708,7 +734,7 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
       }
 
       else {
-        generateAlert(records)
+        generateAlert(records);
 
       }
 
@@ -798,18 +824,18 @@ function appendOutput(records){
     switch (records[i].appendTo) {
       
       case "badIds":
-        output = records[i].originalHeader + records[i].seq + "&#010;";
+        output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;";
         $("#badIds").append(output.trim());
         break;
 
       case "obsoleteSeqs":
-        output= records[i].originalHeader + records[i].seq + "&#010;";
+        output= records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;";
         $("#obsoleteSeqs").append(output.trim());
         break;
 
       
       case "badCharacters":
-        output = records[i].originalHeader + records[i].seq + "&#010;";
+        output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;";
         $("#badCharacters").append(output.trim());
         break;
 
@@ -829,9 +855,9 @@ function appendOutput(records){
         if (addUnderscores) {
           header = header.replace(/ /g, "_");
         }
+;
 
-
-        output = header + "&#010;" + records[i].seq + "&#010;";
+        output = header + "&#010;" + records[i].seq.replace(/-/g, "&#8209;") + "&#010;";
 
         $("#cleanedSeqs").append(output.trim());
 
@@ -855,7 +881,7 @@ function downloadFile(filename, text) {
 
   
   var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text.replace(/‑/g, "-")));
   element.setAttribute('download', filename);
 
   element.style.display = 'none';
@@ -952,7 +978,7 @@ $('#input-draggable').selectize({
         return {
             value: input,
             text: input
-        }
+        };
     }
 });
 
@@ -1016,7 +1042,7 @@ $(function() {
         lines[i] = lines[i].replace(new RegExp('^' + indent), '');
       }
 
-      var code = $.trim(lines.join('\n')).replace(/ /g, '    ');
+      code = $.trim(lines.join('\n')).replace(/ /g, '    ');
       var $pre = $('<pre>').addClass('js').text(code);
       $pre.insertAfter(this);
     }
@@ -1027,7 +1053,7 @@ $(function() {
     var $container = $('<div>').addClass('value').html('Current Value: ');
     var $value = $('<span>').appendTo($container);
     var $input = $(this);
-    var update = function(e) { $value.text(JSON.stringify($input.val())); }
+    var update = function(e) { $value.text(JSON.stringify($input.val())); };
 
     $(this).on('change', update);
     update();
@@ -1052,7 +1078,7 @@ function generateAlert(){
 }
 
 //Error handing
-bootstrap_alert = function() {}
+bootstrap_alert = function() {};
 bootstrap_alert.warning = function(message) {
             $('#error-div').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
         };

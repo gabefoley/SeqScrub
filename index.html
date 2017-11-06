@@ -2,16 +2,13 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Access-Control-Allow-Origin" content="http://eutils.ncbi.nlm.nih.gov">
-    <meta http-equiv="Access-Control-Allow-Origin" content="http://uniprot.org">
     <title> SeqScrub</title>
     <link rel="stylesheet" type="text/css" href="styles/index.css" media="all" />
     <link rel="stylesheet" type="text/css" href="styles/stylesheet.css" media="all" />
     <link rel="stylesheet" type="text/css" href="styles/normalize.css" media="all" />
     <link rel="stylesheet" type="text/css" href="styles/selectize.default.css" media="all" />
     <link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css">
-    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+    <link rel="icon" type="image/png" href="img/favicon.ico">
 </head>
 
 <header>
@@ -47,7 +44,7 @@
                         <label for="tree" class="btn btn-primary"> Choose a tree (optional) </label>
 
                         <input type="text" id="treeToSave"  value="   " /> <br><br><br>
-<input type="submit" class="button" value = "Submit"> <br><br>
+<input type="submit" class="submitButton" value = "Submit"> <br><br>
             </div>
         </div>
         <div class="col-lg-6">
@@ -129,35 +126,32 @@
 
 
 
-            <input type="checkbox" checked id="cleanCheck" value="" autocomplete="off" name="cleanCheck">
+            <input type="checkbox" checked id="cleanCheck" value="" name="cleanCheck">
             <label for="cleanCheck">Cleaned sequences</label> <br>
-            <input type="checkbox" checked id="illegalCheck" value="" autocomplete="off" name="illegalCheck">
+            <input type="checkbox" checked id="illegalCheck" value="" name="illegalCheck">
             <label for="illegalCheck"> Sequences with illegal characters </label> <br>
-            <input type="checkbox" checked id="obsoleteCheck" value="" autocomplete="off" name="obsoleteCheck">
+            <input type="checkbox" checked id="obsoleteCheck" value="" name="obsoleteCheck">
             <label for="obsoleteCheck"> Sequences that are obsolete </label> <br>
-            <input type="checkbox" checked id="unmappableCheck" value="" autocomplete="off" name="unmappableCheck">
+            <input type="checkbox" checked id="unmappableCheck" value="" name="unmappableCheck">
             <label for="unmappableCheck"> Sequences that couldn't be cleaned </label>    <br>
-            <input type="checkbox" checked id="treeCheck" value="" autocomplete="off" name="treeCheck">
+            <input type="checkbox" checked id="treeCheck" value="" name="treeCheck">
             <label for="treeCheck"> Cleaned phylogenetic tree </label>    <br>
-            <input type="checkbox" checked id="summaryCheck" value="" autocomplete="off" name="summaryCheck">
+            <input type="checkbox" checked id="summaryCheck" value="" name="summaryCheck">
             <label for="summaryCheck"> Summary of changes made</label>    <br>
 
-            <input type="checkbox" checked id="selectAll" value="" autocomplete="off" name="sellectAll">
+            <input type="checkbox" checked id="selectAll" value="" name="selectAll">
             <label for="selectAll"> Select all output </label>
 
             <br><br>
 
                 <input type="button" class = "button" id= 'saveButton' value="Save output" onclick="downloadFile(fileToSave.value, cleanedSeqs.value)"> <br><br>
-        <!--         <input type="button" class = "button" id= 'illegalButton' value="Save illegal sequences" onclick="downloadFile(fileToSave.value, badCharacters.value)">
-                <input type="button" class = "button" id= 'obsoleteButton' value="Save obsolete sequences" onclick="downloadFile(fileToSave.value, obsoleteSeqs.value)">
-                <input type="button" class = "button" id= 'unmappableButton' value="Save unmappable sequences" onclick="downloadFile(fileToSave.value, badIds.value)"> <br> <br> -->
+  
                 <input type="button" class = "button" id= 'saveButton' value="Save summary" onclick="downloadSummary(fileToSave.value)">
-        </div>
         </div>
     </form>
 
     <div id="error-div" class="col-lg-6">
-        error
+        
     </div>
 
 
@@ -185,6 +179,9 @@
 
     <!--Download.js -->
     <script src="http://danml.com/js/download.js"></script>
+</div>
+</div>
+</div>
 
 
 

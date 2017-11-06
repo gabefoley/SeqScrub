@@ -4,6 +4,8 @@ body,
   height: 100%;
 }
 
+
+
  .container{
  min-width:12400px;         
  width: auto !important;   /* Firefox will set width as auto */
@@ -16,8 +18,12 @@ body,
 	background: #2ecc71;
 	overflow-y: scroll;
 	overflow-x: hidden;
-	/*word-wrap: break-word;*/
-	font-size: 12px;
+	word-break: : break-all;
+	font-size: 14px;
+	font-family: "Lucida Console", Monaco, monospace;
+	resize: none;
+
+
 
 }
 
@@ -33,6 +39,10 @@ body,
 	overflow-x: hidden;
 	word-wrap: break-word;
 	font-size: 12px;
+	word-break: : break-all;
+	font-size: 14px;
+	font-family: "Lucida Console", Monaco, monospace;
+	resize: none;
 
 
 }
@@ -49,7 +59,10 @@ body,
 	overflow-x: hidden;
 	word-wrap: break-word;
 	font-size: 12px;
-
+	word-break: : break-all;
+	font-size: 14px;
+	font-family: "Lucida Console", Monaco, monospace;
+	resize: none;
 
 }
 
@@ -73,7 +86,10 @@ background: #9b59b6;
 	overflow-x: hidden;
 	word-wrap: break-word;
 	font-size: 12px;
-
+	word-break: : break-all;
+	font-size: 14px;
+	font-family: "Lucida Console", Monaco, monospace;
+	resize: none;
 
 }
 
@@ -100,7 +116,7 @@ body {
 	z-index: -1;
 }
 
-.fileinput + label, .button {
+.fileinput + label, .button, .submitButton{
 
 	background-color: #2ecc71;
 
@@ -120,13 +136,21 @@ body {
 
 }
 
+.submitButton {
+
+	background-color: #3498db;
+	height: 50px;
+
+
+}
+
 .fileinput:focus + label{
 	background: #9b59b6;
 
 }
 
 
-.fileinput + label:hover {
+.fileinput + label:hover, .submitButton:hover {
 	background: goldenrod;
 }
 
@@ -141,11 +165,11 @@ body {
 
 
 
-.button {
+.button  {
 	margin-right: 22%;
 }
 
-.button:hover {
+.button :hover {
 	background: goldenrod;
 
 }
