@@ -557,11 +557,6 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
     headers: {
         'Content-Type':'text/plain'
      },
-    // headers: {
-    //    "Access-Control-Allow-Origin": "*",
-    //    "Access-Control-Allow-Methods": "*",
-    //    "Access-Control-Allow-Headers": "*"
-    // },
     async: true,
 
     success: function(speciesData) {
@@ -586,15 +581,10 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
                 path += " (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
               }
               
-              path += " | ";
-            });
 
-            path = path.substring(0, path.length - 3);
+            // path = path.substring(0, path.length - 3);
 
             console.log(path);
-
-
-
 
 
 
@@ -619,19 +609,17 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
             }
 
 
-          if (taxoncount >= taxon_info){
+          if (taxoncount == 0){
+            console.log("Couldn't find this taxon", headerOpt, records[record].id)
             records[record].foundtaxon = true;
           }
-
-
-
           
-
-        
-
         } catch (e) {
           bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
         }
+
+        });
+
 
         }
       }
@@ -666,6 +654,123 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 }
 
+
+// function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
+//   speciesList = [];
+
+//   idString = getTaxonID(records);
+
+//   urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
+
+
+
+
+//   var promise = $.ajax({
+//     url: urlAll,
+//     type: 'POST',
+//     headers: {
+//         'Content-Type':'text/plain'
+//      },
+//     async: true,
+
+//     success: function(speciesData) {
+
+//       if (speciesData != null) {
+
+
+//         for (var record in records){
+//           if (records[record].taxon.length > 1) {
+
+//             path = "";
+
+
+//             headerFormat.forEach(function(headerOpt) {
+
+//               console.log(headerOpt);
+//               if (headerOpt == 'species') {
+//                 path += "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1]";
+//               }
+
+//               else {
+//                 path += " (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
+//               }
+              
+//               path += " | ";
+//             });
+
+//             path = path.substring(0, path.length - 3);
+
+//             console.log(path);
+
+
+
+//           var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
+
+
+//         try {
+//           var thisNode = node.iterateNext();
+
+
+//           species = "";
+
+//           taxoncount = 0;
+
+
+
+//             while (thisNode) {
+//               taxoncount +=1;
+//               records[record].species += thisNode.textContent + " ";
+//               thisNode = node.iterateNext();
+
+//             }
+
+
+//           if (taxoncount >= taxon_info){
+//             records[record].foundtaxon = true;
+//           }
+
+
+
+          
+
+        
+
+//         } catch (e) {
+//           bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
+//         }
+
+//         }
+//       }
+//     }
+
+//       sortOutput(records, obsoleteList);
+
+//     },
+//     error: function(XMLHttpRequest, textStatus, errorThrown) { 
+//       if (errorThrown == "Bad Request"){
+//         // response = XMLHttpRequest.responseText
+//         // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
+
+//         obsoleteList = [];
+//         sortOutput(records, obsoleteList);
+      
+//       }
+
+//       else {
+//         generateAlert(records);
+
+//       }
+
+
+
+
+//     }   
+
+
+//   });
+
+
+// }
 
 
 
@@ -760,7 +865,6 @@ function sortOutput(records, obsoleteList) {
     console.log(records[i]);
     if ((records[i].species == null || records[i].species == "" || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
       if (records[i].ncbiChecked == true) {
-        console.log('oh yeah we got here');
         records[i].appendTo = "badIds";
         finishedRecords.push(records[i]);
         count +=1;
@@ -776,7 +880,7 @@ function sortOutput(records, obsoleteList) {
         count +=1;
     } else {
 
-      // // If there are illegal characters highlight them within the text
+      // If there are illegal characters highlight them within the text
       if (invalidCharsRegex.test(records[i].seq)) {
         records[i].appendTo = "badCharacters";
         finishedRecords.push(records[i]);
@@ -824,18 +928,18 @@ function appendOutput(records){
     switch (records[i].appendTo) {
       
       case "badIds":
-        output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;";
+        output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
         $("#badIds").append(output.trim());
         break;
 
       case "obsoleteSeqs":
-        output= records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;";
+        output= records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
         $("#obsoleteSeqs").append(output.trim());
         break;
 
       
       case "badCharacters":
-        output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;";
+        output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
         $("#badCharacters").append(output.trim());
         break;
 
@@ -857,7 +961,7 @@ function appendOutput(records){
         }
 ;
 
-        output = header + "&#010;" + records[i].seq.replace(/-/g, "&#8209;") + "&#010;";
+        output = header + "&#010;" + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
 
         $("#cleanedSeqs").append(output.trim());
 
