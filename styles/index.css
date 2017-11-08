@@ -4,6 +4,21 @@ body,
   height: 100%;
 }
 
+label:before{
+	background-color: yellow;
+}
+
+input[type="text"]
+{
+    font-size:12px;
+}
+
+.cleanCheck input[type="checkbox"] + label::before
+{background-color: #990000;  border-color: #990000;}
+
+
+input[type="checkbox"] + label::before
+{background-color: #990000;  border-color: #990000;}
 
 
  .container{
@@ -567,3 +582,8 @@ textarea:focus {
 	  right:-5.6em;
 	  line-height:0;
 	}
+
+a {
+	padding: 23px;
+}
+

@@ -45,7 +45,6 @@ function checkFinal(count, records){
     // }
 
 
-
     // Check if we were able to find the taxonomic information the user requested
     noTaxonWarn = "";
     for (var i in records){
@@ -65,7 +64,13 @@ function checkFinal(count, records){
     // If we are also cleaning a tree
     if (cleanTree) {
       cleanTree = cleanTreeNames();
-      bootstrap_alert.warning(cleanTree);
+      console.log(cleanTree)
+
+      // $("#sectionB").innerHTML = cleanTree;
+
+      bootstrap_alert.tree(cleanTree);
+      // bootstrap_alert.warning(cleanTree);
+
     }
 
   }
@@ -77,9 +82,6 @@ function cleanTreeNames() {
 
   cleanTree = tree;
 
-  console.log('we are here');
-  console.log(splitSummary);
-
   for (var line in splitSummary){
     splitLine = splitSummary[line];
 
@@ -87,9 +89,6 @@ function cleanTreeNames() {
 
     newname = splitLine.split("FROM:")[0].trim();
     oldname = splitLine.split("FROM:")[1].trim();
-
-    console.log(newname);
-    console.log(oldname);
 
     // Escape characters in the old name which will interfere with our regular expression
     oldname = escapeRegExp(oldname);
@@ -150,9 +149,8 @@ $("form#data").submit(function(event) {
   addUnderscores = $('#addUnderscore').is(":checked");
   commonName = $('#commonName').is(":checked");
   retainFirst = $('#getFirstID').is(":checked");
-
-  console.log(addUnderscores);
-  console.log(retainFirst);
+  removeObsolete = $('#checkObsolete').is(":checked");
+  removeUncleaned = $('#removeUnclean').is(":checked");
 
  
   headerFormat = $('select#header-format').val();
@@ -541,120 +539,6 @@ function getIDFromNCBI(records, speciesData) {
   }
 }
 
-function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
-  speciesList = [];
-
-  idString = getTaxonID(records);
-
-  urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
-
-
-
-
-  var promise = $.ajax({
-    url: urlAll,
-    type: 'POST',
-    headers: {
-        'Content-Type':'text/plain'
-     },
-    async: true,
-
-    success: function(speciesData) {
-
-      if (speciesData != null) {
-
-
-        for (var record in records){
-          if (records[record].taxon.length > 1) {
-
-            path = "";
-
-
-            headerFormat.forEach(function(headerOpt) {
-
-              console.log(headerOpt);
-              if (headerOpt == 'species') {
-                path += "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1]";
-              }
-
-              else {
-                path += " (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
-              }
-              
-
-            // path = path.substring(0, path.length - 3);
-
-            console.log(path);
-
-
-
-          var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
-
-
-        try {
-          var thisNode = node.iterateNext();
-
-
-          species = "";
-
-          taxoncount = 0;
-
-
-
-            while (thisNode) {
-              taxoncount +=1;
-              records[record].species += thisNode.textContent + " ";
-              thisNode = node.iterateNext();
-
-            }
-
-
-          if (taxoncount == 0){
-            console.log("Couldn't find this taxon", headerOpt, records[record].id)
-            records[record].foundtaxon = true;
-          }
-          
-        } catch (e) {
-          bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
-        }
-
-        });
-
-
-        }
-      }
-    }
-
-      sortOutput(records, obsoleteList);
-
-    },
-    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-      if (errorThrown == "Bad Request"){
-        // response = XMLHttpRequest.responseText
-        // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
-
-        obsoleteList = [];
-        sortOutput(records, obsoleteList);
-      
-      }
-
-      else {
-        generateAlert(records);
-
-      }
-
-
-
-
-    }   
-
-
-  });
-
-
-}
-
-
 // function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 //   speciesList = [];
 
@@ -695,10 +579,8 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 //                 path += " (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
 //               }
               
-//               path += " | ";
-//             });
 
-//             path = path.substring(0, path.length - 3);
+//             // path = path.substring(0, path.length - 3);
 
 //             console.log(path);
 
@@ -725,19 +607,17 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 //             }
 
 
-//           if (taxoncount >= taxon_info){
+//           if (taxoncount == 0){
+//             console.log("Couldn't find this taxon", headerOpt, records[record].id)
 //             records[record].foundtaxon = true;
 //           }
-
-
-
           
-
-        
-
 //         } catch (e) {
 //           bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
 //         }
+
+//         });
+
 
 //         }
 //       }
@@ -771,6 +651,124 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 
 // }
+
+
+function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
+  speciesList = [];
+
+  idString = getTaxonID(records);
+
+  urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
+
+
+
+
+  var promise = $.ajax({
+    url: urlAll,
+    type: 'POST',
+    headers: {
+        'Content-Type':'text/plain'
+     },
+    async: true,
+
+    success: function(speciesData) {
+
+      if (speciesData != null) {
+
+
+        for (var record in records){
+          if (records[record].taxon.length > 1) {
+
+            path = "";
+
+
+            headerFormat.forEach(function(headerOpt) {
+
+              console.log(headerOpt);
+              if (headerOpt == 'species') {
+                path += "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1]";
+              }
+
+              else {
+                path += " (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
+              }
+              
+              path += " | ";
+            });
+
+            path = path.substring(0, path.length - 3);
+
+            console.log(path);
+
+
+
+          var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
+
+
+        try {
+          var thisNode = node.iterateNext();
+
+
+          species = "";
+
+          taxoncount = 0;
+
+
+
+            while (thisNode) {
+              taxoncount +=1;
+              records[record].species += thisNode.textContent + " ";
+              thisNode = node.iterateNext();
+
+            }
+
+
+          if (taxoncount >= taxon_info){
+            records[record].foundtaxon = true;
+          }
+
+
+
+          
+
+        
+
+        } catch (e) {
+          bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
+        }
+
+        }
+      }
+    }
+
+      sortOutput(records, obsoleteList);
+
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+      if (errorThrown == "Bad Request"){
+        // response = XMLHttpRequest.responseText
+        // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
+
+        obsoleteList = [];
+        sortOutput(records, obsoleteList);
+      
+      }
+
+      else {
+        generateAlert(records);
+
+      }
+
+
+
+
+    }   
+
+
+  });
+
+
+}
 
 
 
@@ -925,26 +923,32 @@ function appendOutput(records){
 
   for (var i in records){
 
-    switch (records[i].appendTo) {
+    console.log('here i am')
+
+    console.log(records[i].appendTo)
+    console.log(removeUncleaned)
+
       
-      case "badIds":
+      if (records[i].appendTo == "badIds" && removeUncleaned){
         output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
         $("#badIds").append(output.trim());
-        break;
+      }
 
-      case "obsoleteSeqs":
+      else if ( records[i].appendTo == "obsoleteSeqs" && removeObsolete){
         output= records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
         $("#obsoleteSeqs").append(output.trim());
-        break;
 
-      
-      case "badCharacters":
+
+      }
+
+      else if (records[i].appendTo == "badCharacters"){
         output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
         $("#badCharacters").append(output.trim());
-        break;
+      }
 
+  
 
-      case "cleanedSeqs":
+      else if (records[i].appendTo == "cleanedSeqs" || (records[i].appendTo == "badIds" && !removeUncleaned) || (records[i].appendTo == "obsoleteSeqs" && !removeObsolete)) {
         formattedType = records[i].type;
         if (ids_with_underscores.indexOf(formattedType) >= 0){
           formattedType = "";
@@ -959,7 +963,6 @@ function appendOutput(records){
         if (addUnderscores) {
           header = header.replace(/ /g, "_");
         }
-;
 
         output = header + "&#010;" + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
 
@@ -972,11 +975,9 @@ function appendOutput(records){
         }
 
         summary += formattedType + records[i].id + "|" + summarySpecies + " FROM: " + records[i].originalHeader.substring(1) + "\n";
-        break;
-
-
 
     }
+  
   }
 }
 
@@ -1019,6 +1020,20 @@ function split(str, char) {
 function escapeRegExp(str) {
     return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
+
+
+$("form#save").submit(function(event) {
+  event.preventDefault();
+
+
+  console.log('savign data');
+  //Grab all form data  
+  var formData = new FormData($(this)[0]);
+
+  console.log(formData);
+});
+
+
 
 
 
@@ -1186,6 +1201,9 @@ bootstrap_alert = function() {};
 bootstrap_alert.warning = function(message) {
             $('#error-div').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
         };
+bootstrap_alert.tree = function(message) {
+            $('#treeOutput').html('<div class="success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+        };
 
 
 
@@ -1212,3 +1230,24 @@ $('.mutliSelect input[type="checkbox"]').on('click', function() {
 
   }
 });
+
+function checkAll(ele) {
+    var checkboxes = $(".downloadCheck");
+    if (ele.checked) {
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].type == 'checkbox') {
+                checkboxes[i].checked = true;
+                $("#selectAllLabel").html('Deselect all output')
+            }
+        }
+    } else {
+        for (var i = 0; i < checkboxes.length; i++) {
+            console.log(i)
+            if (checkboxes[i].type == 'checkbox') {
+                checkboxes[i].checked = false;
+                $("#selectAllLabel").html('Select all output')
+
+            }
+        }
+    }
+}

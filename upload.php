@@ -1,16 +1,4 @@
-
 <?php
-// header("access-control-allow-origin: http://eutils.ncbi.nlm.nih.gov");
-// header("access-control-allow-origin: http://uniprot.org");
-// header("access-control-allow-origin: *");
-
-
-// $http_origin = $_SERVER['HTTP_ORIGIN'];
-
-// if ($http_origin == "http://eutils.ncbi.nlm.nih.gov" || $http_origin == "http://uniprot.org")
-// {  
-//     header("Access-Control-Allow-Origin: $http_origin");
-// }
 
 function cors() {
 
@@ -25,8 +13,6 @@ function cors() {
 
 }
 
-
-
 // Setup directory to store uploads
 $target_dir = "uploads/";
 $target_file = $target_dir . basename($_FILES["file"]["name"]);
@@ -39,28 +25,21 @@ $headerPattern = "/^>.*/";
 $seq = '';
 $seqCount = 0;
 
+$string_name = (string)$target_file;
 
-function checkUpload($filename, $file) {
+// Upload file
+$moved = move_uploaded_file($_FILES["file"]["tmp_name"],  $target_file );
 
 
-// Check to see if we can upload the file
-if (move_uploaded_file($_FILES[$filename]["tmp_name"], $file)) {
 
+if( $moved ) {
+} else {
+  echo "Not uploaded because of error #".$_FILES["file"]["error"];
 }
-else {
-	echo "Sorry there was an issue uploading your file";
-	exit;
-
-}
-}
-
-
-checkUpload("file", $target_file);
 
 if ($_FILES["tree"]["name"]){
-	checkUpload("tree", $tree_file);
+	$moved = move_uploaded_file($_FILES["tree"]["tmp_name"],  $tree_file );
 }
-
 
 $file = fopen($target_file, 'rb');
 while (($line = fgets($file)) !== false){
@@ -100,48 +79,7 @@ while (($line = fgets($file)) !== false){
 
 		}
 
-			// echo $trimmedHeader;
 		$returnArray[] = array('originalHeader' => $line, 'type' => $type ,'id' => $id);
-
-		// echo '<pre>'; print_r($lineArray); echo '</pre>';
-
-			// echo "\n And then... \n";
-		// $trimmedHeader = preg_split("/\|/ ", $lineArray[0])[1];
-
-
-		// }
-		// else {
-		// 	$trimmedHeader = substr(preg_split("/\|/ ", $lineArray[0])[0], 1);
-		// // echo $trimmedHeader;
-		// 	$returnArray[] = array('originalHeader' => $line, 'type' => substr($lineArray[0], 1, 2),'id' => $trimmedHeader);
-
-
-		// }
-
-		// // If ID is >gi, then try to map to Accession ID instead
-		// if (substr($lineArray[0], 0, 3 ) === ">gi" && $lineArray[3]){
-		// 	$trimmedHeader = preg_split("/\|/", $lineArray[0])[1];
-
-		// 	// Create the information to return
-		// 	$returnArray[] = array('originalHeader' => $line, 'type' => 'gi','id' => $trimmedHeader);
-		// }
-
-		// // If ID is >tr, then trim the EntryName information and just leave the unique identifier
-		// elseif (substr($lineArray[0], 0, 3 ) === ">tr"){
-		// 	$trimmedHeader = preg_split("/\|/", $lineArray[0])[1];
-		// 	$returnArray[] = array('originalHeader' => $line, 'type' => 'tr', 'id' => $trimmedHeader);
-
-
-		// }
-
-		// else {
-
-		// 	// Trim the ">" symbol from the header
-		// 	$trimmedHeader = substr($lineArray[0], 1);
-
-		// 	// Create the information to return
-		// 	$returnArray[] = array('originalHeader' => $line, 'type' => substr($lineArray[0], 0, 3 ),'id' => $trimmedHeader);
-		// }
 
 	}
 
