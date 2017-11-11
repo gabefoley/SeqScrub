@@ -19,6 +19,14 @@ var cleanTree = false;
 var tree = "";
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"];
 
+if (cleanTree){
+  $("#treeCheck").prop("disabled", false)
+
+} else {
+  $("#treeCheck").prop("disabled", true)
+
+}
+
 
 $.support.cors = true;
 
@@ -67,16 +75,43 @@ function checkFinal(count, records){
 
       // $("#sectionB").innerHTML = cleanTree;
 
-      bootstrap_alert.tree(cleanTree);
+      // bootstrap_alert.tree(cleanTree);
       // bootstrap_alert.warning(cleanTree);
 
     }
+
+
+    if ($("#cleanedSeqs").val()) {
+      $("#cleanCheck").prop("disabled", false);
+    }
+
+    if ($("#badCharacters").val()) {
+      $("#illegalCheck").prop("disabled", false);
+    }
+    
+    if ($("#obsoleteSeqs").val()) {
+      $("#obsoleteCheck").prop("disabled", false);
+    }
+
+    if ($("#badIds").val()) {
+      $("#unmappableCheck").prop("disabled", false);
+    }
+
+
+
+    $("#summaryCheck").prop("disabled", false);
+
+
+
 
   }
 }
 
 
 function cleanTreeNames() {
+  // Make cleaned tree selectable as an output to download
+  $("#treeCheck").prop("disabled", false);
+
   splitSummary = summary.split("\n");
 
   cleanTree = tree;
@@ -232,7 +267,7 @@ $("form#data").submit(function(event) {
           if (!treeRegEx.test(tree)){
             hideLoadingScreen();
 
-            throw new Error("The original alignment and tree file don't match. " + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree");
+            bootstrap_alert.warning("The original alignment and tree file don't match.\n" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree");
           
           }
         }
@@ -1017,11 +1052,20 @@ $("form#save").submit(function(event) {
     itemName = $(this).val();
     if (itemName == "treeDL"){
 
+      if (cleanTree){
+        outputZip.file('cleanedTree.nwk', cleanTree);
+      }
+
+      else {
+        bootstrap_alert.warning("You requested a phylogenetic tree but there is no cleaned tree available.")
+
+      }
+
     }
 
     else if (itemName == "summaryDL"){
       
-      if (summary != null){
+      if (summary.length > 1){
         outputZip.file('summary.txt', summary);
       }
 
@@ -1103,15 +1147,20 @@ function getSelectedValue(id) {
 
 
 
-// Select all input
-$('#select-all').click(function(event) {   
-    if(this.checked) {
-        // Iterate each checkbox
-        $(':checkbox').each(function() {
-            this.checked = true;                        
-        });
-    }
-});
+// // Select all input
+// $('#select-all').click(function(event) {
+//   $('.save:enabled').prop('checked', this.checked);
+
+//     // if(this.checked) {
+//     //     // Iterate each checkbox
+//     //     $(':checkbox:not(:disabled)').each(function() {
+//     //       // console.log($(this));
+//     //       //   if ($(this):not(:disabled)){
+//     //         this.checked = true;
+//             // }                        
+//     //     });
+//     // }
+// });
 
 // $(function() {
 //   $('select').selectize(options);
@@ -1218,7 +1267,7 @@ function generateAlert(){
 //Error handing
 bootstrap_alert = function() {};
 bootstrap_alert.warning = function(message) {
-            $('#error-div').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+            $('#error-div').append('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
         };
 bootstrap_alert.tree = function(message) {
             $('#treeOutput').html('<div class="success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
@@ -1254,16 +1303,17 @@ $('.mutliSelect input[type="checkbox"]').on('click', function() {
 
 function checkAll(ele) {
     var checkboxes = $(".downloadCheck");
+    console.log(checkboxes);
     if (ele.checked) {
         for (var i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].type == 'checkbox') {
+            if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
                 checkboxes[i].checked = true;
                 $("#selectAllLabel").html('Deselect all output')
             }
         }
     } else {
         for (var i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].type == 'checkbox') {
+            if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
                 checkboxes[i].checked = false;
                 $("#selectAllLabel").html('Select all output')
 

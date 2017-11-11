@@ -13,6 +13,30 @@ input[type="text"]
     font-size:12px;
 }
 
+input[disabled]{
+  /*filter: invert(100%);*/
+}
+
+input[disabled] + label{
+  filter: invert(100%);
+}
+
+input[disabled][checked] {
+width:0px; height:0px;
+}
+input[disabled][checked]:after {
+ content:'\e013'; position:absolute; 
+ margin-top:-10px;
+ opacity: 1 !important;
+ margin-left:-5px;
+ font-family: 'Glyphicons Halflings';
+ font-style: normal;
+ font-weight: normal;
+}
+
+
+
+
 .cleanCheck input[type="checkbox"] + label::before
 {background-color: #990000;  border-color: #990000;}
 
