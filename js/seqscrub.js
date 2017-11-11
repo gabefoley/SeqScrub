@@ -419,7 +419,7 @@ function getDataFromNCBI(records) {
 
   idString = getIDString(records, "NCBI");
 
-    urlDoc = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum";
+    urlDoc = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum";
 
 
   var promise = $.ajax({
