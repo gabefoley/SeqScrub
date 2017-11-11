@@ -1,3 +1,10 @@
+var isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+               navigator.userAgent && !navigator.userAgent.match('CriOS');
+
+if (isSafari){
+  alert("We notice you are using the Safari browser. Currently there are some issues with displaying records when using Safari. \nPlease try viewing SeqScrub with another browser.");
+}
+
 $(document).ready(function() {
   document.getElementsByTagName("html")[0].style.visibility = "visible";
 });
@@ -42,7 +49,7 @@ function checkFinal(count, records){
     noTaxonWarn = "";
     for (var i in records){
       if (!records[i].foundtaxon){
-        noTaxonWarn += records[i].id + "<br>";
+        noTaxonWarn += records[i].originalHeader + "<br>";
       }
 
 
