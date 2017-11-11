@@ -85,16 +85,40 @@ function checkFinal(count, records){
       $("#cleanCheck").prop("disabled", false);
     }
 
+    else {
+      $("#cleanCheck").prop("disabled", true);
+      $("#cleanCheck").prop("checked", false);
+
+    }
+
     if ($("#badCharacters").val()) {
       $("#illegalCheck").prop("disabled", false);
+    }
+
+    else {
+      $("#illegalCheck").prop("disabled", true);
+      $("#illegalCheck").prop("checked", false);
+
     }
     
     if ($("#obsoleteSeqs").val()) {
       $("#obsoleteCheck").prop("disabled", false);
     }
 
+    else {
+      $("#obsoleteCheck").prop("disabled", true);
+      $("#obsoleteCheck").prop("checked", false);
+
+    }
+
     if ($("#badIds").val()) {
       $("#unmappableCheck").prop("disabled", false);
+    }
+
+    else {
+      $("#unmappableCheck").prop("disabled", true);
+      $("#unmappableCheck").prop("checked", false);
+
     }
 
 
@@ -166,6 +190,8 @@ document.getElementById('tree').onchange = function () {
   cleanTree = true;
 };
 
+
+
 //Program a custom submit function for the form
 $("form#data").submit(function(event) {
 
@@ -179,6 +205,9 @@ $("form#data").submit(function(event) {
   $("#badCharacters").empty();
   $("#obsoleteSeqs").empty();
   $("#badIds").empty();
+  cleanTree = false;
+
+
 
   addUnderscores = $('#addUnderscore').is(":checked");
   commonName = $('#commonName').is(":checked");
@@ -207,6 +236,11 @@ $("form#data").submit(function(event) {
   //Change the filename for the file and tree to save to mirror the uploaded filename
   var filename = $('#file').val().split(/(\\|\/)/g).pop();
   var treename = $('#tree').val().split(/(\\|\/)/g).pop();
+
+  if (treename.length > 1){
+    cleanTree = true;
+
+}
 
   var ncbiList = [];
   var uniprotList = [];
