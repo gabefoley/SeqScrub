@@ -61,21 +61,33 @@
             <label for="invalidChars" > Remove sequences containing: </label>
             <input type="text" id="invalidChars" value="B J O U X Z" /> <br>
 
-            <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore">
+            <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore" class=dataCheck>
 
             <label for="addUnderscore"> Change spaces to underscores in species name </label> <br>
 
-            <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID">
+            <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID" class=dataCheck>
 
             <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br>
 
-            <input type="checkbox" checked id="checkObsolete" value=checked name="checkObsolete">
+            <input type="checkbox" checked id="checkObsolete" value=checked name="checkObsolete" class=dataCheck>
 
             <label for="checkObsolete"> Remove obsolete records </label> <br>
 
-            <input type="checkbox" checked id="removeUnclean" value=checked name="removeUnclean">
+            <input type="checkbox" checked id="removeUnclean" value=checked name="removeUnclean" class=dataCheck>
 
-            <label for="removeUnclean"> Remove uncleaned records</label> <br><br>
+            <label for="removeUnclean"> Remove uncleaned records</label> <br>
+
+            <!-- <input type="checkbox" checked id="replaceHeadersDBCheck" name="replaceHeadersDBCheck" class = dataCheck> -->
+
+            <!-- <label for="replaceHeadersDB" > Keep original headers - just replace characters: </label> -->
+            
+            <!-- <input type="text" id="replaceHeadersDB" value=": , ;"/> <br> -->
+
+            <input type="checkbox" id="replaceCharsCheck" name="replaceCharsCheck" value=unchecked>
+
+            <label for="replaceChars" > Don't check databases - just replace characters: </label>
+            
+            <input type="text" id="replaceChars" value=": , ;" /> <br><br>
         </div>
     </form>
     </div>
@@ -86,8 +98,8 @@
 <section class = output-container>
     <label for = "cleanedSeqs" class="seqLabel1">Cleaned sequences: </label>
     <label for = "badCharacters" class="seqLabel2">Sequences with illegal characters: </label>
-    <label for = "obsoleteSeqs" class="seqLabel3">Sequences that are obsolete: </label>
-    <label for = "badIds" class="seqLabel4">Sequences that couldn't be mapped to a species: </label>
+    <label for = "obsoleteSeqs" class="seqLabel3">Obsolete sequences: </label>
+    <label for = "badIds" class="seqLabel4">Unmappable sequences: </label>
 </section>
 <section class = output-container>
 

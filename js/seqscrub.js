@@ -2,7 +2,7 @@ var isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
                navigator.userAgent && !navigator.userAgent.match('CriOS');
 
 if (isSafari){
-  alert("We notice you are using the Safari browser. Currently there are some issues with displaying records when using Safari. \nPlease try viewing SeqScrub with another browser.");
+  alert("We notice you are using the Safari browser. Currently there are some issues with displaying records when using Safari. <br>Please try viewing SeqScrub with another browser.");
 }
 
 $(document).ready(function() {
@@ -207,6 +207,33 @@ $("form#data").submit(function(event) {
   $("#badIds").empty();
   cleanTree = false;
 
+  $("#cleanCheck").prop("disabled", true);
+  $("#cleanCheck").prop("checked", false);
+
+
+  $("#illegalCheck").prop("disabled", true);
+  $("#illegalCheck").prop("checked", false);
+
+
+  $("#obsoleteCheck").prop("disabled", true);
+  $("#obsoleteCheck").prop("checked", false);
+
+  $("#unmappableCheck").prop("disabled", true);
+  $("#unmappableCheck").prop("checked", false);
+
+  $("#treeCheck").prop("disabled", true);
+  $("#treeCheck").prop("checked", false);
+
+
+  $("#summaryCheck").prop("disabled", true);
+  $("#summaryCheck").prop("checked", false);
+
+
+  $("#selectAll").prop("checked", false);
+  $("#selectAllLabel").html('Select all output')
+
+
+
 
 
   addUnderscores = $('#addUnderscore').is(":checked");
@@ -214,6 +241,8 @@ $("form#data").submit(function(event) {
   retainFirst = $('#getFirstID').is(":checked");
   removeObsolete = $('#checkObsolete').is(":checked");
   removeUncleaned = $('#removeUnclean').is(":checked");
+  replaceHeadersDB = $('#replaceHeadersDBCheck').is(":checked");
+  replaceChars = $('#replaceCharsCheck').is(":checked");
 
  
   headerFormat = $('select#header-format').val();
@@ -232,7 +261,17 @@ $("form#data").submit(function(event) {
 
   //Generate a new regex containing the invalid character
   invalidCharsRegex = new RegExp($("#invalidChars").val().trim().replace(/ /g, "|"));
+
+  //Generate a new regex containing the header characters to replace
+  // replaceHeadersRegex = new RegExp($("#replaceHeadersDB").val().trim().replace(/ /g, "|"), 'g');
  
+  //Generate a new regex containing the header characters to replace
+  headerCharsRegex = new RegExp($("#replaceChars").val().trim().replace(/ /g, "|"), 'g');
+
+
+
+  console.log(headerCharsRegex);
+
   //Change the filename for the file and tree to save to mirror the uploaded filename
   var filename = $('#file').val().split(/(\\|\/)/g).pop();
   var treename = $('#tree').val().split(/(\\|\/)/g).pop();
@@ -273,11 +312,86 @@ $("form#data").submit(function(event) {
 
       $("#progressbar").progressbar({ max : numRecords});
 
+      // If we are not going to the databases but just performing a replacement of characters in the headers
+      if (replaceChars){
+        for (var i = 0; i < numRecords; i++) {
+          console.log(i);
+
+          var record = {
+            order: i,
+            id: jsonData[i].id.replace(/-/g,"_"),
+            taxon: "",
+            type: jsonData[i].type,
+            species: "",
+            seq: jsonData[i].seq,
+            obsolete: "",
+            ncbiChecked: false,
+            noCommonName: false,
+            foundtaxon: false,
+            appendTo: "",
+            originalHeader: jsonData[i].originalHeader
+          };
+
+
+
+          header = record.originalHeader.replace( headerCharsRegex, "");
+
+          if (cleanTree) {
+
+            treeRegEx = new RegExp(record.originalHeader.substring(1).trim());
+
+            if (!treeRegEx.test(tree)){
+              hideLoadingScreen();
+
+              bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree");
+            
+            }
+          }
+
+          cleanTreeNames();
+
+
+          output = header  + record.seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+
+          $("#cleanedSeqs").append(output.trim());
+
+          hideLoadingScreen();
+
+          if ($("#cleanedSeqs").val()) {
+            $("#cleanCheck").prop("disabled", false);
+          }
+
+          else {
+            $("#cleanCheck").prop("disabled", true);
+            $("#cleanCheck").prop("checked", false);
+
+          }
+
+          $("#summaryCheck").prop("disabled", false);
+
+
+
+        }
+
+
+      }
+
+      else {
+
+
 
       // For each sequence in the file
       for (var i = 0; i < numRecords; i++) {
 
-        var id = jsonData[i].id.toString();
+        try{
+          var id = jsonData[i].id.toString();
+        }
+
+        catch(e) {
+          bootstrap_alert.warning("There was a problem reading your file. Is it a FASTA file?");
+          hideLoadingScreen();
+
+        }
 
         var record = {
           order: i,
@@ -301,8 +415,8 @@ $("form#data").submit(function(event) {
           if (!treeRegEx.test(tree)){
             hideLoadingScreen();
 
-            bootstrap_alert.warning("The original alignment and tree file don't match.\n" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree");
-          
+            bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree. <br> Check that you have a correctly formatted Newick file that matches your alignment.");
+            return false;
           }
         }
 
@@ -347,6 +461,8 @@ $("form#data").submit(function(event) {
       }
       }
     }
+    }
+
 
   });
 
@@ -1008,12 +1124,19 @@ function appendOutput(records){
 
         }
 
-        var header = ">" + formattedType + records[i].id + "|" + records[i].species.trim();
-        if (addUnderscores) {
-          header = header.replace(/ /g, "_");
+        var header = ">" + formattedType + records[i].id + "|" + records[i].species.trim() + "&#010;";
+
+        if (replaceHeadersDB){
+          header = records[i].originalHeader.replace(replaceHeadersRegex, "");
         }
 
-        output = header + "&#010;" + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+        if (addUnderscores) {
+          header = header.replace(/ /g, "_") ;
+        }
+
+
+
+        output = header  + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
 
         $("#cleanedSeqs").append(output.trim());
 
@@ -1023,7 +1146,19 @@ function appendOutput(records){
           summarySpecies = summarySpecies.trim().replace(/ /g, "_");
         }
 
-        summary += formattedType + records[i].id + "|" + summarySpecies + " FROM: " + records[i].originalHeader.substring(1) + "\n";
+        if (replaceHeadersDB){
+          summary += header + " FROM: " + records[i].originalHeader.substring(1) + "\n";
+        }
+
+        else {
+
+          summary += formattedType + records[i].id + "|" + summarySpecies + " FROM: " + records[i].originalHeader.substring(1) + "\n";
+
+
+        }
+
+
+
 
     }
   
@@ -1179,7 +1314,14 @@ function getSelectedValue(id) {
 }
 
 
+// Either allow for databases to be queried or just the header to be cleaned
+$('#replaceCharsCheck').click(function(event){
+  $(".dataCheck").prop('checked', false);
+});
 
+$(".dataCheck").click(function(event){
+  $('#replaceCharsCheck').prop('checked', false);
+});
 
 // // Select all input
 // $('#select-all').click(function(event) {
@@ -1284,7 +1426,7 @@ $(function() {
 });
 
 function generateAlert(){
-  bootstrap_alert.warning("There was a fatal error \n" + records.length + " sequences are being written to unmappable" );
+  bootstrap_alert.warning("There was a fatal error <br>" + records.length + " sequences are being written to unmappable" );
   obsoleteList = [];
   sortOutput(records, obsoleteList);
 

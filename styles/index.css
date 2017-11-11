@@ -377,14 +377,19 @@ textarea:focus {
 
 .output-container label {
 	background-color: #2ecc71;
-	font-size: 20px;
-	font-family: "Calibri";
+	font-size: 23px;
+	/*font-family: "Calibri";*/
 	width:33.3333%;
 	flex: 2;
 	display:flex;
 	align-items:center;
 	margin: 0px;
 	padding: 10px 0px 0px 10px;
+	color: black;
+	font-weight:bold;
+	/*text-shadow: 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 4px white;*/
+	font-family: "Raleway";
+
 }
 
 .output-container .seqLabel2 {
