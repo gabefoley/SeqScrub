@@ -1,7 +1,3 @@
-// header('Access-Control-Allow-Origin: http://eutils.ncbi.nlm.nih.gov');
-
-
-
 $(document).ready(function() {
   document.getElementsByTagName("html")[0].style.visibility = "visible";
 });
@@ -35,9 +31,6 @@ function hideLoadingScreen(){
 // Check that we have the correct number of cleaned sequences
 function checkFinal(count, records){
   if (count == numRecords){
-    console.log("got here");
-    console.log(records);
-    console.log(records.length);
     hideLoadingScreen();
     // if (noCommon.length > 0) {
     //   console.log(noCommon);
@@ -64,7 +57,6 @@ function checkFinal(count, records){
     // If we are also cleaning a tree
     if (cleanTree) {
       cleanTree = cleanTreeNames();
-      console.log(cleanTree)
 
       // $("#sectionB").innerHTML = cleanTree;
 
@@ -190,9 +182,6 @@ $("form#data").submit(function(event) {
     contentType: false,
     processData: false,
     success: function(returndata) {
-
-      console.log(returndata);
-
       jsonData = JSON.parse(returndata);
 
 
@@ -213,8 +202,6 @@ $("form#data").submit(function(event) {
       for (var i = 0; i < numRecords; i++) {
 
         var id = jsonData[i].id.toString();
-
-        console.log(id);
 
         var record = {
           order: i,
@@ -454,9 +441,6 @@ function getDataFromNCBI(records) {
 
     error: function(XMLHttpRequest, textStatus, errorThrown) { 
       if (errorThrown == "Bad Request"){
-        console.log('error here');
-        console.log(errorThrown);
-        console.log(urlDoc);
         obsoleteList = [];
         sortOutput(records, obsoleteList);
         bootstrap_alert.warning("There was an error when trying to reach this URL:<br> " + '<a href=' + urlDoc + '>' +urlDoc+ '</a>');
@@ -683,8 +667,6 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 
             headerFormat.forEach(function(headerOpt) {
-
-              console.log(headerOpt);
               if (headerOpt == 'species') {
                 path += "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1]";
               }
@@ -697,9 +679,6 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
             });
 
             path = path.substring(0, path.length - 3);
-
-            console.log(path);
-
 
 
           var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
@@ -922,12 +901,6 @@ function appendOutput(records){
 
 
   for (var i in records){
-
-    console.log('here i am')
-
-    console.log(records[i].appendTo)
-    console.log(removeUncleaned)
-
       
       if (records[i].appendTo == "badIds" && removeUncleaned){
         output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
@@ -1021,17 +994,62 @@ function escapeRegExp(str) {
     return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
 
-
+// Get the values from the save output form
 $("form#save").submit(function(event) {
   event.preventDefault();
 
 
   console.log('savign data');
-  //Grab all form data  
-  var formData = new FormData($(this)[0]);
 
-  console.log(formData);
+  var outputZip = new JSZip();
+
+
+  var val = [];
+  $('.downloadCheck:checkbox:checked').each(function(i){
+    $(this.val()) = itemName;
+    if (itemName == "treeDL"){
+
+    }
+
+    else if (itemName == "summaryDL"){
+      
+      if (summary != null){
+        outputZip.file('summary.txt', summary);
+      }
+
+      else {
+        bootstrap_alert.warning("You requested a summary but there is no summary generated.")
+
+      }
+
+
+    }
+
+    else {
+      var item = $('textarea#' + $(this).val().val().replace(/‑/g, "-"));
+      outputZip.file($(this).val() + '.fasta', item);
+    }
+
+      });
+
+  outputZip.generateAsync({type:"blob"})
+  .then(function (blob) {
+      saveAs(blob, "hello.zip");
+  });
+  console.log(outputZip);
+
+
+
+  var cleanText = $('textarea#cleanedSeqs').val();
+  var illegalcharText = $('textarea#cleanedSeqs').val();
+
+  console.log(cleanText);
+  console.log(illegalcharText);
+
+
+  console.log(val)
 });
+
 
 
 
@@ -1073,6 +1091,8 @@ $(".dropdown dd ul li a").on('click', function() {
 function getSelectedValue(id) {
   return $("#" + id).find("dt a span.value").html();
 }
+
+
 
 
 // Select all input
@@ -1121,15 +1141,6 @@ $('#header-format').selectize({
 
 });
 
-// $('#header-format').onchange = function () {
-//   console.log('deteched');
-//     $('#header-format').options[0].selected = true;
-// }
-
-// $('#select-tools option').prop('selected', true);
-
-
-// 
 
 $(function() {
   var $wrapper = $('#wrapper');
@@ -1209,6 +1220,8 @@ bootstrap_alert.tree = function(message) {
 
 
 
+
+
 $(document).bind('click', function(e) {
   var $clicked = $(e.target);
   if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
@@ -1242,7 +1255,6 @@ function checkAll(ele) {
         }
     } else {
         for (var i = 0; i < checkboxes.length; i++) {
-            console.log(i)
             if (checkboxes[i].type == 'checkbox') {
                 checkboxes[i].checked = false;
                 $("#selectAllLabel").html('Select all output')

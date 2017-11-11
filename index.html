@@ -106,27 +106,29 @@
             <form id="save">
                 <div class="form-group">
 
+
+
                     Which output fields should be saved? <br><br>
 
                     <input type="checkbox" class="custom-checkbox"  id="selectAll" onchange="checkAll(this)" value="" name="selectAll">
                     <label for="selectAll" id=selectAllLabel>Select all output</label> <br>
 
-                    <input type="checkbox" class="downloadCheck" checked id="cleanCheck" value="" name="cleanCheck">
+                    <input type="checkbox" class="downloadCheck" checked id="cleanCheck" value="cleanedSeqs" name="cleanCheck">
                     <label for="cleanCheck">Cleaned sequences</label> <br>
                     
-                    <input type="checkbox" class="downloadCheck" id="illegalCheck" value="" name="illegalCheck">
+                    <input type="checkbox" class="downloadCheck" id="illegalCheck" value="badCharacters" name="illegalCheck">
                     <label for="illegalCheck"> Sequences with illegal characters </label> <br>
                     
-                    <input type="checkbox" class="downloadCheck" id="obsoleteCheck" value="" name="obsoleteCheck">
+                    <input type="checkbox" class="downloadCheck" id="obsoleteCheck" value="obsoleteSeqs" name="obsoleteCheck">
                     <label for="obsoleteCheck"> Sequences that are obsolete </label> <br>
                     
-                    <input type="checkbox" class="downloadCheck" id="unmappableCheck" value="" name="unmappableCheck">
+                    <input type="checkbox" class="downloadCheck" id="unmappableCheck" value="badIds" name="unmappableCheck">
                     <label for="unmappableCheck"> Sequences that couldn't be cleaned </label>    <br>
                     
-                    <input type="checkbox" class="downloadCheck" id="treeCheck" value="" name="treeCheck">
+                    <input type="checkbox" class="downloadCheck" id="treeCheck" value="treeDL" name="treeCheck">
                     <label for="treeCheck"> Cleaned phylogenetic tree </label>    <br>
                     
-                    <input type="checkbox" class="downloadCheck" id="summaryCheck" value="" name="summaryCheck">
+                    <input type="checkbox" class="downloadCheck" id="summaryCheck" value="summaryDL" name="summaryCheck">
                     <label for="summaryCheck"> Summary of changes made</label>    <br>
 
    
@@ -184,6 +186,9 @@
 
     <!-- Selectize.js -->
     <script src="./js/selectize.min.js"></script>
+
+    <!-- FileSaver -->
+    <script src="./js/filesaver.min.js"></script>
 
     <!-- SeqScrub -->
     <script src="./js/seqscrub.js"></script>
