@@ -1006,7 +1006,8 @@ $("form#save").submit(function(event) {
 
   var val = [];
   $('.downloadCheck:checkbox:checked').each(function(i){
-    $(this.val()) = itemName;
+    console.log($(this).val());
+    itemName = $(this).val();
     if (itemName == "treeDL"){
 
     }
@@ -1026,7 +1027,7 @@ $("form#save").submit(function(event) {
     }
 
     else {
-      var item = $('textarea#' + $(this).val().val().replace(/‑/g, "-"));
+      var item = $('textarea#' + $(this).val()).val().replace(/‑/g, "-");
       outputZip.file($(this).val() + '.fasta', item);
     }
 
