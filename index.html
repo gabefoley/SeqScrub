@@ -39,7 +39,15 @@
                         <input type="file" class="fileinput" id="tree" name="tree" />
                         <label for="tree" class="btn btn-primary"> Choose a tree (optional) </label>
 
-                        <input type="text" id="treeToSave"  value="   " /> <br><br><br>
+                        <input type="text" id="treeToSave"  value="   " /> <br>
+                        
+                        <label for="seqType">Type of sequence content:</label>
+                        <select class="form-control" id="seqType">
+                          <option value="1">Amino acids</option>
+                          <option value="2">Nucleotides</option>
+                        </select>
+                        <br>
+
                         <input type="submit" class="submitButton" value = "Submit"> <br><br>
             </div>
         </div>

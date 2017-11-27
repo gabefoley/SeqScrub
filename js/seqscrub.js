@@ -206,6 +206,8 @@ $("form#data").submit(function(event) {
   $("#obsoleteSeqs").empty();
   $("#badIds").empty();
   cleanTree = false;
+  bootstrap_alert.clear("");
+
 
   $("#cleanCheck").prop("disabled", true);
   $("#cleanCheck").prop("checked", false);
@@ -243,10 +245,11 @@ $("form#data").submit(function(event) {
   removeUncleaned = $('#removeUnclean').is(":checked");
   replaceHeadersDB = $('#replaceHeadersDBCheck').is(":checked");
   replaceChars = $('#replaceCharsCheck').is(":checked");
-
+  aaOpt = ($("#seqType").val() == '1')
  
   headerFormat = $('select#header-format').val();
   taxon_info = headerFormat.length;
+
 
 
 
@@ -421,7 +424,8 @@ $("form#data").submit(function(event) {
         }
 
 
-        if (record.type == 'tr' || record.type == 'sp' || record.type == '') {
+        if (record.type == 'tr' || record.type == 'sp' || record.type == '' && aaOpt) {
+
           uniprotList.push(record);
 
 
@@ -611,7 +615,20 @@ function getDataFromNCBI(records) {
 
   idString = getIDString(records, "NCBI");
 
-    urlDoc = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum";
+    if (aaOpt){
+
+      urlDoc = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + idString + "&retmode=xml&rettype=docsum";
+
+
+    }
+
+    else {
+
+      urlDoc = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=" + idString + "&retmode=xml&rettype=docsum";
+
+
+    }
+
 
 
   var promise = $.ajax({
@@ -834,7 +851,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
   idString = getTaxonID(records);
 
-  urlAll = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
+  urlAll = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
 
 
 
@@ -1443,10 +1460,18 @@ function generateAlert(){
 //Error handing
 bootstrap_alert = function() {};
 bootstrap_alert.warning = function(message) {
+            $('#error-div').show()
+
             $('#error-div').append('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
         };
 bootstrap_alert.tree = function(message) {
+            $('#error-div').show()
+
             $('#treeOutput').html('<div class="success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+        };
+bootstrap_alert.clear =  function(message) {
+            $('#error-div').empty()
+            $('#error-div').hide()
         };
 
 
