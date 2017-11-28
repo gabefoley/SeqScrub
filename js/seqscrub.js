@@ -1114,11 +1114,10 @@ function appendOutput(records){
     return a.order - b.order;
   });
 
-  limit = 200;
+  limit = 1000;
 
 
-  console.log('limit bimit')
-  console.log(limit)
+
   console.log(numRecords)
   var badIDsCount, obsoleteCount, badCharCount, cleanedCount;
 
