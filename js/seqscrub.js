@@ -19,6 +19,12 @@ var cleanTree = false;
 var tree = "";
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"];
 
+var cleanedSeqsResults = "";
+var badCharCountResults = "";
+var obsoleteSeqsResults = "";
+var badIdsResults = "";
+
+
 if (cleanTree){
   $("#treeCheck").prop("disabled", false)
 
@@ -1108,29 +1114,71 @@ function appendOutput(records){
     return a.order - b.order;
   });
 
+  limit = 200;
+
+
+  console.log('limit bimit')
+  console.log(limit)
+  console.log(numRecords)
+  var badIDsCount, obsoleteCount, badCharCount, cleanedCount;
+
+  badIDsCount = obsoleteCount =badCharCount = cleanedCount = 0;
+
+
+
+
+  if (numRecords > limit) {
+    bootstrap_alert.warning("Records are too large to write out to fields. Download file for full records");
+    limit = 100;
+  }
+
 
   for (var i in records){
       
       if (records[i].appendTo == "badIds" && removeUncleaned){
         output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+        
+        
+        
+        badIdsResults += output.trim();
+        if (badIDsCount < limit) {
         $("#badIds").append(output.trim());
+        badIDsCount += 1;
+      }
       }
 
       else if ( records[i].appendTo == "obsoleteSeqs" && removeObsolete){
         output= records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
-        $("#obsoleteSeqs").append(output.trim());
+        
+        obsoleteSeqsResults += output.trim();
+        if (obsoleteCount < limit){
+          $("#obsoleteSeqs").append(output.trim());
+          obsoleteCount +=1;
+
+        }
+
 
 
       }
 
       else if (records[i].appendTo == "badCharacters"){
         output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
-        $("#badCharacters").append(output.trim());
+        badCharCountResults += output.trim();
+
+        if (badCharCount < limit){
+          $("#badCharacters").append(output.trim());
+          badCharCount +=1;
+
+        }
+
       }
 
   
 
-      else if (records[i].appendTo == "cleanedSeqs" || (records[i].appendTo == "badIds" && !removeUncleaned) || (records[i].appendTo == "obsoleteSeqs" && !removeObsolete)) {
+      else if (records[i].appendTo == "cleanedSeqs" || (records[i].appendTo == "badIds" && !removeUncleaned) || (records[i].appendTo == "obsoleteSeqs" && !removeObsolete) ) {
+        console.log('vimit vimit')
+        console.log(limit)
+        console.log(cleanedCount)
         formattedType = records[i].type;
         if (ids_with_underscores.indexOf(formattedType) >= 0){
           formattedType = "";
@@ -1154,8 +1202,12 @@ function appendOutput(records){
 
 
         output = header  + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+        
+        cleanedSeqsResults += output.trim();
 
+        if (cleanedCount < limit){
         $("#cleanedSeqs").append(output.trim());
+      }
 
         summarySpecies = records[i].species;
         
@@ -1173,6 +1225,8 @@ function appendOutput(records){
 
 
         }
+
+        cleanedCount +=1;
 
 
 
@@ -1227,7 +1281,6 @@ $("form#save").submit(function(event) {
   event.preventDefault();
 
 
-  console.log('savign data');
 
   var outputZip = new JSZip();
 
@@ -1264,7 +1317,33 @@ $("form#save").submit(function(event) {
     }
 
     else {
-      var item = $('textarea#' + $(this).val()).val().replace(/‑/g, "-");
+
+      // If we haven't written all the sequences
+      if (numRecords > limit){
+
+        if ($(this).val() == "cleanedSeqs"){
+          var item = cleanedSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n")
+        }
+
+        else if ($(this).val() == "badCharacters"){
+          var item = badCharactersResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n")
+        }
+
+        else if ($(this).val() == "obsoleteSeqs"){
+          var item = obsoleteSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n")
+        }
+
+        else if ($(this).val() == "badIds"){
+          var item = badIdsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n")
+        }
+
+      }
+
+      // We can take the sequences directly from the text output fields.
+      else {
+        var item = $('textarea#' + $(this).val()).val().replace(/‑/g, "-");
+      }
+
       outputZip.file($(this).val() + '.fasta', item);
     }
 
