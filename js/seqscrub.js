@@ -1162,7 +1162,7 @@ function appendOutput(records){
 
       else if (records[i].appendTo == "badCharacters"){
         output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
-        badCharCountResults += output.trim();
+        badCharactersResults += output.trim();
 
         if (badCharCount < limit){
           $("#badCharacters").append(output.trim());
