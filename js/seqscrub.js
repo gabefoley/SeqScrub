@@ -20,7 +20,7 @@ var tree = "";
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"];
 
 var cleanedSeqsResults = "";
-var badCharCountResults = "";
+var badCharactersResults = "";
 var obsoleteSeqsResults = "";
 var badIdsResults = "";
 
