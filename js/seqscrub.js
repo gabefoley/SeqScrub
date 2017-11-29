@@ -1208,26 +1208,28 @@ function appendOutput(records){
         $("#cleanedSeqs").append(output.trim());
       }
 
-        summarySpecies = records[i].species;
-        
-        if (addUnderscores) {
-          summarySpecies = summarySpecies.trim().replace(/ /g, "_");
-        }
-
-        if (replaceHeadersDB){
-          summary += header + " FROM: " + records[i].originalHeader.substring(1) + "\n";
-        }
-
-        else {
-
-          summary += formattedType + records[i].id + "|" + summarySpecies + " FROM: " + records[i].originalHeader.substring(1) + "\n";
-
-
-        }
 
         cleanedCount +=1;
 
 
+
+
+    }
+
+    
+    summarySpecies = records[i].species;
+    
+    if (addUnderscores) {
+      summarySpecies = summarySpecies.trim().replace(/ /g, "_");
+    }
+
+    if (replaceHeadersDB){
+      summary += header + " FROM: " + records[i].originalHeader.substring(1) + "\n";
+    }
+
+    else {
+
+      summary += formattedType + records[i].id + "|" + summarySpecies + " FROM: " + records[i].originalHeader.substring(1) + "\n";
 
 
     }
