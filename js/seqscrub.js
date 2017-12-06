@@ -895,8 +895,6 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
             });
 
             path = path.substring(0, path.length - 3);
-            console.log(path)
-
 
           var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
@@ -916,16 +914,6 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 
               records[record].species += thisNode.textContent + " ";
-
-              console.log("new species is")
-              console.log(records[record].species)
-              var couldBe= records[record].originalHeader.substring(records[record].originalHeader.indexOf('[')+1,records[record].originalHeader.indexOf("]"));
-              console.log("and the original header is")
-              console.log(couldBe)
-              if (str(records[record].species) !== str(couldBe)){
-                console.log("****************FOUND IT")
-              }
-
               thisNode = node.iterateNext();
 
             }
@@ -1016,12 +1004,7 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
             var thisNode = node.iterateNext();
             while (thisNode) {
               records[record].species = thisNode.textContent;
-              console.log("HERE WE GO")
-              console.log(records[record].species)
-              console.log(records[record].originalHeader.substring(originalHeader.lastIndexOf("[")+1,str.lastIndexOf("]")))
-              if (records[record].species != records[record].originalHeader.substring(originalHeader.lastIndexOf("[")+1,str.lastIndexOf("]"))){
-                console.log("****************FOUND IT")
-              }
+
               thisNode = node.iterateNext();
             }
           } catch (e) {
