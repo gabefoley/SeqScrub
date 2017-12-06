@@ -859,7 +859,7 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
   urlAll = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
 
-
+  console.log(urlAll)
 
 
   var promise = $.ajax({
@@ -881,19 +881,21 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
             path = "";
 
 
+
             headerFormat.forEach(function(headerOpt) {
               if (headerOpt == 'species') {
-                path += "(//TaxId[contains(., '" + records[record].taxon + "')]/../ScientificName)[1]";
+                path += "(//TaxId[.//text()='" + records[record].taxon + "']/../ScientificName)[1]";
               }
 
               else {
-                path += " (//TaxId[contains(., '" + records[record].taxon + "')]/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
+                path += " (//TaxId[.//text()='" + records[record].taxon + "']/../LineageEx/Taxon/Rank[.//text()='" + headerOpt + "']/../ScientificName)[1]";
               }
               
               path += " | ";
             });
 
             path = path.substring(0, path.length - 3);
+            console.log(path)
 
 
           var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
@@ -911,7 +913,19 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
             while (thisNode) {
               taxoncount +=1;
+
+
               records[record].species += thisNode.textContent + " ";
+
+              console.log("new species is")
+              console.log(records[record].species)
+              var couldBe= records[record].originalHeader.substring(records[record].originalHeader.indexOf('[')+1,records[record].originalHeader.indexOf("]"));
+              console.log("and the original header is")
+              console.log(couldBe)
+              if (str(records[record].species) !== str(couldBe)){
+                console.log("****************FOUND IT")
+              }
+
               thisNode = node.iterateNext();
 
             }
@@ -1002,6 +1016,12 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
             var thisNode = node.iterateNext();
             while (thisNode) {
               records[record].species = thisNode.textContent;
+              console.log("HERE WE GO")
+              console.log(records[record].species)
+              console.log(records[record].originalHeader.substring(originalHeader.lastIndexOf("[")+1,str.lastIndexOf("]")))
+              if (records[record].species != records[record].originalHeader.substring(originalHeader.lastIndexOf("[")+1,str.lastIndexOf("]"))){
+                console.log("****************FOUND IT")
+              }
               thisNode = node.iterateNext();
             }
           } catch (e) {
@@ -1175,9 +1195,6 @@ function appendOutput(records){
   
 
       else if (records[i].appendTo == "cleanedSeqs" || (records[i].appendTo == "badIds" && !removeUncleaned) || (records[i].appendTo == "obsoleteSeqs" && !removeObsolete) ) {
-        console.log('vimit vimit')
-        console.log(limit)
-        console.log(cleanedCount)
         formattedType = records[i].type;
         if (ids_with_underscores.indexOf(formattedType) >= 0){
           formattedType = "";
