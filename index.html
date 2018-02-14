@@ -23,6 +23,8 @@
 
 
 
+
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-lg-6">
@@ -56,26 +58,27 @@
             <label for="header-format"> Select header output format: (Click field to add and drag items to rearrange) </label>
 
             <select name="header-format" id="header-format" multiple="multiple">
-                <option selected value="species">Species name</option>
+                <option selected value="geneName"> Gene information</option>
+                <option selected value="speciesName">Species</option>
+                <option value="commonName"> Common name </option>
+                <option value="genus">Genus</option>
+
                 <option value="family">Family</option>
                 <option value="order">Order</option>
+
                 <option value="class">Class</option>
-                <option value="division">Division</option>
                 <option value="phylum">Phylum</option>
                 <option value="kingdom">Kingdom</option>
+                <option value="domain">Domain</option>
+
 
             </select>
 
+            Curation options <br>
+
             <label for="invalidChars" > Remove sequences containing: </label>
-            <input type="text" id="invalidChars" value="B J O U X Z" /> <br>
+            <input type="text" onClick="this.select();" id="invalidChars" value="B J O U X Z" /> <br>
 
-            <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore" class=dataCheck>
-
-            <label for="addUnderscore"> Change spaces to underscores in species name </label> <br>
-
-            <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID" class=dataCheck>
-
-            <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br>
 
             <input type="checkbox" checked id="checkObsolete" value=checked name="checkObsolete" class=dataCheck>
 
@@ -95,7 +98,43 @@
 
             <label for="replaceChars" > Don't check databases - just replace characters: </label>
             
-            <input type="text" id="replaceChars" value=": , ;" /> <br><br>
+            <input type="text" onClick="this.select();" id="replaceChars" value=": , ;" /> <br>
+
+            <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID" class=dataCheck>
+
+            <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br><br>
+
+            Formatting options <br>
+
+            <label for="idChar" > Add this character after ID </label>
+            
+            <input type="text" onClick="this.select();" id="idChar" value=" " /> <br>
+
+            <label for="geneChar" > Use this character to split gene information: </label>
+            
+            <input type="text" onClick="this.select();" id="geneChar" value=" " /> <br>
+
+
+            <label for="speciesChar" > Use this character to split species name information: </label>
+            
+            <input type="text" onClick="this.select();" id="speciesChar" value=" " /> <br>
+
+            <label for="taxonChar" > Use this character to split taxonomic / common name: </label>
+            
+            <input type="text" onClick="this.select();" id="taxonChar" value=" " /> <br>
+
+
+
+
+
+            <input type="checkbox" checked id="addUnderscore" value=checked name="addUnderscore" class=dataCheck>
+
+            <label for="addUnderscore"> Change spaces to underscores in header </label> <br>
+
+            <input type="checkbox" checked id="addSquareBrackets" value=checked name="addSquareBrackets" class=dataCheck>
+
+            <label for="addSquareBrackets"> Add square brackets around species name </label> <br>
+
         </div>
     </form>
     </div>
@@ -190,6 +229,27 @@
         </div> -->
     </div>
 </div>
+
+<script>
+    var beamer_config = {
+        selector : "element-id", //REPLACE: Your element Id to position the alert
+        product_id : "ZioqMcOM292", //DO NOT CHANGE: This is your product code on Beamer
+        //top: 0, /*Optional: Top position offset*/
+        //right: 0, /*Optional: Right position offset*/
+        //language: 'EN', /*Optional: Bring news in the language of choice*/
+        //filter: 'admin', /*Optional : Bring the news for a certain role as well as all the public news*/
+        //lazy: false, /*Optional : true if you want to manually start the script calling Beamer.init()*/
+        //alert : true, /*Optional : false if you don't want to initialize the selector*/
+        //callback : your_callback_function, /*Optional : Beamer will call this function, with the number of new features as a parameter, after the initialization*/
+        
+        //---------------Visitor Information---------------
+        //user_firstname : "firstname", /*Optional : input your user firstname for better statistics*/
+        //user_lastname : "lastname", /*Optional : input your user lastname for better statistics*/
+        //user_email : "email", /*Optional : input your user lastname for better statistics*/
+    };
+</script>
+<script type="text/javascript" src="https://app.getbeamer.com/js/beamer-embed.js"></script>
+                    
     <!-- Jquery and Jquery UI -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
