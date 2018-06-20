@@ -80,7 +80,7 @@
             <input type="text" onClick="this.select();" id="invalidChars" value="B J O U X Z" /> <br>
 
 
-            <input type="checkbox" checked id="checkObsolete" value=checked name="checkObsolete" class=dataCheck>
+            <input type="checkbox" checked id="checkObsolete" value=checked name="checkObsolete" class=obsoleteCheck>
 
             <label for="checkObsolete"> Remove obsolete records </label> <br>
 
@@ -88,15 +88,15 @@
 
             <label for="removeUnclean"> Remove uncleaned records</label> <br>
 
-            <!-- <input type="checkbox" checked id="replaceHeadersDBCheck" name="replaceHeadersDBCheck" class = dataCheck> -->
+            <input type="checkbox" id="replaceHeadersDBCheck" name="replaceHeadersDBCheck" class=headersDBCheck>
 
-            <!-- <label for="replaceHeadersDB" > Keep original headers - just replace characters: </label> -->
+            <label for="replaceHeadersDB" > Keep original headers - just remove characters from headers: </label>
             
-            <!-- <input type="text" id="replaceHeadersDB" value=": , ;"/> <br> -->
+            <input type="text" onClick="this.select();" id="replaceHeadersDB" value=": , ;"/> <br>
 
-            <input type="checkbox" id="replaceCharsCheck" name="replaceCharsCheck" value=unchecked>
+            <input type="checkbox" id="replaceCharsCheck" name="replaceCharsCheck" value=unchecked class="replaceCheck">
 
-            <label for="replaceChars" > Don't check databases - just replace characters: </label>
+            <label for="replaceChars" > Don't check databases - just remove characters: </label>
             
             <input type="text" onClick="this.select();" id="replaceChars" value=": , ;" /> <br>
 
@@ -134,6 +134,10 @@
             <input type="checkbox" checked id="addSquareBrackets" value=checked name="addSquareBrackets" class=dataCheck>
 
             <label for="addSquareBrackets"> Add square brackets around species name </label> <br>
+
+            <input type="checkbox" checked id="removeSpeciesBrackets" value=checked name="removeSpeciesBrackets" class=dataCheck>
+
+            <label for="removeSpeciesBrackets"> Remove internal brackets in species name </label> <br>
 
         </div>
     </form>

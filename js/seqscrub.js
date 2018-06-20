@@ -9,6 +9,7 @@ $(document).ready(function() {
   document.getElementsByTagName("html")[0].style.visibility = "visible";
 });
 
+
 var finishedRecords = [];
 var noCommon = "";
 var count = 0;
@@ -16,12 +17,14 @@ var invalidCharsRegex = "";
 summary = "";
 var cleanTree = false;
 var tree = "";
+var cleanedTree = "";
 ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"];
 
 var cleanedSeqsResults = "";
 var badCharactersResults = "";
 var obsoleteSeqsResults = "";
 var badIdsResults = "";
+
 
 
 if (cleanTree){
@@ -61,7 +64,20 @@ function checkFinal(count, records){
     for (var key in infoErrors) {
         // check if the property/key is defined in the object itself, not in parent
         if (infoErrors.hasOwnProperty(key)) {
-          warning += "<br>Couldn't find the full taxonomic information for " + key + "  for these sequences <br>";
+          if (key == 'geneName'){
+            warning += "<br>Couldn't find the gene information for these sequences <br>";
+
+          }
+
+          else if (key == 'commonName'){
+            warning += "<br>Couldn't find the common name for these sequences <br>";
+          }
+
+          else {
+            warning += "<br>Couldn't find the full taxonomic information for " + key + "  for these sequences <br>";
+
+
+          }
 
 
           splitSeqs = infoErrors[key].trim().split(" ")
@@ -85,9 +101,37 @@ function checkFinal(count, records){
 
     // If we are also cleaning a tree
     if (cleanTree) {
-      cleanTree = cleanTreeNames();
+      console.log("cleaning tree")
+      cleanedTree = cleanTreeNames();
 
     }
+
+    // Create the summary file
+
+    summary += "Updated headers FROM: Original headers \n"
+
+    for (var i in records){
+      // If we were able to clean up the sequence, record the final header
+      if (records[i].finalHeader){
+        summary += records[i].finalHeader.substring(1) + " FROM: " + records[i].originalHeader.substring(1) + "\n";
+      }
+
+      // Otherwise record the original header
+      else {
+        summary += records[i].originalHeader.substring(1) + " FROM: " + records[i].originalHeader.substring(1) + "\n";
+
+
+      }
+
+    }
+
+    summary += "ID mapping FROM: Original headers \n"
+
+    for (var i in records){
+      summary +=  records[i].id.trim() +" FROM: " + records[i].originalHeader.substring(1) + "\n";
+
+    }
+
 
 
     if ($("#cleanedSeqs").val()) {
@@ -147,7 +191,7 @@ function cleanTreeNames() {
 
   splitSummary = summary.split("\n");
 
-  cleanTree = tree;
+  cleanedTree = tree;
 
   for (var line in splitSummary){
     splitLine = splitSummary[line];
@@ -162,15 +206,15 @@ function cleanTreeNames() {
 
 
     treeRegEx = new RegExp(oldname);
-    cleanTree = cleanTree.replace(treeRegEx, newname);
+    cleanedTree = cleanedTree.replace(treeRegEx, newname);
 
     // This step is needed in case a program had already encased a name in the Newick string with quotation marks.
-    cleanTree = cleanTree.replace(/'/g, "");
+    cleanedTree = cleanedTree.replace(/'/g, "");
   }
 }
 
 
-return cleanTree;
+return cleanedTree;
 }
 
 
@@ -249,6 +293,7 @@ $("form#data").submit(function(event) {
 
   addUnderscores = $('#addUnderscore').is(":checked");
   addSquareBrackets = $('#addSquareBrackets').is(":checked");
+  removeSpeciesBrackets = $('#removeSpeciesBrackets').is(":checked");
   commonName = $('#commonName').is(":checked");
   retainFirst = $('#getFirstID').is(":checked");
   removeObsolete = $('#checkObsolete').is(":checked");
@@ -261,6 +306,7 @@ $("form#data").submit(function(event) {
   taxonChar = $("#taxonChar").val()
   speciesChar = $("#speciesChar").val()
   infoErrors = {}
+  invalidChars = $("#invalidChars").val().length > 0
 
 
   headerFormat = $('select#header-format').val();
@@ -276,10 +322,17 @@ $("form#data").submit(function(event) {
   var formData = new FormData($(this)[0]);
 
   //Generate a new regex containing the invalid character
-  invalidCharsRegex = new RegExp($("#invalidChars").val().trim().replace(/ /g, "|"));
+
+  if (invalidChars){
+    invalidCharsRegex = new RegExp(escapeRegExp($("#invalidChars").val().trim()).replace(/ /g, "|"));
+
+  }
+
  
   //Generate a new regex containing the header characters to replace
-  headerCharsRegex = new RegExp($("#replaceChars").val().trim().replace(/ /g, "|"), 'g');
+  headerCharsRegex = new RegExp(escapeRegExp($("#replaceChars").val().trim()).replace(/ /g, "|"), 'g');
+
+  replaceHeadersRegex = new RegExp(escapeRegExp($("#replaceHeadersDB").val().trim()).replace(/ /g, "|"), 'g');
 
 
   //Change the filename for the file and tree to save to mirror the uploaded filename
@@ -324,6 +377,16 @@ $("form#data").submit(function(event) {
 
       // If we are not going to the databases but just performing a replacement of characters in the headers
       if (replaceChars){
+        var records = []
+        limit = 1000
+        var badIDsCount, cleanedCount;
+
+        badIDsCount = cleanedCount = 0;
+
+        if (numRecords > limit) {
+          bootstrap_alert.warning("Records are too large to write out to fields. Download file for full records");
+          limit = 100;
+        }
         for (var i = 0; i < numRecords; i++) {
 
           var record = {
@@ -353,31 +416,92 @@ $("form#data").submit(function(event) {
               bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree");
             
             }
+            cleanedTree = cleanTreeNames();
+
           }
 
-          cleanTreeNames();
 
 
-          output = header  + record.seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
 
-          $("#cleanedSeqs").append(output.trim());
 
-          hideLoadingScreen();
 
-          if ($("#cleanedSeqs").val()) {
-            $("#cleanCheck").prop("disabled", false);
+          // Can still do a check to remove sequences with illegal characters
+
+          if (invalidChars && invalidCharsRegex.test(record.seq)) {
+            record.finalHeader = record.originalHeader
+
+            if (badIDsCount < limit) {
+              output = record.originalHeader  + record.seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+              $("#badCharacters").append(output.trim());
+              badIDsCount += 1;
           }
+
+          }
+
 
           else {
-            $("#cleanCheck").prop("disabled", true);
-            $("#cleanCheck").prop("checked", false);
+
+            record.finalHeader = header
+
+            if (cleanedCount < limit) {
+
+              output = header  + record.seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+              $("#cleanedSeqs").append(output.trim());
+              cleanedCount +=1;
+          }
+
+
+
 
           }
 
-          $("#summaryCheck").prop("disabled", false);
-
+          records.push(record)
 
         }
+
+        hideLoadingScreen();
+
+        if ($("#cleanedSeqs").val()) {
+          $("#cleanCheck").prop("disabled", false);
+        }
+
+        else {
+          $("#cleanCheck").prop("disabled", true);
+          $("#cleanCheck").prop("checked", false);
+
+        }
+
+        if ($("#badCharacters").val()) {
+          $("#illegalCheck").prop("disabled", false);
+        }
+
+        else {
+          $("#illegalCheck").prop("disabled", true);
+          $("#illegalCheck").prop("checked", false);
+
+        }
+
+
+
+        $("#summaryCheck").prop("disabled", false);
+
+        // Create the summary file
+
+        // summary += "Updated headers FROM: Original headers \n"
+
+        // for (var i in records){
+        //   summary += records[i].finalHeader + " FROM: " + record.originalHeader.substring(1) + "\n";
+
+        // }
+
+        // summary += "ID mapping FROM: Original headers \n"
+
+        // for (var i in records){
+        //   summary +=  records[i].id.trim() +" FROM: " + records[i].originalHeader.substring(1) + "\n";
+
+        // }
+        
+
 
 
       }
@@ -573,8 +697,10 @@ function getDataFromUniprot(records, pdb) {
 
           if (records[record].id in speciesDict){
             records[record].taxon = speciesDict[records[record].id];
+            console.log(records[record])
           }
       }
+
 
 
       getSpeciesNameFromNCBI2(records, idString, obsoleteList);
@@ -707,7 +833,7 @@ function getIDFromNCBI(records, speciesData) {
         }
 
       
-      obsoleteCheck = "//DocSum[Item[contains(., 'removed')]]//Item[@Name='AccessionVersion']/text()";
+      obsoleteCheck = "//DocSum[Item[contains(., 'suppressed')] or contains(., 'replaced')]//Item[@Name='AccessionVersion']/text()";
 
       obsoleteNode = speciesData.evaluate(obsoleteCheck, speciesData, null, XPathResult.ANY_TYPE, null);
 
@@ -806,8 +932,8 @@ function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
 
 
                 else {
-
-                  records[record].headerInfo[headerOpt] =  thisNode.textContent; 
+                  //TODO: Temp fix to clean up the common name
+                  records[record].headerInfo[headerOpt] =  thisNode.textContent.replace(/'/g, ""); 
 
 
                 }
@@ -959,7 +1085,7 @@ function sortOutput(records, obsoleteList) {
     } else {
 
       // If there are illegal characters highlight them within the text
-      if (invalidCharsRegex.test(records[i].seq)) {
+      if (invalidChars && invalidCharsRegex.test(records[i].seq)) {
         records[i].appendTo = "badCharacters";
         finishedRecords.push(records[i]);
 
@@ -1036,15 +1162,11 @@ function appendOutput(records){
 
   for (var i in records){
 
-    console.log(records[i].appendTo)
-    console.log(removeUncleaned)
       
       if (records[i].appendTo == "badIds" && removeUncleaned){
-        console.log ('i am here')
 
         output = records[i].originalHeader + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
         
-        console.log ('got here')
         
         badIdsResults += output.trim();
         if (badIDsCount < limit) {
@@ -1094,7 +1216,7 @@ function appendOutput(records){
 
         headerOutput = ""
 
-        if (headerFormat){
+        if (headerFormat && ! replaceHeadersDB){
 
           headerFormat.forEach(function(headerOpt) {
 
@@ -1133,13 +1255,23 @@ function appendOutput(records){
 
             else if (headerOpt == "speciesName"){
 
+              if (removeSpeciesBrackets) {
+                finalSpeciesName = records[i].headerInfo[headerOpt].trim().replace(/\(|\)/g, '')
+              }
+
+              else {
+
+                finalSpeciesName = records[i].headerInfo[headerOpt].trim()
+
+              }
+
               if (records[i].headerInfo[headerOpt]){
 
               if (headerOutput.slice(-1) == speciesChar){
-                headerOutput += records[i].headerInfo[headerOpt].trim() + speciesChar
+                headerOutput += finalSpeciesName + speciesChar 
               }
               else {
-                headerOutput += speciesChar + records[i].headerInfo[headerOpt].trim() + speciesChar
+                headerOutput += speciesChar + finalSpeciesName + speciesChar
 
               }
 
@@ -1184,9 +1316,7 @@ function appendOutput(records){
             }
 
             else {
-              console.log('There was an error ')
-              console.log(headerOpt)
-              console.log(records[i].id)
+
 
               // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
               if (!infoErrors[headerOpt]){
@@ -1212,16 +1342,28 @@ function appendOutput(records){
 
 
 
-        var header = ">" + formattedType.trim() + records[i].id.trim() + idChar + headerOutput.trim() + "&#010;";
+        var header = ">" + formattedType.trim() + records[i].id.trim() + idChar + headerOutput.trim();
+
+        console.log('current header')
+        console.log(header)
 
         if (replaceHeadersDB){
-          header = records[i].originalHeader.replace(replaceHeadersRegex, "");
+          console.log('got here')
+          header = records[i].originalHeader.replace(replaceHeadersRegex, "").trim();
         }
 
         if (addUnderscores) {
           header = header.trim().replace(/ /g, "_") ;
         }
 
+        // Save the final header so we can write it to the summary file
+        records[i].finalHeader = header
+
+        // Add in a newline character to the header
+        header += "&#010;";
+
+        console.log('our header is ')
+        console.log(header)
 
 
 
@@ -1234,22 +1376,7 @@ function appendOutput(records){
         $("#cleanedSeqs").append(output.trim());
       }
 
-        summarySpecies = records[i].species;
-        
-        if (addUnderscores) {
-          summarySpecies = summarySpecies.trim().replace(/ /g, "_");
-        }
 
-        if (replaceHeadersDB){
-          summary += header + " FROM: " + records[i].originalHeader.substring(1) + "\n";
-        }
-
-        else {
-
-          summary += formattedType + records[i].id.trim() + idChar + summarySpecies + " FROM: " + records[i].originalHeader.substring(1) + "\n";
-
-
-        }
 
         cleanedCount +=1;
 
@@ -1316,7 +1443,10 @@ $("form#save").submit(function(event) {
     if (itemName == "treeDL"){
 
       if (cleanTree){
-        outputZip.file('cleanedTree.nwk', cleanTree);
+        cleanedTree = cleanTreeNames();
+        console.log('here is the clean tree')
+        console.log(cleanedTree)
+        outputZip.file('cleanedTree.nwk', cleanedTree);
       }
 
       else {
@@ -1432,11 +1562,30 @@ function getSelectedValue(id) {
 // Either allow for databases to be queried or just the header to be cleaned
 $('#replaceCharsCheck').click(function(event){
   $(".dataCheck").prop('checked', false);
+  $(".obsoleteCheck").prop('checked', false);
+  $('#replaceHeadersDBCheck').prop('checked', false);
+
+
 });
+
+$('#replaceHeadersDBCheck').click(function(event){
+  $(".dataCheck").prop('checked', false);
+  $('#replaceCharsCheck').prop('checked', false);
+
+});
+
+
 
 $(".dataCheck").click(function(event){
   $('#replaceCharsCheck').prop('checked', false);
+  $('#replaceHeadersDBCheck').prop('checked', false);
 });
+
+$(".obsoleteCheck").click(function(event){
+  $('#replaceCharsCheck').prop('checked', false);
+});
+
+
 
 
 $('#input-draggable').selectize({
