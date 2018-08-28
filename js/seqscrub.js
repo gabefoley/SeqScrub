@@ -559,6 +559,7 @@ $("form#data").submit(function(event) {
         }
 
         else if (record.type == 'pdb'){
+          console.log("Was a PDB");
           pdbList.push(record);
         } 
 
@@ -652,7 +653,7 @@ function getDataFromUniprot(records, pdb) {
   speciesDict = {};
   idString = getIDString(records, "UniProt");
 
-  url = "http://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
+  url = "https://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
 
   var promise = $.ajax({
     url: url,
@@ -992,7 +993,7 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
   idString = getIDString(records, "PDB");
 
-  url = "http://www.uniprot.org/uniprot/?query=" + idString + "&format=xml";
+  url = "https://www.uniprot.org/uniprot/?query=" + idString + "&format=xml";
 
   var promise = $.ajax({
     url: url,
@@ -1672,6 +1673,7 @@ $(function() {
 });
 
 function generateAlert(){
+  records = []
   bootstrap_alert.warning("There was a fatal error <br>" + records.length + " sequences are being written to unmappable" );
   obsoleteList = [];
   sortOutput(records, obsoleteList);
