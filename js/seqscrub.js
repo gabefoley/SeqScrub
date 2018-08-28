@@ -1256,17 +1256,21 @@ function appendOutput(records){
 
             else if (headerOpt == "speciesName"){
 
-              if (removeSpeciesBrackets) {
-                finalSpeciesName = records[i].headerInfo[headerOpt].trim().replace(/\(|\)/g, '')
-              }
-
-              else {
-
-                finalSpeciesName = records[i].headerInfo[headerOpt].trim()
-
-              }
-
               if (records[i].headerInfo[headerOpt]){
+
+                if (removeSpeciesBrackets) {
+
+
+
+                  finalSpeciesName = records[i].headerInfo[headerOpt].trim().replace(/\(|\)/g, '')
+                }
+
+                else {
+
+                  finalSpeciesName = records[i].headerInfo[headerOpt].trim()
+
+                }
+
 
               if (headerOutput.slice(-1) == speciesChar){
                 headerOutput += finalSpeciesName + speciesChar 
