@@ -739,6 +739,7 @@ function getDataFromNCBI(records) {
     }
 
 
+
   var promise = $.ajax({
     url: urlDoc,
 
