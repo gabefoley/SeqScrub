@@ -1,10 +1,3 @@
-var isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
-               navigator.userAgent && !navigator.userAgent.match('CriOS');
-
-if (isSafari){
-  alert("We notice you are using the Safari browser. Currently there are some issues with displaying records when using Safari. <br>Please try viewing SeqScrub with another browser.");
-}
-
 $(document).ready(function() {
   document.getElementsByTagName("html")[0].style.visibility = "visible";
 });
@@ -1510,7 +1503,7 @@ $("form#save").submit(function(event) {
 
   outputZip.generateAsync({type:"blob"})
   .then(function (blob) {
-      saveAs(blob, "hello.zip");
+      saveAs(blob, "SeqScrubFiles.zip");
   });
 
 
@@ -1714,9 +1707,9 @@ $(document).bind('click', function(e) {
   if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
 });
 
-$('.mutliSelect input[type="checkbox"]').on('click', function() {
+$('.multiSelect input[type="checkbox"]').on('click', function() {
 
-  var title = $(this).closest('.mutliSelect').find('input[type="checkbox"]').val(),
+  var title = $(this).closest('.multiSelect').find('input[type="checkbox"]').val(),
   title = $(this).val() + ",";
 
   if ($(this).is(':checked')) {
