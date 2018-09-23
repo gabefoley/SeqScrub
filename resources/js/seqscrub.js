@@ -21,10 +21,10 @@ var badIdsResults = "";
 
 
 if (cleanTree){
-  $("#treeCheck").prop("disabled", false)
+  $("#treeCheck").prop("disabled", false);
 
 } else {
-  $("#treeCheck").prop("disabled", true)
+  $("#treeCheck").prop("disabled", true);
 
 }
 
@@ -53,7 +53,7 @@ function checkFinal(count, records){
 
 
     // Check if we failed to retrieve information for any sequences
-    var warning = ""
+    var warning = "";
     for (var key in infoErrors) {
         // check if the property/key is defined in the object itself, not in parent
         if (infoErrors.hasOwnProperty(key)) {
@@ -73,9 +73,9 @@ function checkFinal(count, records){
           }
 
 
-          splitSeqs = infoErrors[key].trim().split(" ")
+          splitSeqs = infoErrors[key].trim().split(" ");
 
-          for (seq in splitSeqs) {
+          for (var seq in splitSeqs) {
             warning += splitSeqs[seq] + "<br>";
 
 
@@ -94,14 +94,13 @@ function checkFinal(count, records){
 
     // If we are also cleaning a tree
     if (cleanTree) {
-      console.log("cleaning tree")
       cleanedTree = cleanTreeNames();
 
     }
 
     // Create the summary file
 
-    summary += "Updated headers FROM: Original headers \n"
+    summary += "Updated headers FROM: Original headers \n";
 
     for (var i in records){
       // If we were able to clean up the sequence, record the final header
@@ -118,10 +117,10 @@ function checkFinal(count, records){
 
     }
 
-    summary += "ID mapping FROM: Original headers \n"
+    summary += "ID mapping FROM: Original headers \n";
 
-    for (var i in records){
-      summary +=  records[i].id.trim() +" FROM: " + records[i].originalHeader.substring(1) + "\n";
+    for (var j in records){
+      summary +=  records[j].id.trim() +" FROM: " + records[j].originalHeader.substring(1) + "\n";
 
     }
 
@@ -278,7 +277,7 @@ $("form#data").submit(function(event) {
 
 
   $("#selectAll").prop("checked", false);
-  $("#selectAllLabel").html('Select all output')
+  $("#selectAllLabel").html('Select all output');
 
 
 
@@ -293,13 +292,13 @@ $("form#data").submit(function(event) {
   removeUncleaned = $('#removeUnclean').is(":checked");
   replaceHeadersDB = $('#replaceHeadersDBCheck').is(":checked");
   replaceChars = $('#replaceCharsCheck').is(":checked");
-  aaOpt = ($("#seqType").val() == '1')
-  idChar = $("#idChar").val()
-  geneChar = $("#geneChar").val()
-  taxonChar = $("#taxonChar").val()
-  speciesChar = $("#speciesChar").val()
-  infoErrors = {}
-  invalidChars = $("#invalidChars").val().length > 0
+  aaOpt = ($("#seqType").val() == '1');
+  idChar = $("#idChar").val();
+  geneChar = $("#geneChar").val();
+  taxonChar = $("#taxonChar").val();
+  speciesChar = $("#speciesChar").val();
+  infoErrors = {};
+  invalidChars = $("#invalidChars").val().length > 0;
 
 
   headerFormat = $('select#header-format').val();
@@ -370,8 +369,8 @@ $("form#data").submit(function(event) {
 
       // If we are not going to the databases but just performing a replacement of characters in the headers
       if (replaceChars){
-        var records = []
-        limit = 1000
+        var records = [];
+        limit = 1000;
         var badIDsCount, cleanedCount;
 
         badIDsCount = cleanedCount = 0;
@@ -421,7 +420,7 @@ $("form#data").submit(function(event) {
           // Can still do a check to remove sequences with illegal characters
 
           if (invalidChars && invalidCharsRegex.test(record.seq)) {
-            record.finalHeader = record.originalHeader
+            record.finalHeader = record.originalHeader;
 
             if (badIDsCount < limit) {
               output = record.originalHeader  + record.seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
@@ -434,7 +433,7 @@ $("form#data").submit(function(event) {
 
           else {
 
-            record.finalHeader = header
+            record.finalHeader = header;
 
             if (cleanedCount < limit) {
 
@@ -448,7 +447,7 @@ $("form#data").submit(function(event) {
 
           }
 
-          records.push(record)
+          records.push(record);
 
         }
 
@@ -552,7 +551,6 @@ $("form#data").submit(function(event) {
         }
 
         else if (record.type == 'pdb'){
-          console.log("Was a PDB");
           pdbList.push(record);
         } 
 
@@ -691,13 +689,13 @@ function getDataFromUniprot(records, pdb) {
 
           if (records[record].id in speciesDict){
             records[record].taxon = speciesDict[records[record].id];
-            console.log(records[record])
+            console.log(records[record]);
           }
       }
 
 
 
-      getSpeciesNameFromNCBI2(records, idString, obsoleteList);
+      getSpeciesNameFromNCBI(records, idString, obsoleteList);
 
 
     },
@@ -797,7 +795,7 @@ function getIDFromNCBI(records, speciesData) {
             var thisNode = node.iterateNext();
             while (thisNode) {
 
-              records[record].headerInfo['geneName'] = thisNode.textContent.split("[")[0];
+              records[record].headerInfo.geneName = thisNode.textContent.split("[")[0];
               thisNode = node.iterateNext();
             }
           } catch (e) {
@@ -846,7 +844,7 @@ function getIDFromNCBI(records, speciesData) {
     }
 
 
-    getSpeciesNameFromNCBI2(records, idString, obsoleteList);
+    getSpeciesNameFromNCBI(records, idString, obsoleteList);
 
 
 
@@ -855,11 +853,11 @@ function getIDFromNCBI(records, speciesData) {
 }
 
 
-function getSpeciesNameFromNCBI2(records, idString, obsoleteList) {
+function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
   speciesList = [];
   idString = formatTaxonID(records);
   urlAll = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
-  console.log(urlAll)
+  console.log(urlAll);
 
 
 
@@ -1143,7 +1141,7 @@ function appendOutput(records){
 
 
 
-  console.log(numRecords)
+  console.log(numRecords);
   var badIDsCount, obsoleteCount, badCharCount, cleanedCount;
 
   badIDsCount = obsoleteCount =badCharCount = cleanedCount = 0;
@@ -1209,7 +1207,7 @@ function appendOutput(records){
 
         }
 
-        headerOutput = ""
+        headerOutput = "";
 
         if (headerFormat && ! replaceHeadersDB){
 
@@ -1221,10 +1219,10 @@ function appendOutput(records){
               if (records[i].headerInfo[headerOpt]){
                 // Check that we're not doubling up on the character to split gene info and species names
                 if (headerOutput.slice(-1) == geneChar){
-                  headerOutput += records[i].headerInfo[headerOpt].trim() + geneChar
+                  headerOutput += records[i].headerInfo[headerOpt].trim() + geneChar;
                 }
                 else {
-                  headerOutput += geneChar + records[i].headerInfo[headerOpt].trim() + geneChar
+                  headerOutput += geneChar + records[i].headerInfo[headerOpt].trim() + geneChar;
 
                 }
 
@@ -1235,13 +1233,13 @@ function appendOutput(records){
 
                 // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
                 if (!infoErrors[headerOpt]){
-                  infoErrors[headerOpt] = records[i].id + " "
+                  infoErrors[headerOpt] = records[i].id + " ";
 
                 }
 
                 // Otherwise add to it 
                 else {
-                  infoErrors[headerOpt] += records[i].id + " "
+                  infoErrors[headerOpt] += records[i].id + " ";
 
 
                 }
@@ -1256,21 +1254,21 @@ function appendOutput(records){
 
 
 
-                  finalSpeciesName = records[i].headerInfo[headerOpt].trim().replace(/\(|\)/g, '')
+                  finalSpeciesName = records[i].headerInfo[headerOpt].trim().replace(/\(|\)/g, '');
                 }
 
                 else {
 
-                  finalSpeciesName = records[i].headerInfo[headerOpt].trim()
+                  finalSpeciesName = records[i].headerInfo[headerOpt].trim();
 
                 }
 
 
               if (headerOutput.slice(-1) == speciesChar){
-                headerOutput += finalSpeciesName + speciesChar 
+                headerOutput += finalSpeciesName + speciesChar;
               }
               else {
-                headerOutput += speciesChar + finalSpeciesName + speciesChar
+                headerOutput += speciesChar + finalSpeciesName + speciesChar;
 
               }
 
@@ -1281,13 +1279,13 @@ function appendOutput(records){
 
               // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
               if (!infoErrors[headerOpt]){
-                infoErrors[headerOpt] = records[i].id + " "
+                infoErrors[headerOpt] = records[i].id + " ";
 
               }
 
               // Otherwise add to it 
               else {
-                infoErrors[headerOpt] += records[i].id + " "
+                infoErrors[headerOpt] += records[i].id + " ";
 
 
               }
@@ -1303,12 +1301,12 @@ function appendOutput(records){
                 // Check that we're not doubling up on the character to split taxon info
                 if (headerOutput.slice(-1) == taxonChar){
 
-                headerOutput += records[i].headerInfo[headerOpt].trim() + taxonChar
+                headerOutput += records[i].headerInfo[headerOpt].trim() + taxonChar;
               }
 
                 else {
 
-                  headerOutput += taxonChar + records[i].headerInfo[headerOpt].trim() + taxonChar
+                  headerOutput += taxonChar + records[i].headerInfo[headerOpt].trim() + taxonChar;
 
 
                 }
@@ -1319,13 +1317,13 @@ function appendOutput(records){
 
               // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
               if (!infoErrors[headerOpt]){
-                infoErrors[headerOpt] = records[i].id + " "
+                infoErrors[headerOpt] = records[i].id + " ";
 
               }
 
               // Otherwise add to it 
               else {
-                infoErrors[headerOpt] += records[i].id + " "
+                infoErrors[headerOpt] += records[i].id + " ";
 
 
               }
@@ -1343,11 +1341,11 @@ function appendOutput(records){
 
         var header = ">" + formattedType.trim() + records[i].id.trim() + idChar + headerOutput.trim();
 
-        console.log('current header')
-        console.log(header)
+        console.log('current header');
+        console.log(header);
 
         if (replaceHeadersDB){
-          console.log('got here')
+          console.log('got here');
           header = records[i].originalHeader.replace(replaceHeadersRegex, "").trim();
         }
 
@@ -1356,13 +1354,13 @@ function appendOutput(records){
         }
 
         // Save the final header so we can write it to the summary file
-        records[i].finalHeader = header
+        records[i].finalHeader = header;
 
         // Add in a newline character to the header
         header += "&#010;";
 
-        console.log('our header is ')
-        console.log(header)
+        console.log('our header is ');
+        console.log(header);
 
 
 
@@ -1443,13 +1441,13 @@ $("form#save").submit(function(event) {
 
       if (cleanTree){
         cleanedTree = cleanTreeNames();
-        console.log('here is the clean tree')
-        console.log(cleanedTree)
+        console.log('here is the clean tree');
+        console.log(cleanedTree);
         outputZip.file('cleanedTree.nwk', cleanedTree);
       }
 
       else {
-        bootstrap_alert.warning("You requested a phylogenetic tree but there is no cleaned tree available.")
+        bootstrap_alert.warning("You requested a phylogenetic tree but there is no cleaned tree available.");
 
       }
 
@@ -1462,7 +1460,7 @@ $("form#save").submit(function(event) {
       }
 
       else {
-        bootstrap_alert.warning("You requested a summary but there is no summary generated.")
+        bootstrap_alert.warning("You requested a summary but there is no summary generated.");
 
       }
 
@@ -1475,19 +1473,19 @@ $("form#save").submit(function(event) {
       if (numRecords > limit){
 
         if ($(this).val() == "cleanedSeqs"){
-          var item = cleanedSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n")
+          var item = cleanedSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n");
         }
 
         else if ($(this).val() == "badCharacters"){
-          var item = badCharactersResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n")
+          var item = badCharactersResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n");
         }
 
         else if ($(this).val() == "obsoleteSeqs"){
-          var item = obsoleteSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n")
+          var item = obsoleteSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n");
         }
 
         else if ($(this).val() == "badIds"){
-          var item = badIdsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n")
+          var item = badIdsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n");
         }
 
       }
@@ -1671,7 +1669,7 @@ $(function() {
 });
 
 function generateAlert(){
-  records = []
+  records = [];
   bootstrap_alert.warning("There was a fatal error <br>" + records.length + " sequences are being written to unmappable" );
   obsoleteList = [];
   sortOutput(records, obsoleteList);
@@ -1689,18 +1687,18 @@ function generateAlert(){
 //Error handing
 bootstrap_alert = function() {};
 bootstrap_alert.warning = function(message) {
-            $('#error-div').show()
+            $('#error-div').show();
 
             $('#error-div').append('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
         };
 bootstrap_alert.tree = function(message) {
-            $('#error-div').show()
+            $('#error-div').show();
 
             $('#treeOutput').html('<div class="success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
         };
 bootstrap_alert.clear =  function(message) {
-            $('#error-div').empty()
-            $('#error-div').hide()
+            $('#error-div').empty();
+            $('#error-div').hide();
         };
 
 $(document).bind('click', function(e) {
@@ -1731,14 +1729,14 @@ function checkAll(ele) {
         for (var i = 0; i < checkboxes.length; i++) {
             if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
                 checkboxes[i].checked = true;
-                $("#selectAllLabel").html('Deselect all output')
+                $("#selectAllLabel").html('Deselect all output');
             }
         }
     } else {
         for (var i = 0; i < checkboxes.length; i++) {
             if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
                 checkboxes[i].checked = false;
-                $("#selectAllLabel").html('Select all output')
+                $("#selectAllLabel").html('Select all output');
 
             }
         }
