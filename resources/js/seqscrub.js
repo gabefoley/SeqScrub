@@ -652,6 +652,7 @@ function getDataFromUniprot(records, pdb) {
 
   url = "https://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
 
+  console.log(url)
   var promise = $.ajax({
     url: url,
     type: 'POST',
@@ -687,18 +688,12 @@ function getDataFromUniprot(records, pdb) {
             // Add the gene information back to the record
               geneDict[splitLine[0]] = splitLine[2];
               entryNameDict[splitLine[0]] = splitLine[1];
-
-
-
-
             }
               }
           }
         }
 
-      
-      
-
+    
         for (var record in records){
 
           if (records[record].id in speciesDict){
@@ -1010,6 +1005,8 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
   url = "https://www.uniprot.org/uniprot/?query=" + idString + "&format=xml";
 
+  console.log(url);
+
   var promise = $.ajax({
     url: url,
     type: 'POST',
@@ -1032,6 +1029,7 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
           }
           var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
+
 
           try {
             var thisNode = node.iterateNext();
@@ -1078,6 +1076,9 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
 
 function sortOutput(records, obsoleteList) {
+
+  console.log("Got to sort output");
+  console.log(records)
 
   ncbiCheck = [];
 
@@ -1144,6 +1145,8 @@ function sortOutput(records, obsoleteList) {
     }
   }
 }
+
+console.log(finishedRecords);
 progressText(count);
 checkFinal(count, finishedRecords);
 
@@ -1718,8 +1721,7 @@ $(function() {
   });
 });
 
-function generateAlert(){
-  records = [];
+function generateAlert(records){
   bootstrap_alert.warning("There was a fatal error <br>" + records.length + " sequences are being written to unmappable" );
   obsoleteList = [];
   sortOutput(records, obsoleteList);

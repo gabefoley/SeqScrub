@@ -63,7 +63,7 @@ while (($line = fgets($file)) !== false){
 		$id = "";
 
 
-
+		// Add the type (NCBI or UniProt) back into the array as the actual letter code
 		if ($type == "XP" || $type == "XM" || $type == "XR" || $type == "WP" || $type == "NP" || $type == "NC" || $type == "NG" || $type == "NM" || $type == "NR") {
 			$id = $type . "_" . $lineArray[1];
 
@@ -79,6 +79,8 @@ while (($line = fgets($file)) !== false){
 
 		}
 
+
+		// Prepare the array for returning
 		$returnArray[] = array('originalHeader' => $line, 'type' => $type ,'id' => $id);
 
 	}
