@@ -288,6 +288,7 @@ $("form#data").submit(function(event) {
   removeSpeciesBrackets = $('#removeSpeciesBrackets').is(":checked");
   commonName = $('#commonName').is(":checked");
   retainFirst = $('#getFirstID').is(":checked");
+  stripUniProtID = $('#stripUniProtID').val();
   removeObsolete = $('#checkObsolete').is(":checked");
   removeUncleaned = $('#removeUnclean').is(":checked");
   replaceHeadersDB = $('#replaceHeadersDBCheck').is(":checked");
@@ -302,6 +303,9 @@ $("form#data").submit(function(event) {
 
 
   headerFormat = $('select#header-format').val();
+
+
+  console.log(stripUniProtID)
 
 
 
@@ -543,7 +547,7 @@ $("form#data").submit(function(event) {
         }
 
 
-        if (record.type == 'tr' || record.type == 'sp' || record.type == '' && aaOpt) {
+        if (record.type == 'tr' || record.type == 'sp' || record.type == 'gi' || record.type == '' && aaOpt) {
 
           uniprotList.push(record);
 
@@ -642,6 +646,8 @@ function formatTaxonID(records) {
 function getDataFromUniprot(records, pdb) {
   obsoleteList = [];
   speciesDict = {};
+  geneDict = {};
+  entryNameDict = [];
   idString = getIDString(records, "UniProt");
 
   url = "https://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
@@ -656,6 +662,8 @@ function getDataFromUniprot(records, pdb) {
 
 
     success: function(speciesData) {
+
+      console.log(speciesData);
 
         splitData = speciesData.split("\n");
 
@@ -676,12 +684,18 @@ function getDataFromUniprot(records, pdb) {
               taxonList = splitLine[4].split(",");
 
               speciesDict[splitLine[0]] = taxonList[taxonList.length - 1].trim();
+            // Add the gene information back to the record
+              geneDict[splitLine[0]] = splitLine[2];
+              entryNameDict[splitLine[0]] = splitLine[1];
+
+
 
 
             }
               }
           }
         }
+
       
       
 
@@ -691,6 +705,15 @@ function getDataFromUniprot(records, pdb) {
             records[record].taxon = speciesDict[records[record].id];
             console.log(records[record]);
           }
+
+          if (records[record].id in geneDict){
+            records[record].headerInfo.geneName = geneDict[records[record].id];
+          }
+
+
+         if (records[record].id in entryNameDict){
+           records[record].id_name = entryNameDict[records[record].id];
+         }
       }
 
 
@@ -1337,9 +1360,31 @@ function appendOutput(records){
           });
       }
 
+        // If it is a UniProt seqeunce, we need to add back in some formatting
+        if (records[i].type == 'tr' || records[i].type == 'sp' || records[i].type == 'gi' ){
+
+          if (stripUniProtID == 'uniprotFormat1'){
+            var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + "|" + records[i].id_name.trim() + idChar + headerOutput.trim();
+          }
+
+          else if (stripUniProtID == 'uniprotFormat2')  {
+            var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + idChar + headerOutput.trim();
+          }
+
+          else if (stripUniProtID == 'uniprotFormat3') {
+            var header = ">" +  records[i].id.trim() +  + idChar + headerOutput.trim();
+
+          }
+
+        }
+
+        else {
+
+          var header = ">" + formattedType.trim() + records[i].id.trim() + idChar + headerOutput.trim();
+
+        }
 
 
-        var header = ">" + formattedType.trim() + records[i].id.trim() + idChar + headerOutput.trim();
 
         console.log('current header');
         console.log(header);
@@ -1358,6 +1403,11 @@ function appendOutput(records){
 
         // Add in a newline character to the header
         header += "&#010;";
+
+
+
+        console.log(records[i])
+        console.log(records[i].type)
 
         console.log('our header is ');
         console.log(header);

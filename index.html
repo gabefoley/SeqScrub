@@ -112,7 +112,20 @@
 
             <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID" class=dataCheck>
 
-            <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br><br>
+            <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br>
+
+            <label for="stripUniProtID"> Format UniProt IDs like - </label> 
+
+
+            <select id="stripUniProtID">
+              <option value=uniprotFormat1 >>tr|A0A1A8UQI7|A0A1A8UQI7_NOTFU </option>
+              <option value=uniprotFormat2 >>tr|A0A1A8UQI7 </option>
+              <option value=uniprotFormat3 >>A0A1A8UQI7 </option>
+            </select>
+            <br><br>
+
+
+
 
             Formatting options <br>
 
