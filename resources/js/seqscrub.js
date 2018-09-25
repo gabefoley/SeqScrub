@@ -183,6 +183,9 @@ function cleanTreeNames() {
   // Make cleaned tree selectable as an output to download
   $("#treeCheck").prop("disabled", false);
 
+  // On the off chance that a tree has duplicate names in it, store the names to make the SeqScrub output consistent
+  name_list = [] 
+
   splitSummary = summary.split("\n");
 
   cleanedTree = tree;
@@ -207,11 +210,20 @@ function cleanTreeNames() {
     oldname = escapeRegExp(oldname);
 
 
-    treeRegEx = new RegExp(oldname);
-    cleanedTree = cleanedTree.replace(treeRegEx, newname);
+    // If the old name hasn't already been cleaned up (off-chance check for duplicate names)
+    if (!(name_list.indexOf(oldname) >=0)){ 
 
-    // This step is needed in case a program had already encased a name in the Newick string with quotation marks.
-    cleanedTree = cleanedTree.replace(/'/g, "");
+
+      treeRegEx = new RegExp(oldname, "g");
+      cleanedTree = cleanedTree.replace(treeRegEx, newname);
+
+      // This step is needed in case a program had already encased a name in the Newick string with quotation marks.
+      cleanedTree = cleanedTree.replace(/'/g, "");
+      name_list.push(oldname);
+
+    }
+
+
   }
 }
 
@@ -311,7 +323,6 @@ $("form#data").submit(function(event) {
   infoErrors = {};
   invalidChars = $("#invalidChars").val().length > 0;
   invalidHeadChars = $("#invalidHeadChars").val().length > 0;
-  convertPDB = $('#convertPDB').is(":checked");
 
 
 

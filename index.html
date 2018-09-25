@@ -87,7 +87,7 @@
             Curation options <br>
 
             <label for="invalidHeadChars" > Remove these characters from header: </label>
-            <input type="text" onClick="this.select();" id="invalidHeadChars" value=": , ;"/> <br>
+            <input type="text" onClick="this.select();" id="invalidHeadChars" value=": , ; ( )"/> <br>
 
 
             <label for="invalidChars" > Remove sequences containing: </label>
@@ -106,13 +106,13 @@
 
             <label for="replaceHeadersDB" > Keep original headers - just remove characters from headers: </label>
             
-            <input type="text" onClick="this.select();" id="replaceHeadersDB" value=": , ;"/> <br>
+            <input type="text" onClick="this.select();" id="replaceHeadersDB" value=": , ; ( )"/> <br>
 
             <input type="checkbox" id="replaceCharsCheck" name="replaceCharsCheck" value=unchecked class="replaceCheck">
 
             <label for="replaceChars" > Don't check databases - just remove characters: </label>
             
-            <input type="text" onClick="this.select();" id="replaceChars" value=": , ;" /> <br>
+            <input type="text" onClick="this.select();" id="replaceChars" value=": , ; ( )" /> <br>
 
             <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID" class=dataCheck>
 
@@ -126,12 +126,6 @@
               <option value=uniprotFormat2 >>tr|A0A1A8UQI7 </option>
               <option value=uniprotFormat3 >>A0A1A8UQI7 </option>
             </select>
-
-            <br>
-
-            <input type="checkbox" id="convertPDB" name="convertPDB">
-
-            <label for="convertPDB"> Convert PDB identifiers into UniProt identifiers</label> <br>
 
             <br><br>
 
