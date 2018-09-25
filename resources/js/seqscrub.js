@@ -17,6 +17,8 @@ var cleanedSeqsResults = "";
 var badCharactersResults = "";
 var obsoleteSeqsResults = "";
 var badIdsResults = "";
+// If the tree is trimmed to the first space, keep a note of this so we can update it accordingly
+var trimmedTree = false;
 
 
 
@@ -193,6 +195,14 @@ function cleanTreeNames() {
     newname = splitLine.split("FROM:")[0].trim();
     oldname = splitLine.split("FROM:")[1].trim();
 
+
+    // If this is a trimmed tree (i.e. the original tree cuts off after the first space in the header, change the names to reflect this)
+    if (trimmedTree){
+
+      oldname = oldname.split(" ")[0];
+
+    }
+
     // Escape characters in the old name which will interfere with our regular expression
     oldname = escapeRegExp(oldname);
 
@@ -301,12 +311,12 @@ $("form#data").submit(function(event) {
   infoErrors = {};
   invalidChars = $("#invalidChars").val().length > 0;
   invalidHeadChars = $("#invalidHeadChars").val().length > 0;
+  convertPDB = $('#convertPDB').is(":checked");
+
 
 
   headerFormat = $('select#header-format').val();
 
-
-  console.log(stripUniProtID)
 
 
 
@@ -405,19 +415,28 @@ $("form#data").submit(function(event) {
 
           header = record.originalHeader.replace( headerCharsRegex, "");
 
-          if (cleanTree) {
+          // if (cleanTree) {
 
-            treeRegEx = new RegExp(record.originalHeader.substring(1).trim());
+          //   console.log(record.originalHeader.substring(1).trim());
 
-            if (!treeRegEx.test(tree)){
-              hideLoadingScreen();
+          //   treeRegEx = new RegExp(record.originalHeader.substring(1).trim());
 
-              bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree");
+          //   trimmedTreeRegEx = new RegExp(record.originalHeader.substring(1).split(" ")[0].trim());
+
+
+          //   if (!treeRegEx.test(tree) && !trimmedTreeRegEx.test(tree)){
+          //     hideLoadingScreen();
+
+          //     bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree");
             
-            }
-            cleanedTree = cleanTreeNames();
+          //   }
 
-          }
+          //   if (trimmedTreeRegEx.test(tree)){
+          //     trimmedTree = true;
+          //   }
+          //   cleanedTree = cleanTreeNames();
+
+          // }
 
 
 
@@ -539,13 +558,22 @@ $("form#data").submit(function(event) {
 
         if (cleanTree) {
 
-          treeRegEx = new RegExp(record.originalHeader.substring(1).trim());
+          treeRegEx = new RegExp(escapeRegExp(record.originalHeader.substring(1).trim()));
 
-          if (!treeRegEx.test(tree)){
+          trimmedTreeRegEx = new RegExp(escapeRegExp(record.originalHeader.substring(1).split(" ")[0].trim()));
+
+
+
+
+          if (!treeRegEx.test(tree) && !trimmedTreeRegEx.test(tree) ){
             hideLoadingScreen();
 
             bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree. <br> Check that you have a correctly formatted Newick file that matches your alignment.");
             return false;
+          }
+
+          if (trimmedTreeRegEx.test(tree)){
+            trimmedTree = true;
           }
         }
 
@@ -568,7 +596,6 @@ $("form#data").submit(function(event) {
       }
 
       if (uniprotList.length > 0) {
-        console.log("Uniprot length = ", uniprotList.length);
         while (uniprotList.length){
           getDataFromUniprot(uniprotList.splice(0,200), false);
 
@@ -577,14 +604,12 @@ $("form#data").submit(function(event) {
       }
 
       if (pdbList.length > 0) {
-        console.log("PDB length = ", pdbList.length);
         while (pdbList.length){
           getPDBSpeciesNameFromUniProt(pdbList.splice(0,200), true);
 
         }
       }
       if (ncbiList.length > 0) {
-        console.log("NCBI length = ", ncbiList.length);
         while (ncbiList.length){
         getDataFromNCBI(ncbiList.splice(0,200));
       }
@@ -655,7 +680,6 @@ function getDataFromUniprot(records, pdb) {
 
   url = "https://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
 
-  console.log(url)
   var promise = $.ajax({
     url: url,
     type: 'POST',
@@ -667,7 +691,6 @@ function getDataFromUniprot(records, pdb) {
 
     success: function(speciesData) {
 
-      console.log(speciesData);
 
         splitData = speciesData.split("\n");
 
@@ -701,7 +724,6 @@ function getDataFromUniprot(records, pdb) {
 
           if (records[record].id in speciesDict){
             records[record].taxon = speciesDict[records[record].id];
-            console.log(records[record]);
           }
 
           if (records[record].id in geneDict){
@@ -878,7 +900,6 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
   speciesList = [];
   idString = formatTaxonID(records);
   urlAll = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
-  console.log(urlAll);
 
 
 
@@ -998,8 +1019,6 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 }
 
 
-
-
 function getPDBSpeciesNameFromUniProt(records, speciesData) {
   fullList = [];
   obsoleteList = [];
@@ -1008,7 +1027,6 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
   url = "https://www.uniprot.org/uniprot/?query=" + idString + "&format=xml";
 
-  console.log(url);
 
   var promise = $.ajax({
     url: url,
@@ -1080,9 +1098,6 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
 function sortOutput(records, obsoleteList) {
 
-  console.log("Got to sort output");
-  console.log(records)
-
   ncbiCheck = [];
 
   // Check to see if there are any illegal characters
@@ -1149,7 +1164,6 @@ function sortOutput(records, obsoleteList) {
   }
 }
 
-console.log(finishedRecords);
 progressText(count);
 checkFinal(count, finishedRecords);
 
@@ -1170,7 +1184,6 @@ function appendOutput(records){
 
 
 
-  console.log(numRecords);
   var badIDsCount, obsoleteCount, badCharCount, cleanedCount;
 
   badIDsCount = obsoleteCount =badCharCount = cleanedCount = 0;
@@ -1391,18 +1404,14 @@ function appendOutput(records){
         }
 
 
-
-        console.log('current header');
-        console.log(header);
-
+        // Keeping the original headers (after checking databases) and getting rid of certain characters
         if (replaceHeadersDB){
-          console.log('got here');
           header = records[i].originalHeader.replace(replaceHeadersRegex, "").trim();
         }
 
         // If we're getting rid of certain characters from the header, let's do that
         if (invalidHeadChars){
-          header = records[i].originalHeader.replace(invalidHeaderCharsRegex, "").trim();
+          header = header.replace(invalidHeaderCharsRegex, "").trim();
         }
         // If we're adding underscores in case of spaces, let's do that
         if (addUnderscores) {
@@ -1416,16 +1425,6 @@ function appendOutput(records){
 
         // Add in a newline character to the header
         header += "&#010;";
-
-
-
-        console.log(records[i])
-        console.log(records[i].type)
-
-        console.log('our header is ');
-        console.log(header);
-
-
 
 
         output = header.trim()  + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
@@ -1504,8 +1503,6 @@ $("form#save").submit(function(event) {
 
       if (cleanTree){
         cleanedTree = cleanTreeNames();
-        console.log('here is the clean tree');
-        console.log(cleanedTree);
         outputZip.file('cleanedTree.nwk', cleanedTree);
       }
 
