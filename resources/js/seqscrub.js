@@ -300,6 +300,7 @@ $("form#data").submit(function(event) {
   speciesChar = $("#speciesChar").val();
   infoErrors = {};
   invalidChars = $("#invalidChars").val().length > 0;
+  invalidHeadChars = $("#invalidHeadChars").val().length > 0;
 
 
   headerFormat = $('select#header-format').val();
@@ -327,6 +328,8 @@ $("form#data").submit(function(event) {
  
   //Generate a new regex containing the header characters to replace
   headerCharsRegex = new RegExp(escapeRegExp($("#replaceChars").val().trim()).replace(/ /g, "|"), 'g');
+
+  invalidHeaderCharsRegex = new RegExp(escapeRegExp($("#invalidHeadChars").val().trim()).replace(/ /g, "|"), 'g');
 
   replaceHeadersRegex = new RegExp(escapeRegExp($("#replaceHeadersDB").val().trim()).replace(/ /g, "|"), 'g');
 
@@ -1397,9 +1400,16 @@ function appendOutput(records){
           header = records[i].originalHeader.replace(replaceHeadersRegex, "").trim();
         }
 
+        // If we're getting rid of certain characters from the header, let's do that
+        if (invalidHeadChars){
+          header = records[i].originalHeader.replace(invalidHeaderCharsRegex, "").trim();
+        }
+        // If we're adding underscores in case of spaces, let's do that
         if (addUnderscores) {
           header = header.trim().replace(/ /g, "_") ;
         }
+
+
 
         // Save the final header so we can write it to the summary file
         records[i].finalHeader = header;

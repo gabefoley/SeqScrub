@@ -86,6 +86,10 @@
 
             Curation options <br>
 
+            <label for="invalidHeadChars" > Remove these characters from header: </label>
+            <input type="text" onClick="this.select();" id="invalidHeadChars" value=": , ;"/> <br>
+
+
             <label for="invalidChars" > Remove sequences containing: </label>
             <input type="text" onClick="this.select();" id="invalidChars" value="B J O U X Z" /> <br>
 
@@ -114,7 +118,7 @@
 
             <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br>
 
-            <label for="stripUniProtID"> Format UniProt IDs like - </label> 
+            <label for="stripUniProtID"> Format UniProt IDs like this - </label> 
 
 
             <select id="stripUniProtID">
@@ -122,8 +126,12 @@
               <option value=uniprotFormat2 >>tr|A0A1A8UQI7 </option>
               <option value=uniprotFormat3 >>A0A1A8UQI7 </option>
             </select>
-            <br><br>
 
+            <input type="checkbox" id="convertPDB" name="convertPDB">
+
+            <label for="convertPDB"> Convert PDB identifiers into UniProt identifiers</label> <br>
+
+            <br><br>
 
 
 
