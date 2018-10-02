@@ -1031,7 +1031,6 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 }
 
-function 
 
 
 function getPDBSpeciesNameFromUniProt(records, speciesData) {
