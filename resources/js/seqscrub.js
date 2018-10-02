@@ -190,6 +190,9 @@ function cleanTreeNames() {
 
   cleanedTree = tree;
 
+  // // This step is needed in case a program had already encased a name in the Newick string with quotation marks.
+  // cleanedTree = cleanedTree.replace(/'/g, "");
+
   for (var line in splitSummary){
     splitLine = splitSummary[line];
 
@@ -217,8 +220,7 @@ function cleanTreeNames() {
       treeRegEx = new RegExp(oldname, "g");
       cleanedTree = cleanedTree.replace(treeRegEx, newname);
 
-      // This step is needed in case a program had already encased a name in the Newick string with quotation marks.
-      cleanedTree = cleanedTree.replace(/'/g, "");
+
       name_list.push(oldname);
 
     }
@@ -1028,6 +1030,8 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 
 }
+
+function 
 
 
 function getPDBSpeciesNameFromUniProt(records, speciesData) {

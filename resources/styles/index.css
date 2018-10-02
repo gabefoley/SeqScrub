@@ -155,7 +155,7 @@ body {
 	z-index: -1;
 }
 
-.fileinput + label, .button, .submitButton{
+.fileinput + label, .button, .submitButton , .docButton, .docButtonSmall{
 
 	background-color: #2ecc71;
 
@@ -187,6 +187,8 @@ body {
 	background: #9b59b6;
 
 }
+
+
 
 
 .fileinput + label:hover, .submitButton:hover {
@@ -227,6 +229,19 @@ body {
 #saveButton:focus {
 	background: #9b59b6;
 
+}
+
+.docButton, .docButtonSmall {
+	background-color: goldenrod;
+	height: 90px;
+}
+
+.docButtonSmall {
+	height: 50px;
+}
+
+.docButton:hover, .docButtonSmall:hover {
+	background: #9b59b6;
 }
 
 #illegalButton {
