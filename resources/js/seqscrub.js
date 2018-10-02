@@ -8,6 +8,7 @@ var noCommon = "";
 var count = 0;
 var invalidCharsRegex = "";
 summary = "";
+summaryCSV="";
 var cleanTree = false;
 var tree = "";
 var cleanedTree = "";
@@ -102,29 +103,32 @@ function checkFinal(count, records){
 
     // Create the summary file
 
-    summary += "Updated headers FROM: Original headers \n";
+    summary += "Original headers : Cleaned headers \n";
+
+    // Create the summary CSV file
+
+    summaryCSV += "Original header, Cleaned header \n";
 
     for (var i in records){
       // If we were able to clean up the sequence, record the final header
       if (records[i].finalHeader){
-        summary += records[i].finalHeader.substring(1) + " FROM: " + records[i].originalHeader.substring(1) + "\n";
+        summary += records[i].originalHeader.substring(1).trim()  + " : " + records[i].finalHeader.substring(1)  + "\n";
+        summaryCSV += records[i].originalHeader.substring(1).trim()  + "," +  records[i].finalHeader.substring(1) + "\n";
       }
 
       // Otherwise record the original header
       else {
-        summary += records[i].originalHeader.substring(1) + " FROM: " + records[i].originalHeader.substring(1) + "\n";
+        summary += records[i].originalHeader.substring(1).trim()  + " : " + records[i].originalHeader.substring(1)  + "\n";
+        summaryCSV += records[i].originalHeader.substring(1).trim() + "," +  records[i].originalHeader.substring(1) + "\n";
 
 
       }
 
     }
 
-    summary += "ID mapping FROM: Original headers \n";
 
-    for (var j in records){
-      summary +=  records[j].id.trim() +" FROM: " + records[j].originalHeader.substring(1) + "\n";
 
-    }
+
 
 
 
@@ -169,6 +173,7 @@ function checkFinal(count, records){
     }
 
 
+    $("#csvCheck").prop("disabled", false);
 
     $("#summaryCheck").prop("disabled", false);
 
@@ -268,6 +273,7 @@ $("form#data").submit(function(event) {
 
   // Clear all the output sections
   summary = "";
+  summaryCSV = "";
   count = 0;
   finishedRecords = [];
   $("#cleanedSeqs").empty();
@@ -294,6 +300,9 @@ $("form#data").submit(function(event) {
 
   $("#treeCheck").prop("disabled", true);
   $("#treeCheck").prop("checked", false);
+
+  $("#csvCheck").prop("disabled", true);
+  $("#csvCheck").prop("checked", false);
 
 
   $("#summaryCheck").prop("disabled", true);
@@ -1525,6 +1534,18 @@ $("form#save").submit(function(event) {
 
       }
 
+    }
+
+    else if (itemName == "csvDL"){
+      
+      if (summaryCSV.length > 1){
+        outputZip.file('summary.csv', summaryCSV);
+      }
+
+      else {
+        bootstrap_alert.warning("You requested a CSV but there is no CSV file generated.");
+
+      }
     }
 
     else if (itemName == "summaryDL"){
