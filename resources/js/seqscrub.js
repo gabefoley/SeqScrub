@@ -9,6 +9,8 @@ var count = 0;
 var invalidCharsRegex = "";
 summary = "";
 summaryCSV="";
+var uniProtToPDB = new Map;
+var PDBToUniProt = new Map;
 var cleanTree = false;
 var tree = "";
 var cleanedTree = "";
@@ -103,23 +105,23 @@ function checkFinal(count, records){
 
     // Create the summary file
 
-    summary += "Original headers : Cleaned headers \n";
+    summary += "Original headers : Cleaned headers \r\n";
 
     // Create the summary CSV file
 
-    summaryCSV += "Original header, Cleaned header \n";
+    summaryCSV += "Original header, Cleaned header \r\n";
 
     for (var i in records){
       // If we were able to clean up the sequence, record the final header
       if (records[i].finalHeader){
-        summary += records[i].originalHeader.substring(1).trim()  + " : " + records[i].finalHeader.substring(1)  + "\n";
-        summaryCSV += records[i].originalHeader.substring(1).trim()  + "," +  records[i].finalHeader.substring(1) + "\n";
+        summary += records[i].originalHeader.substring(1).trim()  + " : " + records[i].finalHeader.substring(1)  + "\r\n";
+        summaryCSV += records[i].originalHeader.substring(1).trim()  + "," +  records[i].finalHeader.substring(1) + "\r\n";
       }
 
       // Otherwise record the original header
       else {
-        summary += records[i].originalHeader.substring(1).trim()  + " : " + records[i].originalHeader.substring(1)  + "\n";
-        summaryCSV += records[i].originalHeader.substring(1).trim() + "," +  records[i].originalHeader.substring(1) + "\n";
+        summary += records[i].originalHeader.substring(1).trim()  + " : " + records[i].originalHeader.substring(1)  + "\r\n";
+        summaryCSV += records[i].originalHeader.substring(1).trim() + "," +  records[i].originalHeader.substring(1) + "\r\n";
 
 
       }
@@ -202,9 +204,14 @@ function cleanTreeNames() {
     splitLine = splitSummary[line];
 
     if (splitLine.length > 0){
+      console.log(splitLine)
 
-    newname = splitLine.split("FROM:")[0].trim();
-    oldname = splitLine.split("FROM:")[1].trim();
+    oldname = splitLine.split(" : ")[0].trim();
+    newname = splitLine.split(" : ")[1].trim();
+
+
+    console.log("New name", newname)
+    console.log("Old name", oldname)
 
 
     // If this is a trimmed tree (i.e. the original tree cuts off after the first space in the header, change the names to reflect this)
@@ -627,7 +634,7 @@ $("form#data").submit(function(event) {
 
       if (pdbList.length > 0) {
         while (pdbList.length){
-          getPDBSpeciesNameFromUniProt(pdbList.splice(0,200), true);
+          getUniProtIDFromPDB(pdbList.splice(0,200), true);
 
         }
       }
@@ -657,8 +664,8 @@ function getIDString(records, database){
     linker = "+OR+id:";
   }
 
-  else if (database == "PDB") {
-    linker = "+OR+";
+  else if (database == "PDB"){
+    linker = "+OR+"
   }
 
   else if (database == "NCBI"){
@@ -666,7 +673,13 @@ function getIDString(records, database){
   }
 
   for (var i = 0, size = records.length; i < size; i++) {
-    idString += records[i].id + linker;
+    if (database == "PDB") {
+      idString += records[i].uniprot_id + linker;
+    }
+    else {
+      idString += records[i].id + linker;
+
+    }
   }
 
   // Remove the final linker string that was added
@@ -688,20 +701,37 @@ function formatTaxonID(records) {
     }
   }
 
+  console.log(idString)
+
   idString = idString.substring(0, idString.length - trim);
   return idString;
 
 }
 
 function getDataFromUniprot(records, pdb) {
+
+  console.log("Got to get data from uniprot")
+  console.log(uniProtToPDB)
   obsoleteList = [];
   speciesDict = {};
   geneDict = {};
   entryNameDict = [];
-  idString = getIDString(records, "UniProt");
+  if (pdb){
+    idString = getIDString(records, "PDB");
+    url = "https://www.uniprot.org/uniprot/?query=" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
 
-  url = "https://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
 
+
+  }
+
+  else {
+    idString = getIDString(records, "UniProt");
+    url = "https://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
+
+  }
+
+
+  console.log (url)
   var promise = $.ajax({
     url: url,
     type: 'POST',
@@ -713,13 +743,30 @@ function getDataFromUniprot(records, pdb) {
 
     success: function(speciesData) {
 
+      console.log(speciesData);
+
 
         splitData = speciesData.split("\n");
+
+
+
 
 
         for (var line in splitData) {
           if (splitData[line] != null){
           splitLine = splitData[line].split("\t");
+
+          // If it is a PDB entry we need to grab the id name from the entry name field, to map back from the uniprotToPDB Map
+          if (pdb){
+            console.log('in a pdb')
+            console.log(splitLine[1])
+            console.log(uniProtToPDB)
+            idName = uniProtToPDB.get(splitLine[1])
+          }
+
+          else {
+            idName = splitLine[0]
+          }
 
           if (splitLine[2] != null){
 
@@ -732,31 +779,73 @@ function getDataFromUniprot(records, pdb) {
 
               taxonList = splitLine[4].split(",");
 
-              speciesDict[splitLine[0]] = taxonList[taxonList.length - 1].trim();
+              speciesDict[idName] = taxonList[taxonList.length - 1].trim();
             // Add the gene information back to the record
-              geneDict[splitLine[0]] = splitLine[2];
-              entryNameDict[splitLine[0]] = splitLine[1];
+              geneDict[idName] = splitLine[2];
+              entryNameDict[idName] = splitLine[1];
+
+              console.log("Here is taxonList")
+              console.log(taxonList);
+
+              console.log("Here is species dict")
+              console.log(speciesDict)
             }
               }
           }
         }
 
+      //   if (pdb){
+
+      //     console.log("But it is a PDB")
+
+      //     for (var record in records){
+
+      //        if (records[record].uniprot_id in speciesDict){
+      //          records[record].taxon = speciesDict[records[record].uniprot_id];
+      //        }
+
+      //        if (records[record].uniprot_id in geneDict){
+      //          records[record].headerInfo.geneName = geneDict[records[record].uniprot_id];
+      //        }
+
+
+      //       if (records[record].uniprot_id in entryNameDict){
+      //         records[record].id_name = entryNameDict[records[record].uniprot_id];
+      //       }
+
+      //   }
+      // }
+
+      //   else {
+
+
+            for (var record in records){
+
+              if (records[record].id in speciesDict){
+                records[record].taxon = speciesDict[records[record].id];
+              }
+
+              if (records[record].id in geneDict){
+                records[record].headerInfo.geneName = geneDict[records[record].id];
+              }
+
+
+             if (records[record].id in entryNameDict){
+               records[record].id_name = entryNameDict[records[record].id];
+             }
+          }
+
+        
+
+
+
+
+      
+
     
-        for (var record in records){
-
-          if (records[record].id in speciesDict){
-            records[record].taxon = speciesDict[records[record].id];
-          }
-
-          if (records[record].id in geneDict){
-            records[record].headerInfo.geneName = geneDict[records[record].id];
-          }
 
 
-         if (records[record].id in entryNameDict){
-           records[record].id_name = entryNameDict[records[record].id];
-         }
-      }
+
 
 
 
@@ -919,9 +1008,14 @@ function getIDFromNCBI(records, speciesData) {
 
 
 function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
+  console.log("Got to getspeciesnamefromNCBI")
+  console.log(records)
   speciesList = [];
+
   idString = formatTaxonID(records);
   urlAll = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
+
+  console.log(urlAll);
 
 
 
@@ -1040,15 +1134,11 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
 
 }
 
+function getUniProtIDFromPDB(records, speciesData) {
 
-
-function getPDBSpeciesNameFromUniProt(records, speciesData) {
-  fullList = [];
-  obsoleteList = [];
-
-  idString = getIDString(records, "PDB");
-
-  url = "https://www.uniprot.org/uniprot/?query=" + idString + "&format=xml";
+  idString = getIDString(records, "UniProt");
+  url = "https://www.uniprot.org/uploadlists/?from=PDB_ID&to=ID&query=" + idString +"&format=tab";
+  console.log(url)
 
 
   var promise = $.ajax({
@@ -1061,62 +1151,50 @@ function getPDBSpeciesNameFromUniProt(records, speciesData) {
 
     success: function(speciesData) {
 
-      if (speciesData != null) {
-
-        for (var record in records) {
-          path = "";
-          if (records[record].type == "pdb") {
-            path = "//*[name()='dbReference'][@id='" + records[record].id + "']/preceding-sibling::*[name()='organism']/*[@type='scientific']";
+      splitData = speciesData.split("\n");
+      for (var line in splitData) {
+        if (splitData[line] != null){
+          splitLine = splitData[line].split("\t");
+          console.log(splitLine)
+          uniProtToPDB.set(splitLine[1], splitLine[0])
+          PDBToUniProt.set(splitLine[0], splitLine[1])
           }
-          else {
-                  path = "/*/*/*[name()='accession'][contains(., '" + records[record].id + "')]/following-sibling::*[name()='organism']/*[@type='scientific']";
-
-          }
-          var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
-
-
-          try {
-            var thisNode = node.iterateNext();
-            while (thisNode) {
-              records[record].species = thisNode.textContent;
-
-              thisNode = node.iterateNext();
-            }
-          } catch (e) {
-            bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
-          }
-
         }
-      
+
+        for (var record in records){
+          console.log("Here are values")
+          console.log(uniProtToPDB)
+          console.log(uniProtToPDB.values())
+          if (PDBToUniProt.has(records[record].id)){
+            records[record].uniprot_id = PDBToUniProt.get(records[record].id);
+          }
       }
+      console.log("ARE THE RECORDS?")
+      console.log(records)
+
+          getDataFromUniprot(records, true);
 
 
-        sortOutput(records, obsoleteList);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+          if (errorThrown == "Bad Request"){
+            response = XMLHttpRequest.responseText;
+            alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable");
 
+            obsoleteList = [];
+            sortOutput(records, obsoleteList);
+          
+          }
 
+          else {
 
-    },
-    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-      if (errorThrown == "Bad Request"){
-        response = XMLHttpRequest.responseText;
-        alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable");
+            generateAlert(records);
 
-        obsoleteList = [];
-        sortOutput(records, obsoleteList);
-      
-      }
+          }
 
-      else {
-        generateAlert(records);
-
-      }
-
-}
-
-});
-}
-
-
+        }   
+      });
+    }
 
 
 function sortOutput(records, obsoleteList) {
@@ -1568,19 +1646,19 @@ $("form#save").submit(function(event) {
       if (numRecords > limit){
 
         if ($(this).val() == "cleanedSeqs"){
-          var item = cleanedSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n");
+          var item = cleanedSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
         }
 
         else if ($(this).val() == "badCharacters"){
-          var item = badCharactersResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n");
+          var item = badCharactersResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
         }
 
         else if ($(this).val() == "obsoleteSeqs"){
-          var item = obsoleteSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n");
+          var item = obsoleteSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
         }
 
         else if ($(this).val() == "badIds"){
-          var item = badIdsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\n");
+          var item = badIdsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
         }
 
       }
