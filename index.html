@@ -86,62 +86,66 @@
 
                 <option value="class">Class</option>
                 <option value="phylum">Phylum</option>
-                <option value="kingdom">Kingdom</option>
+                <option value="superkingdom">Kingdom</option>
 
 
             </select>
 
             Curation options <br>
 
-            <label for="invalidHeadChars" > Remove these characters from header: </label>
-            <input type="text" onClick="this.select();" id="invalidHeadChars" value=": , ; ( )"/> <br>
 
+            <input type="checkbox" checked id="checkObsolete" value=checked name="checkObsolete" class=obsoleteCheck>
+            <label for="checkObsolete"> Remove obsolete records </label> <br>
+
+            <input type="checkbox" checked id="removeUnclean" value=checked name="removeUnclean" class=dataCheck>
+            <label for="removeUnclean"> Remove uncleaned records</label> <br>
 
             <label for="invalidChars" > Remove sequences containing: </label>
             <input type="text" onClick="this.select();" id="invalidChars" value="B J O U X Z" /> <br>
 
+            <label for="invalidHeadChars" > Remove these characters from header: </label>
+            <input type="text" onClick="this.select();" id="invalidHeadChars" value=": , ; ( )"/> <br>
 
-            <input type="checkbox" checked id="checkObsolete" value=checked name="checkObsolete" class=obsoleteCheck>
-
-            <label for="checkObsolete"> Remove obsolete records </label> <br>
-
-            <input type="checkbox" checked id="removeUnclean" value=checked name="removeUnclean" class=dataCheck>
-
-            <label for="removeUnclean"> Remove uncleaned records</label> <br>
 
             <input type="checkbox" id="replaceHeadersDBCheck" name="replaceHeadersDBCheck" class=headersDBCheck>
-
             <label for="replaceHeadersDB" > Keep original headers - just remove characters from headers: </label>
             
             <input type="text" onClick="this.select();" id="replaceHeadersDB" value=": , ; ( )"/> <br>
-
             <input type="checkbox" id="replaceCharsCheck" name="replaceCharsCheck" value=unchecked class="replaceCheck">
 
-            <label for="replaceChars" > Don't check databases - just remove characters: </label>
-            
+            <label for="replaceChars" > Don't check databases - just remove characters from headers: </label>
             <input type="text" onClick="this.select();" id="replaceChars" value=": , ; ( )" /> <br>
 
             <input type="checkbox" checked id="getFirstID" value=checked name="getFirstID" class=dataCheck>
+            <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br><br>
 
-            <label for="getFirstID"> Retain only the first ID from headers with multiple IDs </label> <br>
+
+
+
+
+            Formatting options <br>
 
             <label for="stripUniProtID"> Format UniProt IDs like this - </label> 
-
-
             <select id="stripUniProtID">
               <option value=uniprotFormat1 >>tr|A0A1A8UQI7|A0A1A8UQI7_NOTFU </option>
               <option value=uniprotFormat2 >>tr|A0A1A8UQI7 </option>
               <option value=uniprotFormat3 >>A0A1A8UQI7 </option>
             </select>
 
-            <br><br>
+            <br>
 
+            <label for="PDBFormat"> For PDB sequences - </label> 
+            <select id="PDBFormat">
+              <option value=PDBFormat1 >Keep the original header information and add annotations </option>
+              <option selected="selected" value=PDBFormat2 >Keep the original header information and don't add annotations </option>
+              <option value=PDBFormat3 >Remove the original header information and add annotations </option>
+              <option value=PDBFormat4 >Remove the original header information and don't add annotations </option>
 
+            </select>
 
-            Formatting options <br>
+            <br>
 
             <label for="idChar" > Add this character after ID </label>
-            
             <input type="text" onClick="this.select();" id="idChar" value=" " /> <br>
 
             <label for="geneChar" > Use this character to split gene information: </label>

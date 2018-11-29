@@ -2,3 +2,7 @@ https://www.uniprot.org/uniprot/?query=3QM4&format=xml
 https://www.uniprot.org/uniprot/?query=3QM4
 https://www.uniprot.org/uploadlists/from=ACC&to=P_REFSEQ_AC&query=Q7Z449+GARFIELD&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed
 https://www.uniprot.org/uniprot/?from=ACC&to=P_REFSEQ_AC&query=Q7Z449&format=tab
+
+
+https://www.uniprot.org/uploadlists/?from=PDB_ID&to=ID&query=3QM4&format=tab
+https://www.uniprot.org/uniprot/?from=ACC&to=P_REFSEQ_AC&query=CP2D6_HUMAN&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed
