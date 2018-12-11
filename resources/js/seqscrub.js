@@ -2,6 +2,9 @@ $(document).ready(function() {
   document.getElementsByTagName("html")[0].style.visibility = "visible";
 });
 
+function wait(fn) {
+  window.setTimeout(function() { fn(); }, 1000);
+}
 
 var finishedRecords = [];
 var noCommon = "";
@@ -626,21 +629,22 @@ $("form#data").submit(function(event) {
 
       if (uniprotList.length > 0) {
         while (uniprotList.length){
-          getDataFromUniprot(uniprotList.splice(0,200), false);
 
-
+            getDataFromUniprot(uniprotList.splice(0,200), false);
         }
       }
 
       if (pdbList.length > 0) {
         while (pdbList.length){
-          getUniProtIDFromPDB(pdbList.splice(0,200), true);
+            getUniProtIDFromPDB(pdbList.splice(0,200), true);
 
         }
       }
       if (ncbiList.length > 0) {
         while (ncbiList.length){
         getDataFromNCBI(ncbiList.splice(0,200));
+          // getDataFromNCBI(ncbiList.splice(0,200);
+
       }
       }
     }
@@ -831,6 +835,7 @@ function getDataFromUniprot(records, pdb) {
 
 
              if (records[record].id in entryNameDict){
+              console.log("Getting an id_name")
                records[record].id_name = entryNameDict[records[record].id];
              }
           }
@@ -896,6 +901,7 @@ function getDataFromNCBI(records) {
     url: urlDoc,
 
     type: 'POST',
+
     headers: {
         'Content-Type':'text/plain'
      },
@@ -1022,6 +1028,7 @@ function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
   var promise = $.ajax({
     url: urlAll,
     type: 'POST',
+
     headers: {
         'Content-Type':'text/plain'
      },
@@ -1144,6 +1151,7 @@ function getUniProtIDFromPDB(records, speciesData) {
   var promise = $.ajax({
     url: url,
     type: 'POST',
+
     headers: {
         'Content-Type':'text/plain'
      },
@@ -1482,6 +1490,10 @@ function appendOutput(records){
 
         // If it is a UniProt seqeunce, we need to add back in some formatting
         if (records[i].type == 'tr' || records[i].type == 'sp' || records[i].type == 'gi' ){
+
+          console.log("Here it is");
+          console.log(formattedType);
+          console.log(records[i]);
 
           if (stripUniProtID == 'uniprotFormat1'){
             var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + "|" + records[i].id_name.trim() + idChar + headerOutput.trim();
