@@ -36,7 +36,6 @@ if (cleanTree){
 
 }
 
-
 $.support.cors = true;
 
 $("#commonName").attr('checked', false);
@@ -131,12 +130,6 @@ function checkFinal(count, records){
 
     }
 
-
-
-
-
-
-
     if ($("#cleanedSeqs").val()) {
       $("#cleanCheck").prop("disabled", false);
     }
@@ -207,15 +200,9 @@ function cleanTreeNames() {
     splitLine = splitSummary[line];
 
     if (splitLine.length > 0){
-      console.log(splitLine)
 
     oldname = splitLine.split(" : ")[0].trim();
     newname = splitLine.split(" : ")[1].trim();
-
-
-    console.log("New name", newname)
-    console.log("Old name", oldname)
-
 
     // If this is a trimmed tree (i.e. the original tree cuts off after the first space in the header, change the names to reflect this)
     if (trimmedTree){
@@ -349,11 +336,6 @@ $("form#data").submit(function(event) {
 
   headerFormat = $('select#header-format').val();
 
-
-
-
-
-
   //Disable the default form submission
   event.preventDefault();
 
@@ -364,8 +346,6 @@ $("form#data").submit(function(event) {
 
   if (invalidChars){
     invalidCharsRegex = new RegExp(escapeRegExp($("#invalidChars").val().trim()).replace(/ /g, "|"));
-    console.log("Invalid chars")
-    console.log(invalidCharsRegex)
   }
 
  
@@ -403,7 +383,6 @@ $("form#data").submit(function(event) {
     contentType: false,
     processData: false,
     success: function(returndata) {
-      console.log(returndata)
       jsonData = JSON.parse(returndata);
 
 
@@ -451,34 +430,6 @@ $("form#data").submit(function(event) {
 
           header = record.originalHeader.replace( headerCharsRegex, "");
 
-          // if (cleanTree) {
-
-          //   console.log(record.originalHeader.substring(1).trim());
-
-          //   treeRegEx = new RegExp(record.originalHeader.substring(1).trim());
-
-          //   trimmedTreeRegEx = new RegExp(record.originalHeader.substring(1).split(" ")[0].trim());
-
-
-          //   if (!treeRegEx.test(tree) && !trimmedTreeRegEx.test(tree)){
-          //     hideLoadingScreen();
-
-          //     bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree");
-            
-          //   }
-
-          //   if (trimmedTreeRegEx.test(tree)){
-          //     trimmedTree = true;
-          //   }
-          //   cleanedTree = cleanTreeNames();
-
-          // }
-
-
-
-
-
-
           // Can still do a check to remove sequences with illegal characters
 
           if (invalidChars && invalidCharsRegex.test(record.seq)) {
@@ -503,9 +454,6 @@ $("form#data").submit(function(event) {
               $("#cleanedSeqs").append(output.trim());
               cleanedCount +=1;
           }
-
-
-
 
           }
 
@@ -539,25 +487,6 @@ $("form#data").submit(function(event) {
 
         $("#summaryCheck").prop("disabled", false);
 
-        // Create the summary file
-
-        // summary += "Updated headers FROM: Original headers \n"
-
-        // for (var i in records){
-        //   summary += records[i].finalHeader + " FROM: " + record.originalHeader.substring(1) + "\n";
-
-        // }
-
-        // summary += "ID mapping FROM: Original headers \n"
-
-        // for (var i in records){
-        //   summary +=  records[i].id.trim() +" FROM: " + records[i].originalHeader.substring(1) + "\n";
-
-        // }
-        
-
-
-
       }
 
       else {
@@ -577,16 +506,7 @@ $("form#data").submit(function(event) {
 
         }
 
-        console.log("ID retrieved");
-        console.log(jsonData[i].id);
-        console.log(jsonData[i].id_name)
-        console.log('here we go')
-        console.log(jsonData[i].type)
-
         var record = {
-
-
-
 
           order: i,
           id: jsonData[i].id.replace(/-/g,"_"),
@@ -608,9 +528,6 @@ $("form#data").submit(function(event) {
           treeRegEx = new RegExp(escapeRegExp(record.originalHeader.substring(1).trim()));
 
           trimmedTreeRegEx = new RegExp(escapeRegExp(record.originalHeader.substring(1).split(" ")[0].trim()));
-
-
-
 
           if (!treeRegEx.test(tree) && !trimmedTreeRegEx.test(tree) ){
             hideLoadingScreen();
@@ -683,15 +600,10 @@ $("form#data").submit(function(event) {
 });
 
 function convertToNCBI(records, speciesData){
-  console.log ('here in convert')
 
     if (speciesData != null) {
 
       for (var record in records) {
-        console.log('here we go')
-        console.log(records[record])
-        console.log(records[record].id)
-
           path = "*/DocSum/Item[@Name='Gi'][contains(., '" + records[record].id.split("|")[1] + "')]/../Item[@Name='AccessionVersion']/text()";
 
             var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
@@ -710,12 +622,7 @@ function convertToNCBI(records, speciesData){
 
       }
 
-      console.log ('now the records are')
-      console.log(records)
-
       getIDFromNCBI(records, speciesData);
-
-
 
     }
 
@@ -768,8 +675,6 @@ function formatTaxonID(records) {
     }
   }
 
-  console.log(idString)
-
   idString = idString.substring(0, idString.length - trim);
   return idString;
 
@@ -777,8 +682,6 @@ function formatTaxonID(records) {
 
 function getDataFromUniprot(records, pdb) {
 
-  console.log("Got to get data from uniprot")
-  console.log(uniProtToPDB)
   obsoleteList = [];
   speciesDict = {};
   geneDict = {};
@@ -797,8 +700,6 @@ function getDataFromUniprot(records, pdb) {
 
   }
 
-
-  console.log (url)
   var promise = $.ajax({
     url: url,
     type: 'POST',
@@ -810,14 +711,8 @@ function getDataFromUniprot(records, pdb) {
 
     success: function(speciesData) {
 
-      console.log(speciesData);
-
 
         splitData = speciesData.split("\n");
-
-
-
-
 
         for (var line in splitData) {
           if (splitData[line] != null){
@@ -825,9 +720,6 @@ function getDataFromUniprot(records, pdb) {
 
           // If it is a PDB entry we need to grab the id name from the entry name field, to map back from the uniprotToPDB Map
           if (pdb){
-            console.log('in a pdb')
-            console.log(splitLine[1])
-            console.log(uniProtToPDB)
             idName = uniProtToPDB.get(splitLine[1])
           }
 
@@ -851,39 +743,11 @@ function getDataFromUniprot(records, pdb) {
               geneDict[idName] = splitLine[2];
               entryNameDict[idName] = splitLine[1];
 
-              console.log("Here is taxonList")
-              console.log(taxonList);
-
-              console.log("Here is species dict")
-              console.log(speciesDict)
             }
               }
           }
         }
 
-      //   if (pdb){
-
-      //     console.log("But it is a PDB")
-
-      //     for (var record in records){
-
-      //        if (records[record].uniprot_id in speciesDict){
-      //          records[record].taxon = speciesDict[records[record].uniprot_id];
-      //        }
-
-      //        if (records[record].uniprot_id in geneDict){
-      //          records[record].headerInfo.geneName = geneDict[records[record].uniprot_id];
-      //        }
-
-
-      //       if (records[record].uniprot_id in entryNameDict){
-      //         records[record].id_name = entryNameDict[records[record].uniprot_id];
-      //       }
-
-      //   }
-      // }
-
-      //   else {
 
 
             for (var record in records){
@@ -898,24 +762,9 @@ function getDataFromUniprot(records, pdb) {
 
 
              if (records[record].id in entryNameDict){
-              console.log("Getting an id_name")
                records[record].id_name = entryNameDict[records[record].id];
              }
           }
-
-        
-
-
-
-
-      
-
-    
-
-
-
-
-
 
       getSpeciesNameFromNCBI(records, idString, obsoleteList);
 
@@ -957,11 +806,6 @@ function getDataFromNCBI(records, gi) {
       urlDoc = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=" + idString + "&retmode=xml&rettype=docsum";
 
     }
-
-    console.log('got to data from ncbi')
-    console.log(urlDoc)
-
-
 
   var promise = $.ajax({
     url: urlDoc,
@@ -1088,16 +932,11 @@ function getIDFromNCBI(records, speciesData) {
 
 
 function getSpeciesNameFromNCBI(records, idString, obsoleteList) {
-  console.log("Got to getspeciesnamefromNCBI")
-  console.log(records)
+
   speciesList = [];
 
   idString = formatTaxonID(records);
   urlAll = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
-
-  console.log(urlAll);
-
-
 
   var promise = $.ajax({
     url: urlAll,
@@ -1219,8 +1058,6 @@ function getUniProtIDFromPDB(records, speciesData) {
 
   idString = getIDString(records, "UniProt");
   url = "https://www.uniprot.org/uploadlists/?from=PDB_ID&to=ID&query=" + idString +"&format=tab";
-  console.log(url)
-
 
   var promise = $.ajax({
     url: url,
@@ -1237,22 +1074,17 @@ function getUniProtIDFromPDB(records, speciesData) {
       for (var line in splitData) {
         if (splitData[line] != null){
           splitLine = splitData[line].split("\t");
-          console.log(splitLine)
           uniProtToPDB.set(splitLine[1], splitLine[0])
           PDBToUniProt.set(splitLine[0], splitLine[1])
           }
         }
 
         for (var record in records){
-          console.log("Here are values")
-          console.log(uniProtToPDB)
-          console.log(uniProtToPDB.values())
+ 
           if (PDBToUniProt.has(records[record].id)){
             records[record].uniprot_id = PDBToUniProt.get(records[record].id);
           }
       }
-      console.log("ARE THE RECORDS?")
-      console.log(records)
 
           getDataFromUniprot(records, true);
 
@@ -1280,32 +1112,24 @@ function getUniProtIDFromPDB(records, speciesData) {
 
 
 function sortOutput(records, obsoleteList) {
-  console.log("Called sort ouput")
-  console.log(records)
 
   ncbiCheck = [];
 
   // Check to see if there are any illegal characters
   for (var i in records) {
-    console.log(records[i])
     if ((records[i].headerInfo == null || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
-      console.log('here')
 
       if (records[i].ncbiChecked == true) {
-        console.log('goldfish')
 
         records[i].appendTo = "badIds";
         finishedRecords.push(records[i]);
         count +=1;
       } else {
-        console.log('chicken')
 
         records[i].ncbiChecked = true;
         ncbiCheck.push(records[i]);
       }
     } else if (checkObsolete && obsoleteList.includes(records[i].id)) {
-      console.log('wombat')
-
 
         records[i].appendTo = "obsoleteSeqs";
         finishedRecords.push(records[i]);
@@ -1315,12 +1139,6 @@ function sortOutput(records, obsoleteList) {
 
     else {
 
-
-      // If there are illegal characters highlight them within the text
-      console.log('just before check')
-      console.log(invalidChars)
-      console.log(records[i].seq)
-      console.log(invalidCharsRegex.test(records[i].seq))
       if (invalidChars && invalidCharsRegex.test(records[i].seq)) {
         records[i].appendTo = "badCharacters";
         finishedRecords.push(records[i]);
@@ -1575,18 +1393,11 @@ function appendOutput(records){
 
             }
 
-        
-
-
           });
       }
 
         // If it is a UniProt seqeunce, we need to add back in some formatting
         if (records[i].type == 'tr' || records[i].type == 'sp' || records[i].type == 'gi' ){
-
-          console.log("Here it is");
-          console.log(formattedType);
-          console.log(records[i]);
 
           if (stripUniProtID == 'uniprotFormat1'){
             if (records[i].id_name.length > 0){
@@ -1629,8 +1440,6 @@ function appendOutput(records){
           header = header.trim().replace(/ /g, "_") ;
         }
 
-
-
         // Save the final header so we can write it to the summary file
         records[i].finalHeader = header;
 
@@ -1646,12 +1455,7 @@ function appendOutput(records){
         $("#cleanedSeqs").append(output.trim());
       }
 
-
-
         cleanedCount +=1;
-
-
-
 
     }
   
@@ -1702,12 +1506,9 @@ function escapeRegExp(str) {
 $("form#save").submit(function(event) {
   event.preventDefault();
 
-
-
   var outputZip = new JSZip();
-
-
   var val = [];
+
   $('.downloadCheck:checkbox:checked').each(function(i){
     itemName = $(this).val();
     if (itemName == "treeDL"){
@@ -1795,11 +1596,6 @@ $("form#save").submit(function(event) {
 
 
 });
-
-
-
-
-
 
 
 // Allow for easy selection of full text in each window
