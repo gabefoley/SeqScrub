@@ -331,3 +331,16 @@ table td:first-child {
     transform: translate3d(0,0,0);
   }
 }
+
+
+.faq_item {
+  color: var(--accent-color-dark);
+}
+
+.output_item {
+  color: var(--accent-color);
+}
+
+.error_item {
+  color: var(--primary-color-light);
+}

@@ -57,10 +57,10 @@ while (($line = fgets($file)) !== false){
 
 		$lineArray = preg_split("/[\s,|_\/]+/", $line);
 
-
-
 		$type = substr($lineArray[0], 1);
 		$id = "";
+		$id_name = "";
+
 
 
 		// Add the type (NCBI or UniProt) back into the array as the actual letter code
@@ -69,6 +69,20 @@ while (($line = fgets($file)) !== false){
 
 		} elseif ($type == "pdb" || $type == "sp" || $type == "tr" || $type == "gi"){
 			$id = $lineArray[1];
+			$uniprotArray = preg_split("/[\s,\/]+/", $line);
+			$uniProtstring = print_r($uniprotArray[0], true);
+			$idArray = preg_split("/[\s,|]+/", $uniProtstring);
+
+
+			for ($i = 2; $i < count($idArray); $i++) {
+				$id_name = $id_name . "_" . $idArray[$i];
+			}
+
+			$id_name = ltrim($id_name,"_");
+
+
+			// $id_name = $idArray[1] . "_" . $idArray[2];
+			// $id_name = $uniProtstring;
 		
 
 
@@ -81,7 +95,7 @@ while (($line = fgets($file)) !== false){
 
 
 		// Prepare the array for returning
-		$returnArray[] = array('originalHeader' => $line, 'type' => $type ,'id' => $id);
+		$returnArray[] = array('originalHeader' => $line, 'type' => $type ,'id' => $id, 'id_name' => $id_name);
 
 	}
 

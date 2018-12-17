@@ -364,7 +364,8 @@ $("form#data").submit(function(event) {
 
   if (invalidChars){
     invalidCharsRegex = new RegExp(escapeRegExp($("#invalidChars").val().trim()).replace(/ /g, "|"));
-
+    console.log("Invalid chars")
+    console.log(invalidCharsRegex)
   }
 
  
@@ -429,6 +430,7 @@ $("form#data").submit(function(event) {
           limit = 100;
         }
         for (var i = 0; i < numRecords; i++) {
+
 
           var record = {
             order: i,
@@ -573,9 +575,16 @@ $("form#data").submit(function(event) {
 
         }
 
+        console.log("ID retrieved");
+        console.log(jsonData[i].id);
+        console.log(jsonData[i].id_name)
+
         var record = {
+
+
           order: i,
           id: jsonData[i].id.replace(/-/g,"_"),
+          id_name: jsonData[i].id_name,
           taxon: "",
           type: jsonData[i].type,
           species: "",
@@ -1206,29 +1215,47 @@ function getUniProtIDFromPDB(records, speciesData) {
 
 
 function sortOutput(records, obsoleteList) {
+  console.log("Called sort ouput")
+  console.log(records)
 
   ncbiCheck = [];
 
   // Check to see if there are any illegal characters
   for (var i in records) {
+    console.log(records[i])
     if ((records[i].headerInfo == null || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
+      console.log('here')
+
       if (records[i].ncbiChecked == true) {
+        console.log('goldfish')
+
         records[i].appendTo = "badIds";
         finishedRecords.push(records[i]);
         count +=1;
       } else {
+        console.log('chicken')
+
         records[i].ncbiChecked = true;
         ncbiCheck.push(records[i]);
       }
-    } else if (obsoleteList.includes(records[i].id)) {
+    } else if (checkObsolete && obsoleteList.includes(records[i].id)) {
+      console.log('wombat')
+
 
         records[i].appendTo = "obsoleteSeqs";
         finishedRecords.push(records[i]);
 
         count +=1;
-    } else {
+    } 
+
+    else {
+
 
       // If there are illegal characters highlight them within the text
+      console.log('just before check')
+      console.log(invalidChars)
+      console.log(records[i].seq)
+      console.log(invalidCharsRegex.test(records[i].seq))
       if (invalidChars && invalidCharsRegex.test(records[i].seq)) {
         records[i].appendTo = "badCharacters";
         finishedRecords.push(records[i]);
@@ -1282,6 +1309,7 @@ if (ncbiCheck.length > 0){
   getDataFromNCBI(ncbiCheck);
 }
 }
+
 
 function appendOutput(records){
 
@@ -1496,7 +1524,12 @@ function appendOutput(records){
           console.log(records[i]);
 
           if (stripUniProtID == 'uniprotFormat1'){
-            var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + "|" + records[i].id_name.trim() + idChar + headerOutput.trim();
+            if (records[i].id_name.length > 0){
+              var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + "|" + records[i].id_name.trim() + idChar + headerOutput.trim();
+            }
+            else
+              var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + idChar + headerOutput.trim();
+
           }
 
           else if (stripUniProtID == 'uniprotFormat2')  {
@@ -1504,7 +1537,7 @@ function appendOutput(records){
           }
 
           else if (stripUniProtID == 'uniprotFormat3') {
-            var header = ">" +  records[i].id.trim() +  + idChar + headerOutput.trim();
+            var header = ">" +  records[i].id.trim() + idChar + headerOutput.trim();
 
           }
 
