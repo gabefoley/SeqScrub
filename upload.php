@@ -67,7 +67,12 @@ while (($line = fgets($file)) !== false){
 		if ($type == "XP" || $type == "XM" || $type == "XR" || $type == "WP" || $type == "NP" || $type == "NC" || $type == "NG" || $type == "NM" || $type == "NR") {
 			$id = $type . "_" . $lineArray[1];
 
-		} elseif ($type == "pdb" || $type == "sp" || $type == "tr" || $type == "gi"){
+		} elseif ($type == "gi") {
+			$id = $type . "|" . $lineArray[1];
+
+	
+
+		} elseif ($type == "pdb" || $type == "sp" || $type == "tr" ){
 			$id = $lineArray[1];
 			$uniprotArray = preg_split("/[\s,\/]+/", $line);
 			$uniProtstring = print_r($uniprotArray[0], true);

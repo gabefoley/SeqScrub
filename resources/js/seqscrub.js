@@ -389,6 +389,7 @@ $("form#data").submit(function(event) {
   var ncbiList = [];
   var uniprotList = [];
   var pdbList = [];
+  var giList = [];
   uniprotDict = {};
   ncbiDict = {};
 
@@ -402,6 +403,7 @@ $("form#data").submit(function(event) {
     contentType: false,
     processData: false,
     success: function(returndata) {
+      console.log(returndata)
       jsonData = JSON.parse(returndata);
 
 
@@ -578,8 +580,12 @@ $("form#data").submit(function(event) {
         console.log("ID retrieved");
         console.log(jsonData[i].id);
         console.log(jsonData[i].id_name)
+        console.log('here we go')
+        console.log(jsonData[i].type)
 
         var record = {
+
+
 
 
           order: i,
@@ -619,16 +625,19 @@ $("form#data").submit(function(event) {
         }
 
 
-        if (record.type == 'tr' || record.type == 'sp' || record.type == 'gi' || record.type == '' && aaOpt) {
+        if (record.type == 'tr' || record.type == 'sp' || record.type == '' && aaOpt) {
 
           uniprotList.push(record);
-
 
         }
 
         else if (record.type == 'pdb'){
           pdbList.push(record);
         } 
+
+        else if (record.type == 'gi'){
+          giList.push(record)
+        }
 
         else {
           record.ncbiChecked = true;
@@ -649,10 +658,15 @@ $("form#data").submit(function(event) {
 
         }
       }
+
+      if (giList.length > 0) {
+        while (giList.length){
+          getDataFromNCBI(giList.splice(0,200), true)
+        }
+      }
       if (ncbiList.length > 0) {
         while (ncbiList.length){
-        getDataFromNCBI(ncbiList.splice(0,200));
-          // getDataFromNCBI(ncbiList.splice(0,200);
+        getDataFromNCBI(ncbiList.splice(0,200), false);
 
       }
       }
@@ -667,6 +681,46 @@ $("form#data").submit(function(event) {
 
 
 });
+
+function convertToNCBI(records, speciesData){
+  console.log ('here in convert')
+
+    if (speciesData != null) {
+
+      for (var record in records) {
+        console.log('here we go')
+        console.log(records[record])
+        console.log(records[record].id)
+
+          path = "*/DocSum/Item[@Name='Gi'][contains(., '" + records[record].id.split("|")[1] + "')]/../Item[@Name='AccessionVersion']/text()";
+
+            var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
+
+            try {
+              var thisNode = node.iterateNext();
+              while (thisNode) {
+
+                records[record].id = thisNode.textContent
+                thisNode = node.iterateNext();
+              }
+            } catch (e) {
+              bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
+            }
+
+
+      }
+
+      console.log ('now the records are')
+      console.log(records)
+
+      getIDFromNCBI(records, speciesData);
+
+
+
+    }
+
+  }
+
 
 
 function getIDString(records, database){
@@ -888,7 +942,7 @@ function getDataFromUniprot(records, pdb) {
 }
 
 
-function getDataFromNCBI(records) {
+function getDataFromNCBI(records, gi) {
 
   idString = getIDString(records, "NCBI");
 
@@ -903,6 +957,9 @@ function getDataFromNCBI(records) {
       urlDoc = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=" + idString + "&retmode=xml&rettype=docsum";
 
     }
+
+    console.log('got to data from ncbi')
+    console.log(urlDoc)
 
 
 
@@ -920,7 +977,15 @@ function getDataFromNCBI(records) {
 
     success: function(speciesData) {
 
-      getIDFromNCBI(records, speciesData);
+      if (gi) {
+
+        convertToNCBI(records, speciesData);
+
+      }
+
+      else {
+        getIDFromNCBI(records, speciesData);
+      }
     },
 
 
