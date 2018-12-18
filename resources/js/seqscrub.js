@@ -206,6 +206,7 @@ function cleanTreeNames() {
 
     // If this is a trimmed tree (i.e. the original tree cuts off after the first space in the header, change the names to reflect this)
     if (trimmedTree){
+      console.log("Old name is " + oldname)
 
       oldname = oldname.split(" ")[0];
 
@@ -224,6 +225,7 @@ function cleanTreeNames() {
 
 
       name_list.push(oldname);
+
 
     }
 
@@ -525,11 +527,12 @@ $("form#data").submit(function(event) {
 
         if (cleanTree) {
 
-          treeRegEx = new RegExp(escapeRegExp(record.originalHeader.substring(1).trim()));
+          treeRegEx = new RegExp(escapeRegExp(record.originalHeader.substring(1).trim()) + "\:");
 
-          trimmedTreeRegEx = new RegExp(escapeRegExp(record.originalHeader.substring(1).split(" ")[0].trim()));
+          trimmedTreeRegEx = new RegExp(escapeRegExp(record.originalHeader.substring(1).split(" ")[0].trim()) + "\:");
 
-          if (!treeRegEx.test(tree) && !trimmedTreeRegEx.test(tree) ){
+
+          if ((!treeRegEx.test(tree)) && (!trimmedTreeRegEx.test(tree)) ){
             hideLoadingScreen();
 
             bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree. <br> Check that you have a correctly formatted Newick file that matches your alignment.");
