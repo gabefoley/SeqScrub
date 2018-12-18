@@ -206,8 +206,6 @@ function cleanTreeNames() {
 
     // If this is a trimmed tree (i.e. the original tree cuts off after the first space in the header, change the names to reflect this)
     if (trimmedTree){
-      console.log("Old name is " + oldname)
-
       oldname = oldname.split(" ")[0];
 
     }
@@ -221,14 +219,20 @@ function cleanTreeNames() {
 
 
       treeRegEx = new RegExp(oldname, "g");
-      cleanedTree = cleanedTree.replace(treeRegEx, newname);
+      quotationRegEx = new RegExp("\'" + oldname + "\'", "g")
+
+      // If we want to add quotation marks around headers with whitespace and this header doesn't already have quotation marks
+      if ((addQuotationMarks) && (/\s/.test(newname)) && !(quotationRegEx.test(cleanedTree))){
+        cleanedTree = cleanedTree.replace(treeRegEx, "'" + newname + "'");
+      }
+      else {
+        cleanedTree = cleanedTree.replace(treeRegEx, newname);
+      }
 
 
       name_list.push(oldname);
 
-
     }
-
 
   }
 }
@@ -318,6 +322,7 @@ $("form#data").submit(function(event) {
   addUnderscores = $('#addUnderscore').is(":checked");
   addSquareBrackets = $('#addSquareBrackets').is(":checked");
   removeSpeciesBrackets = $('#removeSpeciesBrackets').is(":checked");
+  addQuotationMarks = $('#addQuotationMarks').is(":checked");
   commonName = $('#commonName').is(":checked");
   retainFirst = $('#getFirstID').is(":checked");
   stripUniProtID = $('#stripUniProtID').val();
@@ -533,13 +538,20 @@ $("form#data").submit(function(event) {
 
 
           if ((!treeRegEx.test(tree)) && (!trimmedTreeRegEx.test(tree)) ){
+            treeRegEx = new RegExp(escapeRegExp("\'" + record.originalHeader.substring(1).trim()) + "\'\:");
+
+            trimmedTreeRegEx = new RegExp(escapeRegExp("\'" + record.originalHeader.substring(1).split(" ")[0].trim()) + "\'\:");
             hideLoadingScreen();
+            if ((!treeRegEx.test(tree)) && (!trimmedTreeRegEx.test(tree)) ){
 
-            bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree. <br> Check that you have a correctly formatted Newick file that matches your alignment.");
-            return false;
+
+              bootstrap_alert.warning("The original alignment and tree file don't match. <br>" + record.originalHeader.substring(1).trim() +  " is in the alignment but not in the tree. <br> Check that you have a correctly formatted Newick file that matches your alignment.");
+              return false;
           }
+        }
 
-          if (trimmedTreeRegEx.test(tree)){
+          // Check to see if this is a trimmed tree
+          if (trimmedTreeRegEx.test(tree) && !(treeRegEx.test(tree))){
             trimmedTree = true;
           }
         }

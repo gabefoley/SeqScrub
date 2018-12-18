@@ -37,7 +37,7 @@
       </aside>
       <article class="doc__content">
         <section class="js-section">
-          <h3 class="section__title">Input options</h3>
+          <h2 class="section__title">Input options</h2>
           <p>SeqScrub is run by selecting the input files you wish to clean.</p>
           <table id="customers">
             <tr>
@@ -64,7 +64,7 @@
           <hr />
         </section>
         <section class="js-section">
-          <h3 class="section__title">Curation options</h3>
+          <h2 class="section__title">Curation options</h2>
           <table id="customers">
             <tr>
               <th><h1>Options</h1></th>
@@ -115,7 +115,7 @@
           <hr />
         </section>
         <section class="js-section">
-          <h3 class="section__title">Formatting options</h3>
+          <h2 class="section__title">Formatting options</h2>
           <table id="customers">
             <tr>
               <th><h1>Options</h1></th>
@@ -167,10 +167,16 @@
               <td>Remove any brackets which appear in a species name that is added to a header. Brackets sometimes appear in species names that are retrieved from databases, but can cause issues with downstream analysis as brackets have special syntactic meaning in the Newick file format.</td>
               <td>True</td>
             </tr>
+
+            <tr>
+              <td>If cleaning a tree and the new label contains whitespace, add quotation marks</td>
+              <td>Because whitespace can cause problems in Newick files, SeqScrub can automatically wrap any sequences that would have whitespace added as a result of the cleaning and annotation with quotation marks. If a sequence is already wrapped in quotation marks in the original tree it retains them and does not add extra quotation marks.</td>
+              <td>True</td>
+            </tr>
           </table>
         </section>
         <section class="js-section">
-          <h3 class="section__title">Output fields</h3>
+          <h2 class="section__title">Output fields</h2>
           <p>
             <div class=output_item> Cleaned sequences </div>
           </p>
@@ -205,47 +211,47 @@
 
         </section>
         <section class="js-section">
-          <h3 class="section__title">Downloading options</h3>
+          <h2 class="section__title">Downloading options</h2>
           <p>Any or all of the four output fields can be downloaded, as well as the phylogenetic tree you may have chosen to optionally clean, and two summary files in either comma separated value (.csv) or text format (.txt).
           </p>
         </section>
         <section class="js-section">
-          <h3 class="section__title">Error messages</h3>
+          <h2 class="section__title">Error messages</h2>
           <p>
-            <div class=error_item> Couldn't find the gene information for these sequences. <br> Couldn't find the common name for these sequences. <br> Couldn't find the full taxonomic information for &lt taxonomic rank &gt for these sequences. </div>
+            <div class=error_item><h1> Couldn't find the gene information for these sequences. <br> Couldn't find the common name for these sequences. <br> Couldn't find the full taxonomic information for &lt taxonomic rank &gt for these sequences. </h1> </div>
           </p>
           <p>
 
             These error messages occur when a particular annotation fails for a particular sequence. This is usually a result of these annotations not being present in the database for this record.
           </p>
           <p>
-            <div class=error_item> Records are too large to write out to fields. Download file for full records</div>
+            <div class=error_item><h1> Records are too large to write out to fields. Download file for full records</h1></div>
             </p>
             <p>
             This error message appears to warn the user that copy and pasting content from the output fields will not capture every record, and they should instead use the download options and button to retrieve their cleaned files.
           </p>
           <p>
-            <div class=error_item> There was a problem reading your file. Is it a FASTA file?</div>
+            <div class=error_item><h1> There was a problem reading your file. Is it a FASTA file?</h1></div>
             </p>
             <p>
             This error message occurs when SeqScrub is unable to parse the initial input file as a FASTA file. Check that your file meets the format requirements of a FASTA file.
           </p>
           <p>
-            <div class=error_item> The original alignment and tree file don't match. &lt record name &gt is in the alignment but not in the tree. Check that you have a correctly formatted Newick file that matches your alignment. </div>
+            <div class=error_item><h1> The original alignment and tree file don't match. &lt record name &gt is in the alignment but not in the tree. Check that you have a correctly formatted Newick file that matches your alignment.</h1></div>
             </p>
             <p>
 
             If you want to update a phylogenetic tree file at the same time as an alignment file, they must have the same information in their headers initially. SeqScrub performs an initial check to enforce this condition, otherwise it is unable to clean a tree alongside an alignment file.
           </p>
           <p>
-            <div class=error_item> "There was an error when trying to reach this URL: &lt url &gt</div>
+            <div class=error_item><h1> "There was an error when trying to reach this URL: &lt url &gt</h1></div>
             </p>
             <p>
 
             When connecting to external databases if SeqScrub runs into an error it will output the url it is trying to reach and failing on. Sometimes clicking on these links can provide information as to why SeqScrub is failing to connect to it.
           </p>
           <p>
-            <div class=error_item> Error: There was a problem reading the XML records</div>
+            <div class=error_item><h1> Error: There was a problem reading the XML records</h1></div>
             </p>
             <p>
 
@@ -253,7 +259,7 @@
 
           </p>
           <p>
-            <div class=error_item> You requested a phylogenetic tree but there is no cleaned tree available. <br> You requested a CSV but there is no CSV file generated. <br> You requested a summary but there is no summary generated. </div>
+            <div class=error_item><h1> You requested a phylogenetic tree but there is no cleaned tree available. <br> You requested a CSV but there is no CSV file generated. <br> You requested a summary but there is no summary generated.</h1></div>
             </p>
             <p>
 
@@ -262,7 +268,7 @@
           </p>
 
           <p>
-            <div class=error_item> There was a fatal error %lt number %gt sequences are being written to un-mappable <br> Please note: Currently not all sequences have been written to an output field <br> Please note: Despite the error, all sequences have still been written to an output field </div>
+            <div class=error_item><h1> There was a fatal error %lt number %gt sequences are being written to un-mappable <br> Please note: Currently not all sequences have been written to an output field <br> Please note: Despite the error, all sequences have still been written to an output field</h1></div>
             </p>
             <p>
 
@@ -273,7 +279,7 @@
 
         </section>
         <section class="js-section">
-          <h3 class="section__title">FAQ and troubleshooting</h3>
+          <h2 class="section__title">FAQ and troubleshooting</h2>
           <p>
             <div class=faq_item>
                 <h1> I have sequences that don't appear in NCBI or UniProt. Can SeqScrub still clean them? </h1>
@@ -299,7 +305,7 @@
             Check that you are using an appropriate text editor for viewing your FASTA files. A program like Notepad will not automatically display the line breaks correctly - this is true of other online bioinformatic programs and not just SeqScrub. Our recommendation is to change to a different text editor. However, you can open the downloaded FASTA files in a program like WordPad on Windows and then just resave the file. This will allow for them to be opened in Notepad with the correct formatting.
           </p>
 
-          <p>
+          
           <p>
             <div class=faq_item>
               <h1> My sequences get sent to un-mappable, even when they should be discoverable in one of the databases</h1>
@@ -308,6 +314,17 @@
           <p>
             SeqScrub can occasionally run into issues connecting to the external databases. Our recommendation is to try the files again. If the problem persists, reducing the number of sequences per file may help.
           </p>
+
+          <p>
+            <div class=faq_item>
+              <h1> How identical do my sequences in my alignment and phylogenetic tree need to be?</h1>
+            </div>
+          </p>
+          <p>
+            SeqScrub checks to see if headers are a match, but it allows for quotation marks to appear around the header information in the Newick tree (this is a common format added to allow for white spaces in Newick files). It also allows for sequences in the alignment to have whitespace such as 'XP_014834532.1 PREDICTED aromatase-like [Poecilia mexicana]' and a Newick file that only contains the identifier that occurs before the whitespace - 'XP_014834532.1'. Headers in the Newick file cannot add any extra information (besides quotation marks).
+          </p>
+
+
 
           <p>
 
