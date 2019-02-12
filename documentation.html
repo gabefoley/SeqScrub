@@ -268,7 +268,7 @@
           </p>
 
           <p>
-            <div class=error_item><h1> There was a fatal error %lt number %gt sequences are being written to un-mappable <br> Please note: Currently not all sequences have been written to an output field <br> Please note: Despite the error, all sequences have still been written to an output field</h1></div>
+            <div class=error_item><h1> There was a fatal error &lt number &gt sequences are being written to un-mappable <br> Please note: Currently not all sequences have been written to an output field <br> Please note: Despite the error, all sequences have still been written to an output field</h1></div>
             </p>
             <p>
 
@@ -322,6 +322,15 @@
           </p>
           <p>
             SeqScrub checks to see if headers are a match, but it allows for quotation marks to appear around the header information in the Newick tree (this is a common format added to allow for white spaces in Newick files). It also allows for sequences in the alignment to have whitespace such as 'XP_014834532.1 PREDICTED aromatase-like [Poecilia mexicana]' and a Newick file that only contains the identifier that occurs before the whitespace - 'XP_014834532.1'. Headers in the Newick file cannot add any extra information (besides quotation marks).
+          </p>
+
+          <p>
+            <div class=faq_item>
+              <h1> My sequences take a very long time to be cleaned </h1>
+            </div>
+          </p>
+          <p>
+            Occasionly SeqScrub can have issues with a database connection. We recommend simply refreshing the page and trying the files again. If the issue persists, try only running files with less than 1000 sequences through SeqScrub.
           </p>
 
 
