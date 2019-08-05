@@ -454,11 +454,17 @@ $("form#data").submit(function(event) {
           else {
 
             record.finalHeader = header;
+            output = header  + record.seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+            cleanedSeqsResults += output.trim();
+
 
             if (cleanedCount < limit) {
 
-              output = header  + record.seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+              // output = header  + record.seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
               $("#cleanedSeqs").append(output.trim());
+              
+              
+            
               cleanedCount +=1;
           }
 
