@@ -1,3 +1,5 @@
+https://img.shields.io/uptimerobot/ratio/7/m783704485-14a0fd15fb64b95827ff99d7?label=uptime%20%28last%207%20days%29&style=plastic
+
 # SeqScrub
 Website for cleaning FASTA headers and newick strings
 
