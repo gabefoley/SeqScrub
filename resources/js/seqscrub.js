@@ -199,10 +199,12 @@ function cleanTreeNames() {
   for (var line in splitSummary){
     splitLine = splitSummary[line];
 
-    if (splitLine.length > 0){
+    if (splitLine.trim().length > 0){
 
-    oldname = splitLine.split(" : ")[0].trim();
-    newname = splitLine.split(" : ")[1].trim();
+      console.log(splitLine)
+
+      oldname = splitLine.split(" : ")[0].trim();
+      newname = splitLine.split(" : ")[1].trim();
 
     // If this is a trimmed tree (i.e. the original tree cuts off after the first space in the header, change the names to reflect this)
     if (trimmedTree){
