@@ -6,7 +6,7 @@ Website for cleaning FASTA headers and newick strings
 
 SeqScrub was published in BioTechniques in 2019.
 
-doi.org/10.2144/btn-2018-0188
+[doi.org/10.2144/btn-2018-0188](doi.org/10.2144/btn-2018-0188)
 
 If you use it, please cite - 
 
