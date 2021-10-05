@@ -21,3 +21,5 @@ Foley G, Sützl L, D'Cunha SA, Gillam EM, Bodén M. _SeqScrub: a web tool for au
 
 
 ![SeqScrub Overview](https://raw.githubusercontent.com/gabefoley/SeqScrub/master/resources/img/Figure_1.png)
+
+
