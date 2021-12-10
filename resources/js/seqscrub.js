@@ -384,7 +384,7 @@ $("form#data").submit(function(event) {
 
 
   $.ajax({
-    url: 'upload.php',
+    url: '../../upload.php',
     type: 'POST',
     data: formData,
     async: true,
