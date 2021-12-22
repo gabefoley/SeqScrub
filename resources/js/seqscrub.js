@@ -274,6 +274,10 @@ document.getElementById('tree').onchange = function () {
 //Program a custom submit function for the form
 $("form#data").submit(function(event) {
 
+  console.log('triggered')
+  console.log($(this)[0])
+
+
 
 
   // Clear all the output sections
@@ -349,7 +353,9 @@ $("form#data").submit(function(event) {
   event.preventDefault();
 
   //Grab all form data  
+  console.log($(this))
   var formData = new FormData($(this)[0]);
+
 
   //Generate a new regex containing the invalid character
 
@@ -382,15 +388,19 @@ $("form#data").submit(function(event) {
   uniprotDict = {};
   ncbiDict = {};
 
+  console.log(formData)
+  console.log(filename)
+
 
   $.ajax({
-    url: '/upload.php',
+    url: './upload.php',
     type: 'POST',
     data: formData,
     async: true,
     cache: false,
     contentType: false,
     processData: false,
+
     success: function(returndata) {
       jsonData = JSON.parse(returndata);
 
