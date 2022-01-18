@@ -27,9 +27,9 @@ $seqCount = 0;
 
 $string_name = (string)$target_file;
 
+
 // Upload file
 $moved = move_uploaded_file($_FILES["file"]["tmp_name"],  $target_file );
-
 
 
 if( $moved ) {
@@ -126,7 +126,7 @@ while (($line = fgets($file)) !== false){
 
 
 $jsonData = json_encode($returnArray);
-echo $jsonData;
-
+// echo $jsonData;
+echo 'returner'
 
 ?>
