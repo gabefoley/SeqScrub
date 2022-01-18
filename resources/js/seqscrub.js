@@ -402,6 +402,9 @@ $("form#data").submit(function(event) {
     processData: false,
 
     success: function(returndata) {
+
+      console.log('success')
+      console.log(returndata)
       jsonData = JSON.parse(returndata);
 
 

@@ -126,7 +126,7 @@ while (($line = fgets($file)) !== false){
 
 
 $jsonData = json_encode($returnArray);
-echo $jsonData;
-
+// echo $jsonData;
+echo 'returner '
 
 ?>
