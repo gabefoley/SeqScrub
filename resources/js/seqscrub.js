@@ -355,8 +355,8 @@ $("form#data").submit(function(event) {
   //Grab all form data  
   console.log($(this))
   var formData = new FormData($(this)[0]);
-  console.log('form data is')
-  console.log($(this)[0])
+  // console.log('form data is')
+  // console.log($(this)[0])
 
 
   //Generate a new regex containing the invalid character

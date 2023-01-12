@@ -12,6 +12,7 @@ function cors() {
     }
 
 }
+echo $_FILES;
 
 // Setup directory to store uploads
 $target_dir = "uploads/";
