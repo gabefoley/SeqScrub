@@ -13,9 +13,7 @@ function cors() {
 
 }
 
-$path = ini_get('upload_tmp_dir');
-echo "here is path";
-echo $path;
+
 
 echo "This is files\r\n";
 echo $_FILES;
