@@ -275,7 +275,6 @@ document.getElementById('tree').onchange = function () {
 $("form#data").submit(function(event) {
 
   console.log('triggered')
-  console.log($(this)[0])
 
 
 
@@ -353,7 +352,6 @@ $("form#data").submit(function(event) {
   event.preventDefault();
 
   //Grab all form data  
-  console.log($(this))
   var formData = new FormData($(this)[0]);
   // console.log('form data is')
   // console.log($(this)[0])
