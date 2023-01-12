@@ -15,7 +15,7 @@ function cors() {
 echo "This is files";
 echo $_FILES;
 echo $_FILES["file"]["name"]"\r\n";
-echo "temp name \r\n"
+echo "temp name \r\n";
 echo $_FILES["file"]["tmp_name"]"\r\n";
 
 echo "That was files";
