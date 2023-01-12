@@ -12,11 +12,12 @@ function cors() {
     }
 
 }
-echo "This is files";
+echo "This is files\r\n";
 echo $_FILES;
-echo $_FILES["file"]["name"]"\r\n";
-echo "temp name \r\n";
-echo $_FILES["file"]["tmp_name"]"\r\n";
+echo "\r\n filename name \r\n";
+echo $_FILES["file"]["name"];
+echo "\r\n temp name \r\n";
+echo $_FILES["file"]["tmp_name"];
 
 echo "That was files";
 
