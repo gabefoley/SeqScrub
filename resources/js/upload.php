@@ -27,6 +27,9 @@ $seqCount = 0;
 
 $string_name = (string)$target_file;
 
+echo "In PHP"
+echo $string_name
+
 
 // Upload file
 $moved = move_uploaded_file($_FILES["file"]["tmp_name"],  $target_file );
