@@ -13,6 +13,7 @@ function cors() {
 
 }
 $path = ini_get('upload_tmp_dir');
+echo "here is path";
 echo $path;
 
 echo "This is files\r\n";
@@ -79,7 +80,7 @@ while (($line = fgets($file)) !== false){
 
 		// Add the type (NCBI or UniProt) back into the array as the actual letter code
 		if ($type == "XP" || $type == "XM" || $type == "XR" || $type == "WP" || $type == "NP" || $type == "NC" || $type == "NG" || $type == "NM" || $type == "NR") {
-			$id = $type . "_" . $lineArray[1];
+			$id = $type . "_" .w $lineArray[1];
 
 		} elseif ($type == "gi") {
 			$id = $type . "|" . $lineArray[1];
