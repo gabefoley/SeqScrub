@@ -388,9 +388,6 @@ $("form#data").submit(function(event) {
   uniprotDict = {};
   ncbiDict = {};
 
-  console.log(formData)
-  console.log(filename)
-
 
   $.ajax({
     url: './upload.php',
