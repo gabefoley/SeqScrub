@@ -12,9 +12,6 @@ function cors() {
     }
 
 }
-
-
-
 echo "This is files\r\n";
 echo $_FILES;
 echo "\r\n filename name \r\n";
@@ -22,9 +19,16 @@ echo $_FILES["file"]["name"];
 echo "\r\n temp name \r\n";
 echo $_FILES["file"]["tmp_name"];
 echo "\r\n error \r\n";
-echo $_FILES["file"]["error"];
+echo $_FILES["file"]["error"]
 
 echo "That was files";
+
+$inipath = php_ini_loaded_file();
+if ($inipath) {
+    echo 'Loaded php.ini: ' . $inipath;
+} else {
+    echo 'A php.ini file is not loaded';
+}
 
 // Setup directory to store uploads
 $target_dir = "uploads/";
@@ -79,7 +83,7 @@ while (($line = fgets($file)) !== false){
 
 		// Add the type (NCBI or UniProt) back into the array as the actual letter code
 		if ($type == "XP" || $type == "XM" || $type == "XR" || $type == "WP" || $type == "NP" || $type == "NC" || $type == "NG" || $type == "NM" || $type == "NR") {
-			$id = $type . "_" .w $lineArray[1];
+			$id = $type . "_" . $lineArray[1];
 
 		} elseif ($type == "gi") {
 			$id = $type . "|" . $lineArray[1];
