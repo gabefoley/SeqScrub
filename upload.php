@@ -16,8 +16,11 @@ function cors() {
 // echo $_FILES;
 echo "\r\n filename name \r\n";
 echo $_FILES["file"]["name"];
-// echo "\r\n temp name \r\n";
-// echo $_FILES["file"]["tmp_name"];
+
+echo "\r\n filename name \r\n";
+echo $_FILES["file"]["name"];
+echo "\r\n temp name \r\n";
+echo $_FILES["file"]["tmp_name"];
 // echo "\r\n error \r\n";
 // echo $_FILES["file"]["error"]
 // echo "That was files";
