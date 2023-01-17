@@ -22,13 +22,13 @@ function cors() {
 // echo $_FILES["file"]["error"]
 // echo "That was files";
 
-$inipath = php_ini_loaded_file();
+// $inipath = php_ini_loaded_file();
 
-if ($inipath) {
-    echo 'Loaded php.ini: ' . $inipath;
-} else {
-    echo 'A php.ini file is not loaded';
-}
+// if ($inipath) {
+//     echo 'Loaded php.ini: ' . $inipath;
+// } else {
+//     echo 'A php.ini file is not loaded';
+// }
 
 // Setup directory to store uploads
 $target_dir = "uploads/";
