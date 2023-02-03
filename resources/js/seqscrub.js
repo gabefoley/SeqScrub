@@ -201,7 +201,7 @@ function cleanTreeNames() {
 
     if (splitLine.trim().length > 0){
 
-      console.log(splitLine)
+      // console.log(splitLine)
 
       oldname = splitLine.split(" : ")[0].trim();
       newname = splitLine.split(" : ")[1].trim();
@@ -274,7 +274,7 @@ document.getElementById('tree').onchange = function () {
 //Program a custom submit function for the form
 $("form#data").submit(function(event) {
 
-  console.log('triggered')
+  // console.log('triggered')
 
 
 
@@ -400,8 +400,8 @@ $("form#data").submit(function(event) {
 
     success: function(returndata) {
 
-      console.log('success')
-      console.log(returndata)
+      // console.log('success')
+      // console.log(returndata)
       jsonData = JSON.parse(returndata);
 
 
@@ -729,20 +729,30 @@ function getDataFromUniprot(records, pdb) {
 
   else {
     idString = getIDString(records, "UniProt");
-    url = "https://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
+    // url = "https://www.uniprot.org/uniprot/?query=id:" + idString +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
+
+      url = "https://www.uniprot.org/uniprotkb?query=accession:P05793+OR+accession:Q01292&fields=accession,id,protein_name,organism_name,organism_id,lineage,reviewed&view=table"
+
+      url = "https://www.uniprot.org/uniprotkb?query=accession:P05793+OR+accession:Q01292"
+
+      url = "https://rest.uniprot.org/uniprotkb/search?query=accession:P05793+OR+accession:Q01292&fields=accession,id,protein_name,organism_name,organism_id,lineage,reviewed&format=tsv"
 
   }
 
   var promise = $.ajax({
     url: url,
     type: 'POST',
+    datatype: 'jsonp',
     headers: {
         'Content-Type':'text/plain'
+
      },
     async: true,
 
 
     success: function(speciesData) {
+
+      // console.log(speciesData)
 
 
         splitData = speciesData.split("\n");
