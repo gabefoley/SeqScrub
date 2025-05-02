@@ -939,7 +939,7 @@ $(document).ready(function() {
   if (ncbiCheck.length > 0){  
     getDataFromNCBI(ncbiCheck);
   }
-}
+}),
 
 function appendOutput(records) {
   records.sort(function(a, b) {
@@ -1148,7 +1148,7 @@ function appendOutput(records) {
   $obsoleteSeqs.append(obsoleteSeqsFragment);
   $badCharacters.append(badCharactersFragment);
   $cleanedSeqs.append(cleanedSeqsFragment);
-}
+},
 
 function downloadFile(filename, text) {
   var element = document.createElement('a');
@@ -1161,13 +1161,13 @@ function downloadFile(filename, text) {
   element.click();
 
   document.body.removeChild(element);
-}
+},
 
 function downloadSummary(filename) {
   if (summary != null){
     download(summary, filename.split('_')[0] + "_summary.txt", "text/plain");
   }
-}
+},
 
 function split(str, char) {
  var i = str.indexOf(char);
@@ -1176,13 +1176,13 @@ function split(str, char) {
   return  str.slice(0, i);
  else
   return str;     
-}
+},
 
 // Improved function to escape special regex characters
 function escapeRegExp(str) {
   if (!str) return "";
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
+},
 
 // Get the values from the save output form
 $("form#save").submit(function(event) {
