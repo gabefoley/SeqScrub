@@ -596,30 +596,27 @@ $(document).ready(function() {
 
           for (var line in splitData) {
             if (splitData[line] != null){
-            splitLine = splitData[line].split("\t");
+              splitLine = splitData[line].split("\t");
 
-            // If it is a PDB entry we need to grab the id name from the entry name field, to map back from the uniprotToPDB Map
-            if (pdb){
-              idName = uniProtToPDB.get(splitLine[1])
-            }
-
-            else {
-              idName = splitLine[0]
-            }
-
-            if (splitLine[2] != null){
-
-              if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
-                obsoleteList.push(splitLine[0]);
+              // If it is a PDB entry we need to grab the id name from the entry name field, to map back from the uniprotToPDB Map
+              if (pdb){
+                idName = uniProtToPDB.get(splitLine[1]);
+              }
+              else {
+                idName = splitLine[0];
               }
 
-              else {
-                taxonList = splitLine[4].split(",");
-
-                speciesDict[idName] = taxonList[taxonList.length - 1].trim();
-                // Add the gene information back to the record
-                geneDict[idName] = splitLine[2];
-                entryNameDict[idName] = splitLine[1];
+              if (splitLine[2] != null){
+                if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
+                  obsoleteList.push(splitLine[0]);
+                }
+                else {
+                  taxonList = splitLine[4].split(",");
+                  speciesDict[idName] = taxonList[taxonList.length - 1].trim();
+                  // Add the gene information back to the record
+                  geneDict[idName] = splitLine[2];
+                  entryNameDict[idName] = splitLine[1];
+                }
               }
             }
           }
@@ -638,8 +635,12 @@ $(document).ready(function() {
             }
           }
 
-          getSpeciesNameFromNCBI(records, idString, obsoleteList);
-
+          try { 
+            getSpeciesNameFromNCBI(records, idString, obsoleteList);
+          } catch (error) {
+            console.error("Error calling getSpeciesNameFromNCBI:", error);
+            sortOutput(records, obsoleteList);
+          }
         } catch (error) {
           console.error("Error processing UniProt data:", error);
           bootstrap_alert.warning("Error processing data from UniProt: " + error.message);
@@ -760,15 +761,13 @@ $(document).ready(function() {
     idString = formatTaxonID(records);
     urlAll = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + idString + "&retmode=xml&rettype=all";
 
-    var promise = $.ajax({
+    $.ajax({
       url: urlAll,
       type: 'POST',
-
       headers: {
-          'Content-Type':'text/plain'
-       },
+        'Content-Type':'text/plain'
+      },
       async: true,
-
       success: function(speciesData) {
         if (speciesData != null) {
           for (var record in records){
@@ -826,105 +825,103 @@ $(document).ready(function() {
             }
           }
         }
-      }
-
-      sortOutput(records, obsoleteList);
-
-    },
-    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-      if (errorThrown == "Bad Request"){
-        obsoleteList = [];
+        
         sortOutput(records, obsoleteList);
-      }
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        if (errorThrown == "Bad Request"){
+          obsoleteList = [];
+          sortOutput(records, obsoleteList);
+        }
+        else {
+          generateAlert(records);
+        }
+      }   
+    });
+  }
 
-      else {
-        generateAlert(records);
-      }
-    }   
-  });
-}
+  function getUniProtIDFromPDB(records, speciesData) {
+    idString = getIDString(records, "UniProt");
+    url = "https://www.uniprot.org/uploadlists/?from=PDB_ID&to=ID&query=" + idString +"&format=tab";
 
-function getUniProtIDFromPDB(records, speciesData) {
-  idString = getIDString(records, "UniProt");
-  url = "https://www.uniprot.org/uploadlists/?from=PDB_ID&to=ID&query=" + idString +"&format=tab";
-
-  var promise = $.ajax({
-    url: url,
-    type: 'POST',
-
-    headers: {
+    $.ajax({
+      url: url,
+      type: 'POST',
+      headers: {
         'Content-Type':'text/plain'
-     },
-    async: true,
-
-    success: function(speciesData) {
-      splitData = speciesData.split("\n");
-      for (var line in splitData) {
-        if (splitData[line] != null){
-          splitLine = splitData[line].split("\t");
-          uniProtToPDB.set(splitLine[1], splitLine[0])
-          PDBToUniProt.set(splitLine[0], splitLine[1])
+      },
+      async: true,
+      success: function(speciesData) {
+        splitData = speciesData.split("\n");
+        for (var line in splitData) {
+          if (splitData[line] != null){
+            splitLine = splitData[line].split("\t");
+            uniProtToPDB.set(splitLine[1], splitLine[0]);
+            PDBToUniProt.set(splitLine[0], splitLine[1]);
+          }
         }
-      }
 
-      for (var record in records){
-        if (PDBToUniProt.has(records[record].id)){
-          records[record].uniprot_id = PDBToUniProt.get(records[record].id);
+        for (var record in records){
+          if (PDBToUniProt.has(records[record].id)){
+            records[record].uniprot_id = PDBToUniProt.get(records[record].id);
+          }
         }
-      }
 
-      getDataFromUniprot(records, true);
+        getDataFromUniprot(records, true);
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        if (errorThrown == "Bad Request"){
+          response = XMLHttpRequest.responseText;
+          alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable");
 
-    },
-    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-      if (errorThrown == "Bad Request"){
-        response = XMLHttpRequest.responseText;
-        alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable");
+          obsoleteList = [];
+          sortOutput(records, obsoleteList);
+        }
+        else {
+          generateAlert(records);
+        }
+      }   
+    });
+  }
 
-        obsoleteList = [];
-        sortOutput(records, obsoleteList);
-      }
+  function sortOutput(records, obsoleteList) {
+    ncbiCheck = [];
 
+    // Check to see if there are any illegal characters
+    for (var i in records) {
+      if ((records[i].headerInfo == null || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
+        if (records[i].ncbiChecked == true) {
+          records[i].appendTo = "badIds";
+          finishedRecords.push(records[i]);
+          count +=1;
+        } else {
+          records[i].ncbiChecked = true;
+          ncbiCheck.push(records[i]);
+        }
+      } else if (checkObsolete && obsoleteList.includes(records[i].id)) {
+        records[i].appendTo = "obsoleteSeqs";
+        finishedRecords.push(records[i]);
+        count +=1;
+      } 
       else {
-        generateAlert(records);
-      }
-    }   
-  });
-}
-
-function sortOutput(records, obsoleteList) {
-  ncbiCheck = [];
-
-  // Check to see if there are any illegal characters
-  for (var i in records) {
-    if ((records[i].headerInfo == null || records[i].taxon == "") && !(obsoleteList.includes(records[i].id))) {
-      if (records[i].ncbiChecked == true) {
-        records[i].appendTo = "badIds";
-        finishedRecords.push(records[i]);
-        count +=1;
-      } else {
-        records[i].ncbiChecked = true;
-        ncbiCheck.push(records[i]);
-      }
-    } else if (checkObsolete && obsoleteList.includes(records[i].id)) {
-      records[i].appendTo = "obsoleteSeqs";
-      finishedRecords.push(records[i]);
-      count +=1;
-    } 
-
-    else {
-      if (invalidChars && invalidCharsRegex.test(records[i].seq)) {
-        records[i].appendTo = "badCharacters";
-        finishedRecords.push(records[i]);
-        count +=1;
-      } else {
-        // User has specified not to just retain the first ID, and there are multiple IDs
-        if (records[i].originalHeader.split(">").length > 2) {
-          if (!retainFirst) {
-            records[i].appendTo = "badIds";
-            finishedRecords.push(records[i]);
-            count +=1;
-            break;
+        if (invalidChars && invalidCharsRegex.test(records[i].seq)) {
+          records[i].appendTo = "badCharacters";
+          finishedRecords.push(records[i]);
+          count +=1;
+        } else {
+          // User has specified not to just retain the first ID, and there are multiple IDs
+          if (records[i].originalHeader.split(">").length > 2) {
+            if (!retainFirst) {
+              records[i].appendTo = "badIds";
+              finishedRecords.push(records[i]);
+              count +=1;
+              break;
+            }
+            else {
+              records[i].appendTo = "cleanedSeqs";
+              finishedRecords.push(records[i]);
+              count += 1;
+            }
           }
           else {
             records[i].appendTo = "cleanedSeqs";
@@ -932,22 +929,16 @@ function sortOutput(records, obsoleteList) {
             count += 1;
           }
         }
-        else {
-          records[i].appendTo = "cleanedSeqs";
-          finishedRecords.push(records[i]);
-          count += 1;
-        }
       }
     }
   }
-}
 
-progressText(count);
-checkFinal(count, finishedRecords);
+  progressText(count);
+  checkFinal(count, finishedRecords);
 
-if (ncbiCheck.length > 0){  
-  getDataFromNCBI(ncbiCheck);
-}
+  if (ncbiCheck.length > 0){  
+    getDataFromNCBI(ncbiCheck);
+  }
 }
 
 function appendOutput(records) {
@@ -1268,289 +1259,287 @@ $("form#save").submit(function(event) {
       saveAs(blob, "SeqScrubFiles.zip");
   });
 
-  var cleanText = $('textarea#cleanedSeqs').val();
-  var illegalcharText = $('textarea#cleanedSeqs').val();
-});
+  // Allow for easy selection of full text in each window
+  $cleanedSeqs.click(function() {
+    $cleanedSeqs.select();
+  });
 
-// Allow for easy selection of full text in each window
-$cleanedSeqs.click(function() {
-  $cleanedSeqs.select();
-});
+  $badCharacters.click(function() {
+    $badCharacters.select();
+  });
 
-$badCharacters.click(function() {
-  $badCharacters.select();
-});
+  $obsoleteSeqs.click(function() {
+    $obsoleteSeqs.select();
+  });
 
-$obsoleteSeqs.click(function() {
-  $obsoleteSeqs.select();
-});
+  $badIds.click(function() {
+    $badIds.select();
+  });
 
-$badIds.click(function() {
-  $badIds.select();
-});
+  /*
+    Dropdown with Multiple checkbox select with jQuery - May 27, 2013
+    (c) 2013 @ElmahdiMahmoud
+    license: https://www.opensource.org/licenses/mit-license.php
+  */
 
-/*
-  Dropdown with Multiple checkbox select with jQuery - May 27, 2013
-  (c) 2013 @ElmahdiMahmoud
-  license: https://www.opensource.org/licenses/mit-license.php
-*/
+  $(".dropdown dt a").on('click', function() {
+    $(".dropdown dd ul").slideToggle('fast');
+  });
 
-$(".dropdown dt a").on('click', function() {
-  $(".dropdown dd ul").slideToggle('fast');
-});
+  $(".dropdown dd ul li a").on('click', function() {
+    $(".dropdown dd ul").hide();
+  });
 
-$(".dropdown dd ul li a").on('click', function() {
-  $(".dropdown dd ul").hide();
-});
-
-function getSelectedValue(id) {
-  return $("#" + id).find("dt a span.value").html();
-}
-
-// Either allow for databases to be queried or just the header to be cleaned
-$('#replaceCharsCheck').click(function(event){
-  $(".dataCheck").prop('checked', false);
-  $(".obsoleteCheck").prop('checked', false);
-  $('#replaceHeadersDBCheck').prop('checked', false);
-});
-
-$('#replaceHeadersDBCheck').click(function(event){
-  $(".dataCheck").prop('checked', false);
-  $('#replaceCharsCheck').prop('checked', false);
-});
-
-$(".dataCheck").click(function(event){
-  $('#replaceCharsCheck').prop('checked', false);
-  $('#replaceHeadersDBCheck').prop('checked', false);
-});
-
-$(".obsoleteCheck").click(function(event){
-  $('#replaceCharsCheck').prop('checked', false);
-});
-
-$('#input-draggable').selectize({
-    plugins: ['drag_drop'],
-    delimiter: ',',
-    persist: false,
-    create: function(input) {
-        return {
-            value: input,
-            text: input
-        };
-    }
-});
-
-$('.input-sortable').selectize({
-    plugins: ['drag_drop'],
-    persist: false,
-    create: true
-});
-
-$('#header-format').selectize({
-    maxItems: null,
-    valueField: 'id',
-    labelField: 'title',
-    searchField: 'title',
-    plugins: ['drag_drop', 'remove_button'],
-    create: false,
-    highlight: true,
-});
-
-$(function() {
-  var $wrapper = $('#wrapper');
-
-  // theme switcher
-  var theme_match = String(window.location).match(/[?&]theme=([a-z0-9]+)/);
-  var theme = (theme_match && theme_match[1]) || 'default';
-  var themes = ['default','legacy','bootstrap2','bootstrap3'];
-
-  var $themes = $('<div>').addClass('theme-selector').insertAfter('h1');
-  for (var i = 0; i < themes.length; i++) {
-    $themes.append('<a href="?theme=' + themes[i] + '"' + (themes[i] === theme ? ' class="active"' : '') + '>' + themes[i] + '</a>');
+  function getSelectedValue(id) {
+    return $("#" + id).find("dt a span.value").html();
   }
 
-  // display scripts on the page
-  $('script', $wrapper).each(function() {
-    var code = this.text;
-    if (code && code.length) {
-      var lines = code.split('\n');
-      var indent = null;
+  // Either allow for databases to be queried or just the header to be cleaned
+  $('#replaceCharsCheck').click(function(event){
+    $(".dataCheck").prop('checked', false);
+    $(".obsoleteCheck").prop('checked', false);
+    $('#replaceHeadersDBCheck').prop('checked', false);
+  });
 
-      for (var i = 0; i < lines.length; i++) {
-        if (/^[  ]*$/.test(lines[i])) continue;
-        if (!indent) {
-          var lineindent = lines[i].match(/^([  ]+)/);
-          if (!lineindent) break;
-          indent = lineindent[1];
-        }
-        lines[i] = lines[i].replace(new RegExp('^' + indent), '');
+  $('#replaceHeadersDBCheck').click(function(event){
+    $(".dataCheck").prop('checked', false);
+    $('#replaceCharsCheck').prop('checked', false);
+  });
+
+  $(".dataCheck").click(function(event){
+    $('#replaceCharsCheck').prop('checked', false);
+    $('#replaceHeadersDBCheck').prop('checked', false);
+  });
+
+  $(".obsoleteCheck").click(function(event){
+    $('#replaceCharsCheck').prop('checked', false);
+  });
+
+  $('#input-draggable').selectize({
+      plugins: ['drag_drop'],
+      delimiter: ',',
+      persist: false,
+      create: function(input) {
+          return {
+              value: input,
+              text: input
+          };
       }
+  });
 
-      code = $.trim(lines.join('\n')).replace(/ /g, '    ');
-      var $pre = $('<pre>').addClass('js').text(code);
-      $pre.insertAfter(this);
+  $('.input-sortable').selectize({
+      plugins: ['drag_drop'],
+      persist: false,
+      create: true
+  });
+
+  $('#header-format').selectize({
+      maxItems: null,
+      valueField: 'id',
+      labelField: 'title',
+      searchField: 'title',
+      plugins: ['drag_drop', 'remove_button'],
+      create: false,
+      highlight: true,
+  });
+
+  $(function() {
+    var $wrapper = $('#wrapper');
+
+    // theme switcher
+    var theme_match = String(window.location).match(/[?&]theme=([a-z0-9]+)/);
+    var theme = (theme_match && theme_match[1]) || 'default';
+    var themes = ['default','legacy','bootstrap2','bootstrap3'];
+
+    var $themes = $('<div>').addClass('theme-selector').insertAfter('h1');
+    for (var i = 0; i < themes.length; i++) {
+      $themes.append('<a href="?theme=' + themes[i] + '"' + (themes[i] === theme ? ' class="active"' : '') + '>' + themes[i] + '</a>');
     }
-  });
 
-  // show current input values
-  $('select.selectized,input.selectized', $wrapper).each(function() {
-    var $container = $('<div>').addClass('value').html('Current Value: ');
-    var $value = $('<span>').appendTo($container);
-    var $input = $(this);
-    var update = function(e) { $value.text(JSON.stringify($input.val())); };
+    // display scripts on the page
+    $('script', $wrapper).each(function() {
+      var code = this.text;
+      if (code && code.length) {
+        var lines = code.split('\n');
+        var indent = null;
 
-    $(this).on('change', update);
-    update();
-
-    $container.insertAfter($input);
-  });
-});
-
-function generateAlert(records){
-  bootstrap_alert.warning("There was a fatal error <br>" + records.length + " sequences are being written to unmappable" );
-  obsoleteList = [];
-  sortOutput(records, obsoleteList);
-
-  if (count != numRecords) {
-    bootstrap_alert.warning("Please note: Currently not all sequences have been written to an output field");
-  }
-  else {
-    bootstrap_alert.warning ("Please note: Despite the error, all sequences have still been written to an output field");
-  }
-
-  hideLoadingScreen();
-}
-
-//Error handing
-bootstrap_alert = function() {};
-bootstrap_alert.warning = function(message) {
-            $('#error-div').show();
-
-            $('#error-div').append('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
-        };
-bootstrap_alert.tree = function(message) {
-            $('#error-div').show();
-
-            $('#treeOutput').html('<div class="success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
-        };
-bootstrap_alert.clear =  function(message) {
-            $('#error-div').empty();
-            $('#error-div').hide();
-        };
-
-$(document).bind('click', function(e) {
-  var $clicked = $(e.target);
-  if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
-});
-
-$('.multiSelect input[type="checkbox"]').on('click', function() {
-  var title = $(this).closest('.multiSelect').find('input[type="checkbox"]').val(),
-  title = $(this).val() + ",";
-
-  if ($(this).is(':checked')) {
-    var html = '<span title="' + title + '">' + title + '</span>';
-    $('.multiSel').append(html);
-    $(".hida").hide();
-  } else {
-    $('span[title="' + title + '"]').remove();
-    var ret = $(".hida");
-    $('.dropdown dt a').append(ret);
-  }
-});
-
-function checkAll(ele) {
-    var checkboxes = $(".downloadCheck");
-    if (ele.checked) {
-        for (var i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
-                checkboxes[i].checked = true;
-                $("#selectAllLabel").html('Deselect all output');
-            }
+        for (var i = 0; i < lines.length; i++) {
+          if (/^[  ]*$/.test(lines[i])) continue;
+          if (!indent) {
+            var lineindent = lines[i].match(/^([  ]+)/);
+            if (!lineindent) break;
+            indent = lineindent[1];
+          }
+          lines[i] = lines[i].replace(new RegExp('^' + indent), '');
         }
+
+        code = $.trim(lines.join('\n')).replace(/ /g, '    ');
+        var $pre = $('<pre>').addClass('js').text(code);
+        $pre.insertAfter(this);
+      }
+    });
+
+    // show current input values
+    $('select.selectized,input.selectized', $wrapper).each(function() {
+      var $container = $('<div>').addClass('value').html('Current Value: ');
+      var $value = $('<span>').appendTo($container);
+      var $input = $(this);
+      var update = function(e) { $value.text(JSON.stringify($input.val())); };
+
+      $(this).on('change', update);
+      update();
+
+      $container.insertAfter($input);
+    });
+  });
+
+  function generateAlert(records){
+    bootstrap_alert.warning("There was a fatal error <br>" + records.length + " sequences are being written to unmappable" );
+    obsoleteList = [];
+    sortOutput(records, obsoleteList);
+
+    if (count != numRecords) {
+      bootstrap_alert.warning("Please note: Currently not all sequences have been written to an output field");
+    }
+    else {
+      bootstrap_alert.warning ("Please note: Despite the error, all sequences have still been written to an output field");
+    }
+
+    hideLoadingScreen();
+  }
+
+  //Error handing
+  bootstrap_alert = function() {};
+  bootstrap_alert.warning = function(message) {
+              $('#error-div').show();
+
+              $('#error-div').append('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+          };
+  bootstrap_alert.tree = function(message) {
+              $('#error-div').show();
+
+              $('#treeOutput').html('<div class="success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+          };
+  bootstrap_alert.clear =  function(message) {
+              $('#error-div').empty();
+              $('#error-div').hide();
+          };
+
+  $(document).bind('click', function(e) {
+    var $clicked = $(e.target);
+    if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
+  });
+
+  $('.multiSelect input[type="checkbox"]').on('click', function() {
+    var title = $(this).closest('.multiSelect').find('input[type="checkbox"]').val(),
+    title = $(this).val() + ",";
+
+    if ($(this).is(':checked')) {
+      var html = '<span title="' + title + '">' + title + '</span>';
+      $('.multiSel').append(html);
+      $(".hida").hide();
     } else {
-        for (var i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
-                checkboxes[i].checked = false;
-                $("#selectAllLabel").html('Select all output');
-            }
-        }
+      $('span[title="' + title + '"]').remove();
+      var ret = $(".hida");
+      $('.dropdown dt a').append(ret);
     }
-}
+  });
 
-// Function to sanitize user input before inserting into DOM
-function sanitizeHTML(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+  function checkAll(ele) {
+      var checkboxes = $(".downloadCheck");
+      if (ele.checked) {
+          for (var i = 0; i < checkboxes.length; i++) {
+              if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
+                  checkboxes[i].checked = true;
+                  $("#selectAllLabel").html('Deselect all output');
+              }
+          }
+      } else {
+          for (var i = 0; i < checkboxes.length; i++) {
+              if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
+                  checkboxes[i].checked = false;
+                  $("#selectAllLabel").html('Select all output');
+              }
+          }
+      }
+  }
 
-// Create a function to process large datasets in a web worker
-function processLargeDataset(records, callback) {
-  // Check if Web Workers are supported
-  if (window.Worker) {
-    // Create a blob URL for the worker script
-    var workerCode = `
-      self.onmessage = function(e) {
-        var records = e.data.records;
-        var results = [];
+  // Function to sanitize user input before inserting into DOM
+  function sanitizeHTML(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // Create a function to process large datasets in a web worker
+  function processLargeDataset(records, callback) {
+    // Check if Web Workers are supported
+    if (window.Worker) {
+      // Create a blob URL for the worker script
+      var workerCode = `
+        self.onmessage = function(e) {
+          var records = e.data.records;
+          var results = [];
+          
+          // Process records without blocking the UI
+          for (var i = 0; i < records.length; i++) {
+            // Process each record
+            // ... processing logic ...
+            
+            // Report progress periodically
+            if (i % 100 === 0) {
+              self.postMessage({type: 'progress', value: i, total: records.length});
+            }
+          }
+          
+          self.postMessage({type: 'complete', results: results});
+        };
+      `;
+      
+      var blob = new Blob([workerCode], {type: 'application/javascript'});
+      var worker = new Worker(URL.createObjectURL(blob));
+      
+      worker.onmessage = function(e) {
+        if (e.data.type === 'progress') {
+          // Update progress bar
+          progressText(e.data.value);
+        } else if (e.data.type === 'complete') {
+          // Process is complete
+          callback(e.data.results);
+          worker.terminate();
+        }
+      };
+      
+      worker.postMessage({records: records});
+    } else {
+      // Fallback for browsers that don't support Web Workers
+      // Process in chunks to avoid UI freezing
+      var i = 0;
+      var results = [];
+      var chunkSize = 100;
+      
+      function processChunk() {
+        var end = Math.min(i + chunkSize, records.length);
         
-        // Process records without blocking the UI
-        for (var i = 0; i < records.length; i++) {
+        for (; i < end; i++) {
           // Process each record
           // ... processing logic ...
-          
-          // Report progress periodically
-          if (i % 100 === 0) {
-            self.postMessage({type: 'progress', value: i, total: records.length});
-          }
         }
         
-        self.postMessage({type: 'complete', results: results});
-      };
-    `;
-    
-    var blob = new Blob([workerCode], {type: 'application/javascript'});
-    var worker = new Worker(URL.createObjectURL(blob));
-    
-    worker.onmessage = function(e) {
-      if (e.data.type === 'progress') {
-        // Update progress bar
-        progressText(e.data.value);
-      } else if (e.data.type === 'complete') {
-        // Process is complete
-        callback(e.data.results);
-        worker.terminate();
-      }
-    };
-    
-    worker.postMessage({records: records});
-  } else {
-    // Fallback for browsers that don't support Web Workers
-    // Process in chunks to avoid UI freezing
-    var i = 0;
-    var results = [];
-    var chunkSize = 100;
-    
-    function processChunk() {
-      var end = Math.min(i + chunkSize, records.length);
-      
-      for (; i < end; i++) {
-        // Process each record
-        // ... processing logic ...
+        progressText(i);
+        
+        if (i < records.length) {
+          setTimeout(processChunk, 0);
+        } else {
+          callback(results);
+        }
       }
       
-      progressText(i);
-      
-      if (i < records.length) {
-        setTimeout(processChunk, 0);
-      } else {
-        callback(results);
-      }
+      processChunk();
     }
-    
-    processChunk();
   }
-}
+
+});
