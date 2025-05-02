@@ -940,607 +940,608 @@ $(document).ready(function() {
   if (ncbiCheck.length > 0){  
     getDataFromNCBI(ncbiCheck);
   }
-}),
 
-function appendOutput(records) {
-  records.sort(function(a, b) {
-    return a.order - b.order;
-  });
+  // Move appendOutput function inside document ready
+  function appendOutput(records) {
+    records.sort(function(a, b) {
+      return a.order - b.order;
+    });
 
-  var limit = 1000;
-  var badIDsCount, obsoleteCount, badCharCount, cleanedCount;
-  badIDsCount = obsoleteCount = badCharCount = cleanedCount = 0;
+    var limit = 1000;
+    var badIDsCount, obsoleteCount, badCharCount, cleanedCount;
+    badIDsCount = obsoleteCount = badCharCount = cleanedCount = 0;
 
-  if (numRecords > limit) {
-    bootstrap_alert.warning("Records are too large to write out to fields. Download file for full records");
-    limit = 100;
-  }
+    if (numRecords > limit) {
+      bootstrap_alert.warning("Records are too large to write out to fields. Download file for full records");
+      limit = 100;
+    }
 
-  // Prepare output fragments for each category
-  var badIdsFragment = document.createDocumentFragment();
-  var obsoleteSeqsFragment = document.createDocumentFragment();
-  var badCharactersFragment = document.createDocumentFragment();
-  var cleanedSeqsFragment = document.createDocumentFragment();
+    // Prepare output fragments for each category
+    var badIdsFragment = document.createDocumentFragment();
+    var obsoleteSeqsFragment = document.createDocumentFragment();
+    var badCharactersFragment = document.createDocumentFragment();
+    var cleanedSeqsFragment = document.createDocumentFragment();
 
-  for (var i in records) {
-    if (records[i].appendTo == "badIds" && removeUncleaned) {
-      var safeHeader = sanitizeHTML(records[i].originalHeader);
-      var safeSeq = sanitizeHTML(records[i].seq.replace(/-/g, "&#8209;"));
-      output = safeHeader + safeSeq + "&#010;";
+    for (var i in records) {
+      if (records[i].appendTo == "badIds" && removeUncleaned) {
+        var safeHeader = sanitizeHTML(records[i].originalHeader);
+        var safeSeq = sanitizeHTML(records[i].seq.replace(/-/g, "&#8209;"));
+        output = safeHeader + safeSeq + "&#010;";
+        
+        if (badIDsCount < limit) {
+          var div = document.createElement('div');
+          div.innerHTML = output.trim();
+          badIdsFragment.appendChild(div);
+          badIDsCount += 1;
+        }
+      }
       
-      if (badIDsCount < limit) {
-        var div = document.createElement('div');
-        div.innerHTML = output.trim();
-        badIdsFragment.appendChild(div);
-        badIDsCount += 1;
-      }
-    }
-    
-    else if (records[i].appendTo == "obsoleteSeqs" && removeObsolete) {
-      output= sanitizeHTML(records[i].originalHeader) + sanitizeHTML(records[i].seq.replace(/-/g, "&#8209;")) + "&#010;";
-      
-      if (obsoleteCount < limit){
-        var div = document.createElement('div');
-        div.innerHTML = output.trim();
-        obsoleteSeqsFragment.appendChild(div);
-        obsoleteCount +=1;
-      }
-    }
-
-    else if (records[i].appendTo == "badCharacters") {
-      output = sanitizeHTML(records[i].originalHeader) + sanitizeHTML(records[i].seq.replace(/-/g, "&#8209;")) + "&#010;";
-      badCharactersFragment.appendChild(output.trim());
-
-      if (badCharCount < limit){
-        var div = document.createElement('div');
-        div.innerHTML = output.trim();
-        badCharactersFragment.appendChild(div);
-        badCharCount +=1;
-      }
-    }
-
-    else if (records[i].appendTo == "cleanedSeqs" || (records[i].appendTo == "badIds" && !removeUncleaned) || (records[i].appendTo == "obsoleteSeqs" && !removeObsolete) ) {
-      formattedType = sanitizeHTML(records[i].type);
-      if (ids_with_underscores.indexOf(formattedType) >= 0){
-        formattedType = "";
-      }
-      else if (records[i].type.length > 0) {
-        formattedType += idChar;
+      else if (records[i].appendTo == "obsoleteSeqs" && removeObsolete) {
+        output= sanitizeHTML(records[i].originalHeader) + sanitizeHTML(records[i].seq.replace(/-/g, "&#8209;")) + "&#010;";
+        
+        if (obsoleteCount < limit){
+          var div = document.createElement('div');
+          div.innerHTML = output.trim();
+          obsoleteSeqsFragment.appendChild(div);
+          obsoleteCount +=1;
+        }
       }
 
-      headerOutput = "";
+      else if (records[i].appendTo == "badCharacters") {
+        output = sanitizeHTML(records[i].originalHeader) + sanitizeHTML(records[i].seq.replace(/-/g, "&#8209;")) + "&#010;";
+        badCharactersFragment.appendChild(output.trim());
 
-      if (headerFormat && ! replaceHeadersDB){
-        headerFormat.forEach(function(headerOpt) {
-          if (headerOpt == "geneName"){
-            if (records[i].headerInfo[headerOpt]){
-              // Check that we're not doubling up on the character to split gene info and species names
-              if (headerOutput.slice(-1) == geneChar){
-                headerOutput += records[i].headerInfo[headerOpt].trim() + geneChar;
+        if (badCharCount < limit){
+          var div = document.createElement('div');
+          div.innerHTML = output.trim();
+          badCharactersFragment.appendChild(div);
+          badCharCount +=1;
+        }
+      }
+
+      else if (records[i].appendTo == "cleanedSeqs" || (records[i].appendTo == "badIds" && !removeUncleaned) || (records[i].appendTo == "obsoleteSeqs" && !removeObsolete) ) {
+        formattedType = sanitizeHTML(records[i].type);
+        if (ids_with_underscores.indexOf(formattedType) >= 0){
+          formattedType = "";
+        }
+        else if (records[i].type.length > 0) {
+          formattedType += idChar;
+        }
+
+        headerOutput = "";
+
+        if (headerFormat && ! replaceHeadersDB){
+          headerFormat.forEach(function(headerOpt) {
+            if (headerOpt == "geneName"){
+              if (records[i].headerInfo[headerOpt]){
+                // Check that we're not doubling up on the character to split gene info and species names
+                if (headerOutput.slice(-1) == geneChar){
+                  headerOutput += records[i].headerInfo[headerOpt].trim() + geneChar;
+                }
+                else {
+                  headerOutput += geneChar + records[i].headerInfo[headerOpt].trim() + geneChar;
+                }
               }
+
               else {
-                headerOutput += geneChar + records[i].headerInfo[headerOpt].trim() + geneChar;
+                // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
+                if (!infoErrors[headerOpt]){
+                  infoErrors[headerOpt] = records[i].id + " ";
+                }
+
+                // Otherwise add to it 
+                else {
+                  infoErrors[headerOpt] += records[i].id + " ";
+                }
+              }
+            }
+
+            else if (headerOpt == "speciesName"){
+              if (records[i].headerInfo[headerOpt]){
+                if (removeSpeciesBrackets) {
+                  finalSpeciesName = records[i].headerInfo[headerOpt].trim().replace(/\(|\)/g, '');
+                }
+                else {
+                  finalSpeciesName = records[i].headerInfo[headerOpt].trim();
+                }
+
+                if (headerOutput.slice(-1) == speciesChar){
+                  headerOutput += finalSpeciesName + speciesChar;
+                }
+                else {
+                  headerOutput += speciesChar + finalSpeciesName + speciesChar;
+                }
+              }
+
+              else {
+                // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
+                if (!infoErrors[headerOpt]){
+                  infoErrors[headerOpt] = records[i].id + " ";
+                }
+
+                // Otherwise add to it 
+                else {
+                  infoErrors[headerOpt] += records[i].id + " ";
+                }
               }
             }
 
             else {
-              // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
-              if (!infoErrors[headerOpt]){
-                infoErrors[headerOpt] = records[i].id + " ";
+              if (records[i].headerInfo[headerOpt]){
+                // Check that we're not doubling up on the character to split taxon info
+                if (headerOutput.slice(-1) == taxonChar){
+                  headerOutput += records[i].headerInfo[headerOpt].trim() + taxonChar;
+                }
+
+                else {
+                  headerOutput += taxonChar + records[i].headerInfo[headerOpt].trim() + taxonChar;
+                }
               }
 
-              // Otherwise add to it 
               else {
-                infoErrors[headerOpt] += records[i].id + " ";
+                // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
+                if (!infoErrors[headerOpt]){
+                  infoErrors[headerOpt] = records[i].id + " ";
+                }
+
+                // Otherwise add to it 
+                else {
+                  infoErrors[headerOpt] += records[i].id + " ";
+                }
               }
             }
+          });
+        }
+
+        // If it is a UniProt seqeunce, we need to add back in some formatting
+        if (records[i].type == 'tr' || records[i].type == 'sp' || records[i].type == 'gi' ){
+          if (stripUniProtID == 'uniprotFormat1'){
+            if (records[i].id_name.length > 0){
+              var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + "|" + records[i].id_name.trim() + idChar + headerOutput.trim();
+            }
+            else
+              var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + idChar + headerOutput.trim();
           }
 
-          else if (headerOpt == "speciesName"){
-            if (records[i].headerInfo[headerOpt]){
-              if (removeSpeciesBrackets) {
-                finalSpeciesName = records[i].headerInfo[headerOpt].trim().replace(/\(|\)/g, '');
-              }
-              else {
-                finalSpeciesName = records[i].headerInfo[headerOpt].trim();
-              }
-
-              if (headerOutput.slice(-1) == speciesChar){
-                headerOutput += finalSpeciesName + speciesChar;
-              }
-              else {
-                headerOutput += speciesChar + finalSpeciesName + speciesChar;
-              }
-            }
-
-            else {
-              // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
-              if (!infoErrors[headerOpt]){
-                infoErrors[headerOpt] = records[i].id + " ";
-              }
-
-              // Otherwise add to it 
-              else {
-                infoErrors[headerOpt] += records[i].id + " ";
-              }
-            }
-          }
-
-          else {
-            if (records[i].headerInfo[headerOpt]){
-              // Check that we're not doubling up on the character to split taxon info
-              if (headerOutput.slice(-1) == taxonChar){
-                headerOutput += records[i].headerInfo[headerOpt].trim() + taxonChar;
-              }
-
-              else {
-                headerOutput += taxonChar + records[i].headerInfo[headerOpt].trim() + taxonChar;
-              }
-            }
-
-            else {
-              // If we don't have an existing list of sequences that failed on this taxonomic rank, create one
-              if (!infoErrors[headerOpt]){
-                infoErrors[headerOpt] = records[i].id + " ";
-              }
-
-              // Otherwise add to it 
-              else {
-                infoErrors[headerOpt] += records[i].id + " ";
-              }
-            }
-          }
-        });
-      }
-
-      // If it is a UniProt seqeunce, we need to add back in some formatting
-      if (records[i].type == 'tr' || records[i].type == 'sp' || records[i].type == 'gi' ){
-        if (stripUniProtID == 'uniprotFormat1'){
-          if (records[i].id_name.length > 0){
-            var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + "|" + records[i].id_name.trim() + idChar + headerOutput.trim();
-          }
-          else
+          else if (stripUniProtID == 'uniprotFormat2')  {
             var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + idChar + headerOutput.trim();
-        }
-
-        else if (stripUniProtID == 'uniprotFormat2')  {
-          var header = ">" + formattedType.trim() + "|" +  records[i].id.trim() + idChar + headerOutput.trim();
-        }
-
-        else if (stripUniProtID == 'uniprotFormat3') {
-          var header = ">" +  records[i].id.trim() + idChar + headerOutput.trim();
-        }
-      }
-
-      else {
-        var header = ">" + formattedType.trim() + records[i].id.trim() + idChar + headerOutput.trim();
-      }
-
-      // Keeping the original headers (after checking databases) and getting rid of certain characters
-      if (replaceHeadersDB){
-        header = records[i].originalHeader.replace(replaceHeadersRegex, "").trim();
-      }
-
-      // If we're getting rid of certain characters from the header, let's do that
-      if (invalidHeadChars){
-        header = header.replace(invalidHeaderCharsRegex, "").trim();
-      }
-      // If we're adding underscores in case of spaces, let's do that
-      if (addUnderscores) {
-        header = header.trim().replace(/ /g, "_") ;
-      }
-
-      // Save the final header so we can write it to the summary file
-      records[i].finalHeader = header;
-
-      // Add in a newline character to the header
-      header += "&#010;";
-
-      output = header.trim()  + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
-      
-      cleanedSeqsFragment.appendChild(output.trim());
-
-      cleanedCount +=1;
-    }
-  }
-
-  // Append all fragments at once
-  $badIds.append(badIdsFragment);
-  $obsoleteSeqs.append(obsoleteSeqsFragment);
-  $badCharacters.append(badCharactersFragment);
-  $cleanedSeqs.append(cleanedSeqsFragment);
-},
-
-function downloadFile(filename, text) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text.replace(/‑/g, "-")));
-  element.setAttribute('download', filename);
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
-},
-
-function downloadSummary(filename) {
-  if (summary != null){
-    download(summary, filename.split('_')[0] + "_summary.txt", "text/plain");
-  }
-},
-
-function split(str, char) {
- var i = str.indexOf(char);
-
- if(i > 0)
-  return  str.slice(0, i);
- else
-  return str;     
-},
-
-// Improved function to escape special regex characters
-function escapeRegExp(str) {
-  if (!str) return "";
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-},
-
-// Get the values from the save output form
-$("form#save").submit(function(event) {
-  event.preventDefault();
-
-  var outputZip = new JSZip();
-  var val = [];
-
-  $('.downloadCheck:checkbox:checked').each(function(i){
-    itemName = $(this).val();
-    if (itemName == "treeDL"){
-      if (cleanTree){
-        cleanedTree = cleanTreeNames();
-        outputZip.file('cleanedTree.nwk', cleanedTree);
-      }
-      else {
-        bootstrap_alert.warning("You requested a phylogenetic tree but there is no cleaned tree available.");
-      }
-    }
-
-    else if (itemName == "csvDL"){
-      
-      if (summaryCSV.length > 1){
-        outputZip.file('summary.csv', summaryCSV);
-      }
-
-      else {
-        bootstrap_alert.warning("You requested a CSV but there is no CSV file generated.");
-      }
-    }
-
-    else if (itemName == "summaryDL"){
-      
-      if (summary.length > 1){
-        outputZip.file('summary.txt', summary);
-      }
-
-      else {
-        bootstrap_alert.warning("You requested a summary but there is no summary generated.");
-      }
-    }
-
-    else {
-      // If we haven't written all the sequences
-      if (numRecords > limit){
-        if ($(this).val() == "cleanedSeqs"){
-          var item = cleanedSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
-        }
-
-        else if ($(this).val() == "badCharacters"){
-          var item = badCharactersResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
-        }
-
-        else if ($(this).val() == "obsoleteSeqs"){
-          var item = obsoleteSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
-        }
-
-        else if ($(this).val() == "badIds"){
-          var item = badIdsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
-        }
-      }
-
-      // We can take the sequences directly from the text output fields.
-      else {
-        var item = $('textarea#' + $(this).val()).val().replace(/‑/g, "-");
-      }
-
-      outputZip.file($(this).val() + '.fasta', item);
-    }
-  });
-
-  outputZip.generateAsync({type:"blob"})
-  .then(function (blob) {
-      saveAs(blob, "SeqScrubFiles.zip");
-  });
-
-  // Allow for easy selection of full text in each window
-  $cleanedSeqs.click(function() {
-    $cleanedSeqs.select();
-  });
-
-  $badCharacters.click(function() {
-    $badCharacters.select();
-  });
-
-  $obsoleteSeqs.click(function() {
-    $obsoleteSeqs.select();
-  });
-
-  $badIds.click(function() {
-    $badIds.select();
-  });
-
-  /*
-    Dropdown with Multiple checkbox select with jQuery - May 27, 2013
-    (c) 2013 @ElmahdiMahmoud
-    license: https://www.opensource.org/licenses/mit-license.php
-  */
-
-  $(".dropdown dt a").on('click', function() {
-    $(".dropdown dd ul").slideToggle('fast');
-  });
-
-  $(".dropdown dd ul li a").on('click', function() {
-    $(".dropdown dd ul").hide();
-  });
-
-  function getSelectedValue(id) {
-    return $("#" + id).find("dt a span.value").html();
-  }
-
-  // Either allow for databases to be queried or just the header to be cleaned
-  $('#replaceCharsCheck').click(function(event){
-    $(".dataCheck").prop('checked', false);
-    $(".obsoleteCheck").prop('checked', false);
-    $('#replaceHeadersDBCheck').prop('checked', false);
-  });
-
-  $('#replaceHeadersDBCheck').click(function(event){
-    $(".dataCheck").prop('checked', false);
-    $('#replaceCharsCheck').prop('checked', false);
-  });
-
-  $(".dataCheck").click(function(event){
-    $('#replaceCharsCheck').prop('checked', false);
-    $('#replaceHeadersDBCheck').prop('checked', false);
-  });
-
-  $(".obsoleteCheck").click(function(event){
-    $('#replaceCharsCheck').prop('checked', false);
-  });
-
-  $('#input-draggable').selectize({
-      plugins: ['drag_drop'],
-      delimiter: ',',
-      persist: false,
-      create: function(input) {
-          return {
-              value: input,
-              text: input
-          };
-      }
-  });
-
-  $('.input-sortable').selectize({
-      plugins: ['drag_drop'],
-      persist: false,
-      create: true
-  });
-
-  $('#header-format').selectize({
-      maxItems: null,
-      valueField: 'id',
-      labelField: 'title',
-      searchField: 'title',
-      plugins: ['drag_drop', 'remove_button'],
-      create: false,
-      highlight: true,
-  });
-
-  $(function() {
-    var $wrapper = $('#wrapper');
-
-    // theme switcher
-    var theme_match = String(window.location).match(/[?&]theme=([a-z0-9]+)/);
-    var theme = (theme_match && theme_match[1]) || 'default';
-    var themes = ['default','legacy','bootstrap2','bootstrap3'];
-
-    var $themes = $('<div>').addClass('theme-selector').insertAfter('h1');
-    for (var i = 0; i < themes.length; i++) {
-      $themes.append('<a href="?theme=' + themes[i] + '"' + (themes[i] === theme ? ' class="active"' : '') + '>' + themes[i] + '</a>');
-    }
-
-    // display scripts on the page
-    $('script', $wrapper).each(function() {
-      var code = this.text;
-      if (code && code.length) {
-        var lines = code.split('\n');
-        var indent = null;
-
-        for (var i = 0; i < lines.length; i++) {
-          if (/^[  ]*$/.test(lines[i])) continue;
-          if (!indent) {
-            var lineindent = lines[i].match(/^([  ]+)/);
-            if (!lineindent) break;
-            indent = lineindent[1];
           }
-          lines[i] = lines[i].replace(new RegExp('^' + indent), '');
+
+          else if (stripUniProtID == 'uniprotFormat3') {
+            var header = ">" +  records[i].id.trim() + idChar + headerOutput.trim();
+          }
         }
 
-        code = $.trim(lines.join('\n')).replace(/ /g, '    ');
-        var $pre = $('<pre>').addClass('js').text(code);
-        $pre.insertAfter(this);
+        else {
+          var header = ">" + formattedType.trim() + records[i].id.trim() + idChar + headerOutput.trim();
+        }
+
+        // Keeping the original headers (after checking databases) and getting rid of certain characters
+        if (replaceHeadersDB){
+          header = records[i].originalHeader.replace(replaceHeadersRegex, "").trim();
+        }
+
+        // If we're getting rid of certain characters from the header, let's do that
+        if (invalidHeadChars){
+          header = header.replace(invalidHeaderCharsRegex, "").trim();
+        }
+        // If we're adding underscores in case of spaces, let's do that
+        if (addUnderscores) {
+          header = header.trim().replace(/ /g, "_") ;
+        }
+
+        // Save the final header so we can write it to the summary file
+        records[i].finalHeader = header;
+
+        // Add in a newline character to the header
+        header += "&#010;";
+
+        output = header.trim()  + records[i].seq.replace(/-/g, "&#8209;") + "&#010;"; //Replace hyphens with non-breaking hyphens
+        
+        cleanedSeqsFragment.appendChild(output.trim());
+
+        cleanedCount +=1;
+      }
+    }
+
+    // Append all fragments at once
+    $badIds.append(badIdsFragment);
+    $obsoleteSeqs.append(obsoleteSeqsFragment);
+    $badCharacters.append(badCharactersFragment);
+    $cleanedSeqs.append(cleanedSeqsFragment);
+  }
+
+  function downloadFile(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text.replace(/‑/g, "-")));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
+
+  function downloadSummary(filename) {
+    if (summary != null){
+      download(summary, filename.split('_')[0] + "_summary.txt", "text/plain");
+    }
+  }
+
+  function split(str, char) {
+    var i = str.indexOf(char);
+
+    if(i > 0)
+      return  str.slice(0, i);
+    else
+      return str;     
+  }
+
+  // Improved function to escape special regex characters
+  function escapeRegExp(str) {
+    if (!str) return "";
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
+
+  // Fix the form#save submit handler
+  $("form#save").submit(function(event) {
+    event.preventDefault();
+
+    var outputZip = new JSZip();
+    var val = [];
+
+    $('.downloadCheck:checkbox:checked').each(function(i){
+      itemName = $(this).val();
+      if (itemName == "treeDL"){
+        if (cleanTree){
+          cleanedTree = cleanTreeNames();
+          outputZip.file('cleanedTree.nwk', cleanedTree);
+        }
+        else {
+          bootstrap_alert.warning("You requested a phylogenetic tree but there is no cleaned tree available.");
+        }
+      }
+
+      else if (itemName == "csvDL"){
+        
+        if (summaryCSV.length > 1){
+          outputZip.file('summary.csv', summaryCSV);
+        }
+
+        else {
+          bootstrap_alert.warning("You requested a CSV but there is no CSV file generated.");
+        }
+      }
+
+      else if (itemName == "summaryDL"){
+        
+        if (summary.length > 1){
+          outputZip.file('summary.txt', summary);
+        }
+
+        else {
+          bootstrap_alert.warning("You requested a summary but there is no summary generated.");
+        }
+      }
+
+      else {
+        // If we haven't written all the sequences
+        if (numRecords > limit){
+          if ($(this).val() == "cleanedSeqs"){
+            var item = cleanedSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
+          }
+
+          else if ($(this).val() == "badCharacters"){
+            var item = badCharactersResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
+          }
+
+          else if ($(this).val() == "obsoleteSeqs"){
+            var item = obsoleteSeqsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
+          }
+
+          else if ($(this).val() == "badIds"){
+            var item = badIdsResults.replace(/&#8209;/g, "-").replace(/&#010;/g, "\r\n");
+          }
+        }
+
+        // We can take the sequences directly from the text output fields.
+        else {
+          var item = $('textarea#' + $(this).val()).val().replace(/‑/g, "-");
+        }
+
+        outputZip.file($(this).val() + '.fasta', item);
       }
     });
 
-    // show current input values
-    $('select.selectized,input.selectized', $wrapper).each(function() {
-      var $container = $('<div>').addClass('value').html('Current Value: ');
-      var $value = $('<span>').appendTo($container);
-      var $input = $(this);
-      var update = function(e) { $value.text(JSON.stringify($input.val())); };
-
-      $(this).on('change', update);
-      update();
-
-      $container.insertAfter($input);
+    outputZip.generateAsync({type:"blob"})
+    .then(function (blob) {
+        saveAs(blob, "SeqScrubFiles.zip");
     });
-  });
 
-  function generateAlert(records){
-    bootstrap_alert.warning("There was a fatal error <br>" + records.length + " sequences are being written to unmappable" );
-    obsoleteList = [];
-    sortOutput(records, obsoleteList);
+    // Move these click handlers inside document ready
+    $cleanedSeqs.click(function() {
+      $cleanedSeqs.select();
+    });
 
-    if (count != numRecords) {
-      bootstrap_alert.warning("Please note: Currently not all sequences have been written to an output field");
+    $badCharacters.click(function() {
+      $badCharacters.select();
+    });
+
+    $obsoleteSeqs.click(function() {
+      $obsoleteSeqs.select();
+    });
+
+    $badIds.click(function() {
+      $badIds.select();
+    });
+
+    /*
+      Dropdown with Multiple checkbox select with jQuery - May 27, 2013
+      (c) 2013 @ElmahdiMahmoud
+      license: https://www.opensource.org/licenses/mit-license.php
+    */
+
+    $(".dropdown dt a").on('click', function() {
+      $(".dropdown dd ul").slideToggle('fast');
+    });
+
+    $(".dropdown dd ul li a").on('click', function() {
+      $(".dropdown dd ul").hide();
+    });
+
+    function getSelectedValue(id) {
+      return $("#" + id).find("dt a span.value").html();
     }
-    else {
-      bootstrap_alert.warning ("Please note: Despite the error, all sequences have still been written to an output field");
-    }
 
-    hideLoadingScreen();
-  }
+    // Either allow for databases to be queried or just the header to be cleaned
+    $('#replaceCharsCheck').click(function(event){
+      $(".dataCheck").prop('checked', false);
+      $(".obsoleteCheck").prop('checked', false);
+      $('#replaceHeadersDBCheck').prop('checked', false);
+    });
 
-  //Error handing
-  bootstrap_alert = function() {};
-  bootstrap_alert.warning = function(message) {
-              $('#error-div').show();
+    $('#replaceHeadersDBCheck').click(function(event){
+      $(".dataCheck").prop('checked', false);
+      $('#replaceCharsCheck').prop('checked', false);
+    });
 
-              $('#error-div').append('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
-          };
-  bootstrap_alert.tree = function(message) {
-              $('#error-div').show();
+    $(".dataCheck").click(function(event){
+      $('#replaceCharsCheck').prop('checked', false);
+      $('#replaceHeadersDBCheck').prop('checked', false);
+    });
 
-              $('#treeOutput').html('<div class="success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
-          };
-  bootstrap_alert.clear =  function(message) {
-              $('#error-div').empty();
-              $('#error-div').hide();
-          };
+    $(".obsoleteCheck").click(function(event){
+      $('#replaceCharsCheck').prop('checked', false);
+    });
 
-  $(document).bind('click', function(e) {
-    var $clicked = $(e.target);
-    if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
-  });
+    $('#input-draggable').selectize({
+        plugins: ['drag_drop'],
+        delimiter: ',',
+        persist: false,
+        create: function(input) {
+            return {
+                value: input,
+                text: input
+            };
+        }
+    });
 
-  $('.multiSelect input[type="checkbox"]').on('click', function() {
-    var title = $(this).closest('.multiSelect').find('input[type="checkbox"]').val(),
-    title = $(this).val() + ",";
+    $('.input-sortable').selectize({
+        plugins: ['drag_drop'],
+        persist: false,
+        create: true
+    });
 
-    if ($(this).is(':checked')) {
-      var html = '<span title="' + title + '">' + title + '</span>';
-      $('.multiSel').append(html);
-      $(".hida").hide();
-    } else {
-      $('span[title="' + title + '"]').remove();
-      var ret = $(".hida");
-      $('.dropdown dt a').append(ret);
-    }
-  });
+    $('#header-format').selectize({
+        maxItems: null,
+        valueField: 'id',
+        labelField: 'title',
+        searchField: 'title',
+        plugins: ['drag_drop', 'remove_button'],
+        create: false,
+        highlight: true,
+    });
 
-  function checkAll(ele) {
-      var checkboxes = $(".downloadCheck");
-      if (ele.checked) {
-          for (var i = 0; i < checkboxes.length; i++) {
-              if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
-                  checkboxes[i].checked = true;
-                  $("#selectAllLabel").html('Deselect all output');
-              }
+    $(function() {
+      var $wrapper = $('#wrapper');
+
+      // theme switcher
+      var theme_match = String(window.location).match(/[?&]theme=([a-z0-9]+)/);
+      var theme = (theme_match && theme_match[1]) || 'default';
+      var themes = ['default','legacy','bootstrap2','bootstrap3'];
+
+      var $themes = $('<div>').addClass('theme-selector').insertAfter('h1');
+      for (var i = 0; i < themes.length; i++) {
+        $themes.append('<a href="?theme=' + themes[i] + '"' + (themes[i] === theme ? ' class="active"' : '') + '>' + themes[i] + '</a>');
+      }
+
+      // display scripts on the page
+      $('script', $wrapper).each(function() {
+        var code = this.text;
+        if (code && code.length) {
+          var lines = code.split('\n');
+          var indent = null;
+
+          for (var i = 0; i < lines.length; i++) {
+            if (/^[  ]*$/.test(lines[i])) continue;
+            if (!indent) {
+              var lineindent = lines[i].match(/^([  ]+)/);
+              if (!lineindent) break;
+              indent = lineindent[1];
+            }
+            lines[i] = lines[i].replace(new RegExp('^' + indent), '');
           }
+
+          code = $.trim(lines.join('\n')).replace(/ /g, '    ');
+          var $pre = $('<pre>').addClass('js').text(code);
+          $pre.insertAfter(this);
+        }
+      });
+
+      // show current input values
+      $('select.selectized,input.selectized', $wrapper).each(function() {
+        var $container = $('<div>').addClass('value').html('Current Value: ');
+        var $value = $('<span>').appendTo($container);
+        var $input = $(this);
+        var update = function(e) { $value.text(JSON.stringify($input.val())); };
+
+        $(this).on('change', update);
+        update();
+
+        $container.insertAfter($input);
+      });
+    });
+
+    function generateAlert(records){
+      bootstrap_alert.warning("There was a fatal error <br>" + records.length + " sequences are being written to unmappable" );
+      obsoleteList = [];
+      sortOutput(records, obsoleteList);
+
+      if (count != numRecords) {
+        bootstrap_alert.warning("Please note: Currently not all sequences have been written to an output field");
+      }
+      else {
+        bootstrap_alert.warning ("Please note: Despite the error, all sequences have still been written to an output field");
+      }
+
+      hideLoadingScreen();
+    }
+
+    //Error handing
+    bootstrap_alert = function() {};
+    bootstrap_alert.warning = function(message) {
+                $('#error-div').show();
+
+                $('#error-div').append('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+            };
+    bootstrap_alert.tree = function(message) {
+                $('#error-div').show();
+
+                $('#treeOutput').html('<div class="success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+            };
+    bootstrap_alert.clear =  function(message) {
+                $('#error-div').empty();
+                $('#error-div').hide();
+            };
+
+    $(document).bind('click', function(e) {
+      var $clicked = $(e.target);
+      if (!$clicked.parents().hasClass("dropdown")) $(".dropdown dd ul").hide();
+    });
+
+    $('.multiSelect input[type="checkbox"]').on('click', function() {
+      var title = $(this).closest('.multiSelect').find('input[type="checkbox"]').val(),
+      title = $(this).val() + ",";
+
+      if ($(this).is(':checked')) {
+        var html = '<span title="' + title + '">' + title + '</span>';
+        $('.multiSel').append(html);
+        $(".hida").hide();
       } else {
-          for (var i = 0; i < checkboxes.length; i++) {
-              if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
-                  checkboxes[i].checked = false;
-                  $("#selectAllLabel").html('Select all output');
-              }
-          }
+        $('span[title="' + title + '"]').remove();
+        var ret = $(".hida");
+        $('.dropdown dt a').append(ret);
       }
-  }
+    });
 
-  // Function to sanitize user input before inserting into DOM
-  function sanitizeHTML(str) {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
+    function checkAll(ele) {
+        var checkboxes = $(".downloadCheck");
+        if (ele.checked) {
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
+                    checkboxes[i].checked = true;
+                    $("#selectAllLabel").html('Deselect all output');
+                }
+            }
+        } else {
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].type == 'checkbox' && ! checkboxes[i].disabled) {
+                    checkboxes[i].checked = false;
+                    $("#selectAllLabel").html('Select all output');
+                }
+            }
+        }
+    }
 
-  // Create a function to process large datasets in a web worker
-  function processLargeDataset(records, callback) {
-    // Check if Web Workers are supported
-    if (window.Worker) {
-      // Create a blob URL for the worker script
-      var workerCode = `
-        self.onmessage = function(e) {
-          var records = e.data.records;
-          var results = [];
+    // Function to sanitize user input before inserting into DOM
+    function sanitizeHTML(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Create a function to process large datasets in a web worker
+    function processLargeDataset(records, callback) {
+      // Check if Web Workers are supported
+      if (window.Worker) {
+        // Create a blob URL for the worker script
+        var workerCode = `
+          self.onmessage = function(e) {
+            var records = e.data.records;
+            var results = [];
+            
+            // Process records without blocking the UI
+            for (var i = 0; i < records.length; i++) {
+              // Process each record
+              // ... processing logic ...
+              
+              // Report progress periodically
+              if (i % 100 === 0) {
+                self.postMessage({type: 'progress', value: i, total: records.length});
+              }
+            }
+            
+            self.postMessage({type: 'complete', results: results});
+          };
+        `;
+        
+        var blob = new Blob([workerCode], {type: 'application/javascript'});
+        var worker = new Worker(URL.createObjectURL(blob));
+        
+        worker.onmessage = function(e) {
+          if (e.data.type === 'progress') {
+            // Update progress bar
+            progressText(e.data.value);
+          } else if (e.data.type === 'complete') {
+            // Process is complete
+            callback(e.data.results);
+            worker.terminate();
+          }
+        };
+        
+        worker.postMessage({records: records});
+      } else {
+        // Fallback for browsers that don't support Web Workers
+        // Process in chunks to avoid UI freezing
+        var i = 0;
+        var results = [];
+        var chunkSize = 100;
+        
+        function processChunk() {
+          var end = Math.min(i + chunkSize, records.length);
           
-          // Process records without blocking the UI
-          for (var i = 0; i < records.length; i++) {
+          for (; i < end; i++) {
             // Process each record
             // ... processing logic ...
-            
-            // Report progress periodically
-            if (i % 100 === 0) {
-              self.postMessage({type: 'progress', value: i, total: records.length});
-            }
           }
           
-          self.postMessage({type: 'complete', results: results});
-        };
-      `;
-      
-      var blob = new Blob([workerCode], {type: 'application/javascript'});
-      var worker = new Worker(URL.createObjectURL(blob));
-      
-      worker.onmessage = function(e) {
-        if (e.data.type === 'progress') {
-          // Update progress bar
-          progressText(e.data.value);
-        } else if (e.data.type === 'complete') {
-          // Process is complete
-          callback(e.data.results);
-          worker.terminate();
-        }
-      };
-      
-      worker.postMessage({records: records});
-    } else {
-      // Fallback for browsers that don't support Web Workers
-      // Process in chunks to avoid UI freezing
-      var i = 0;
-      var results = [];
-      var chunkSize = 100;
-      
-      function processChunk() {
-        var end = Math.min(i + chunkSize, records.length);
-        
-        for (; i < end; i++) {
-          // Process each record
-          // ... processing logic ...
+          progressText(i);
+          
+          if (i < records.length) {
+            setTimeout(processChunk, 0);
+          } else {
+            callback(results);
+          }
         }
         
-        progressText(i);
-        
-        if (i < records.length) {
-          setTimeout(processChunk, 0);
-        } else {
-          callback(results);
-        }
+        processChunk();
       }
-      
-      processChunk();
     }
-  }
 
+  });
 });
