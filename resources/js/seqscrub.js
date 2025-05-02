@@ -13,6 +13,7 @@ $(document).ready(function() {
   var tree = "";
   var cleanedTree = "";
   var ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"];
+  var numRecords = 0; // Define numRecords here at the top level
   
   var cleanedSeqsResults = "";
   var badCharactersResults = "";
@@ -211,9 +212,9 @@ $(document).ready(function() {
     return cleanedTree;
   }
 
-  function progressText(count){
+  function progressText(count) {
     pad = count.toString().padStart(numRecords.toString().length, 0);
-    $(".loader-text").html("Cleaned " + pad + "/" + numRecords );
+    $(".loader-text").html("Cleaned " + pad + "/" + numRecords);
     $("#progressbar").progressbar({ value: 200});
     $(".loader").css("border-top", "border-top: 16px solid red");
   }
