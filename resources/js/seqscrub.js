@@ -15,6 +15,7 @@ $(document).ready(function() {
   var ids_with_underscores = ["XP", "XM", "XR", "WP", "NP", "NC", "NG", "NM", "NR"];
   var numRecords = 0; // Define numRecords here at the top level
   var infoErrors = {}; // Add infoErrors initialization here
+  var ncbiCheck = []; // Add ncbiCheck initialization here
   
   var cleanedSeqsResults = "";
   var badCharactersResults = "";
